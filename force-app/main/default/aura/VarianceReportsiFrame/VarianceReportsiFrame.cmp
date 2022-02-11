@@ -1,0 +1,15 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" controller="VarianceReportsDashboardsCtrl" access="global" >
+  <aura:attribute name="url" type="sObject" default=""/>
+  <aura:attribute name="isLoaded" type="Boolean" default="true"/>
+
+  <aura:if isTrue="{!v.isLoaded}">
+    <iFrame id="iframe" src="{!v.url}" style="height: 400px; width: 100%; border: none; overflow-y: scroll;" onload="{!c.checkLoad}" />
+    <aura:set attribute="else">
+      <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+        <lightning:icon iconName="utility:error" size="x-small" variant="inverse"/>&nbsp;
+        <h2>There was an error loading the requested report.</h2>
+      </div>
+    </aura:set>
+  </aura:if>
+
+</aura:component>

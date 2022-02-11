@@ -1,0 +1,59 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" controller="VarianceReportsDashboardsCtrl" access="global" >
+  <!-- AURA ATTRIBUTES -->
+  <aura:attribute name="dashboards" type="List" default=""/>
+  <aura:attribute name="searchKey" type="String" default=""/>
+  <aura:attribute name="loading" type="Boolean" default="true"/>
+
+  <!-- AURA HANDLERS -->
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+  <!-- AURA COMPONENT -->
+  <lightning:card title="Variance Reports" iconName="standard:calibration">
+    <aura:set attribute="actions">
+      <lightning:buttonIcon iconName="utility:refresh" variant="border-filled" alternativeText="Refresh" onclick="{!c.doInit}"/>
+      <lightning:buttonIcon iconName="utility:new" variant="border-filled" alternativeText="Refresh" onclick="{!c.createRecord}"/>
+    </aura:set>
+
+    <!-- DISPLAY DASHBOARDS CODE -->
+    <div class="slds-p-horizontal_small">
+      <aura:if isTrue="{!and(empty(v.dashboards), v.loading)}">
+        <!-- while loading embedded dashboards -->
+        <div style="height: 30px">
+          <lightning:spinner alternativeText="Loading"/>
+        </div>
+        <!-- display each of the dashboards, using an accordian -->
+        <aura:set attribute="else">
+          <div onkeyup="{!c.searchKeyChange}">
+            <lightning:input type="search" variant="label-hidden" value="{!v.searchKey}" onchange="{!c.searchKeyChange}" placeholder="Search..."/>
+          </div>
+          <aura:if isTrue="{!empty(v.dashboards)}">
+            <div style="padding-top: 25px; padding-bottom: 10px; text-align: center;">
+              There are no reports matching your search criteria.
+            </div>
+          </aura:if>
+          <lightning:accordion allowMultipleSectionsOpen="true">
+            <!-- iterate through dashboards to build out the accordian -->
+            <aura:iteration items="{!v.dashboards}" var="dash">
+              <lightning:accordionSection name="{!dash.Id}" label="{!dash.Name}">
+                <aura:set attribute="actions">
+                  <aura:if isTrue="{!dash.iFrame_URL__c}">
+                    <lightning:buttonIcon iconName="utility:new_window" variant="bare" value="{!dash.iFrame_URL__c}" alternativeText="Open Report" onclick="{!c.openNewWindow}"/>
+                  </aura:if>
+                  <lightning:buttonIcon iconName="utility:edit" variant="bare" value="{!dash.Id}" alternativeText="Edit" onclick="{!c.editRecord}"/>
+                </aura:set>
+                <aura:set attribute="body">
+                  <aura:if isTrue="{!dash.Embed_Code__c}">
+                    <lightning:formattedRichText value="{!dash.Embed_Code__c}"/>
+                    <aura:set attribute="else">
+                      <lightning:button iconName="utility:new_window" value="{!dash.iFrame_URL__c}" label="Open Report" onclick="{!c.openNewWindow}"/>
+                    </aura:set>
+                  </aura:if>
+                </aura:set>
+              </lightning:accordionSection>
+            </aura:iteration>
+          </lightning:accordion>
+        </aura:set>
+      </aura:if> 
+    </div>
+  </lightning:card> 
+</aura:component>

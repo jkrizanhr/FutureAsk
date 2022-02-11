@@ -1,0 +1,136 @@
+<aura:component implements="force:hasRecordId,force:appHostable,flexipage:availableForAllPageTypes" controller="DigitalResourceOrdersCtrl" access="global" >
+  <!-- AURA ATTRIBUTES -->
+  <aura:attribute name="recordId" type="String"/>
+  <aura:attribute name="loading" type="Boolean" default="true"/>
+  <aura:attribute name="trueValue" type="Boolean" default="true"/>
+  <aura:attribute name="partner" type="Object" default=""/>
+  <aura:attribute name="today" type="Date"/>
+  <aura:attribute name="roiPrice" type="Double" default="0"/>
+  <aura:attribute name="roiQuantity" type="Double" default="1"/>
+  <aura:attribute name="resourceOrderItems" type="List" default=""/>
+  <aura:attribute name="resourceOrderId" type="String" default=""/>
+  <aura:attribute name="componentTitle" type="String" default="Log Shared Digital Resources"/>
+
+  <!-- AURA HANDLERS -->
+  <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+
+  <lightning:card title="{!v.componentTitle}" iconName="standard:product_item">
+    <div class="slds-p-horizontal_small">
+      <aura:if isTrue="{!v.loading}">
+        <div style="height: 30px">
+          <lightning:spinner alternativeText="Loading"/>
+        </div>
+        <aura:set attribute="else">
+          <!-- PAGE 1: CREATE THE RESOURCE ORDER | PULLS DEFAULTS FROM THE ACCOUNT RECORD -->
+          <!-- Description of component -->
+          <div style="text-align: left;"> 
+            This is used to document that digital resources have been shared with a partner.
+          </div>
+          <hr style="margin: 15px 3px !important;" ></hr>
+          <!-- Create the Resource Order -->
+          <aura:if isTrue="{!empty(v.resourceOrderId)}">
+            <lightning:recordEditForm objectApiName="Resource_Order__c" onsuccess="{!c.handleResourceOrderSuccess}">
+              <lightning:messages />
+              <lightning:layout>
+                <lightning:layoutItem size="6">
+                  <lightning:inputField fieldName="Contact__c" value="{!v.partner.npe01__One2OneContact__c}"/>
+                </lightning:layoutItem>
+                <lightning:layoutItem size="6">
+                  <lightning:inputField fieldName="Submitted_Date__c" value="{!v.today}"/>
+                </lightning:layoutItem>
+              </lightning:layout>
+              <label class="slds-form-element__label" for="Description__c">Description</label>
+              <lightning:helptext content="Ex: Shared link to COVID resources via email"></lightning:helptext>
+              <lightning:inputField fieldName="Description__c" variant="label-hidden"/>
+              <div style="visibility: hidden; display: none;">
+                <lightning:inputField fieldName="Project_Manager__c" value="{!v.partner.Primary_Partnership_Manager__c}" />
+                <lightning:inputField fieldName="Account__c" value="{!v.recordId}" />
+                <lightning:inputField fieldName="Name" value="{!v.recordId}"></lightning:inputField>
+                <lightning:inputField fieldName="Status__c" value="Complete" />
+                <lightning:inputField fieldName="Advance_without_Roles__c" value="{!v.trueValue}"/>
+                <lightning:inputField fieldName="Is_Digital_Order__c" value="{!v.trueValue}"/>
+              </div>
+              <div style="text-align: right; margin-right: 4px;">
+                <lightning:button variant="brand" type="submit" name="next" label="Next >" />
+              </div>
+            </lightning:recordEditForm>
+            
+            <!-- PAGE 2: ADD RESOURCE ORDER ITEMS TO THE RESOURCE ORDER -->
+            <aura:set attribute="else">
+              <!-- Add additional resource order items -->
+              <lightning:recordEditForm objectApiName="Resource_Order_Item__c" onsuccess="{!c.handleResourceOrderItemSuccess}">
+                <lightning:messages />
+                <lightning:inputField aura:id="roiResource" fieldName="Resource__c" />
+                <lightning:layout>
+                  <lightning:layoutItem size="4">
+                    <lightning:inputField aura:id="roiPrice" fieldName="Price_per_Resource__c" value="{!v.roiPrice}" />
+                  </lightning:layoutItem>
+                  <lightning:layoutItem size="3">
+                    <lightning:inputField aura:id="roiQuantity" fieldName="Quantity__c" value="{!v.roiQuantity}" />
+                  </lightning:layoutItem>
+                  <lightning:layoutItem size="3">
+                    <lightning:inputField aura:id="roiAmount" fieldName="Amount__c" />
+                  </lightning:layoutItem>
+                  <lightning:layoutItem size="2" class="slds-p-left_xx-small">
+                    <lightning:button class="slds-button_stretch slds-m-top_large" variant="brand" type="submit" name="next" label="Add" />
+                  </lightning:layoutItem>
+                </lightning:layout>
+                <div style="visibility: hidden; display: none;">
+                  <lightning:inputField fieldName="Resource_Order__c" value="{!v.resourceOrderId}"/>
+                  <lightning:inputField fieldName="Status__c" value="Shipped" />
+                  <lightning:inputField fieldName="Custom_Request__c" value="Resource shared digitally with partner." />
+                  <lightning:inputField fieldName="Is_Digital_Resource__c" value="{!v.trueValue}"/>
+                </div>
+              </lightning:recordEditForm>
+              
+                <!-- Table to display the ROI that have already been created -->
+              <aura:if isTrue="{!not(empty(v.resourceOrderItems))}">
+                <hr style="margin: 15px 3px !important;" ></hr>
+                <div class="slds-text-heading_small" style="margin: 0 0 15px;">
+                  <lightning:icon iconName="standard:contract" size="small" alternativeTest="Order Summary" title="Order Summary"/>
+                  &nbsp;&nbsp;Order Summary
+                </div>
+                <div style="background-color: #ebebeb;">
+                  <lightning:layout>
+                    <lightning:layoutItem size="7"><div style="margin: 3px 5px;">Resource</div></lightning:layoutItem>
+                    <lightning:layoutItem size="2"><div style="margin: 3px 0;">Quanity</div></lightning:layoutItem>
+                    <lightning:layoutItem size="3"><div style="margin: 3px 0;">Amount</div></lightning:layoutItem>
+                  </lightning:layout>
+                </div>
+                <aura:iteration items="{!v.resourceOrderItems}" var="roi" indexVar="index">
+                  <div style="margin: 3px 8px;">
+                    <lightning:recordViewForm recordId="{!roi}" objectApiName="Resource_Order_Item__c">
+                      <lightning:layout>
+                        <lightning:layoutItem size="7">
+                          <lightning:outputField fieldName="Resource__c" variant="label-hidden" />
+                        </lightning:layoutItem>
+                        <lightning:layoutItem size="2">
+                          <lightning:outputField fieldName="Quantity__c" variant="label-hidden" />
+                        </lightning:layoutItem>
+                        <lightning:layoutItem size="2">
+                          <lightning:outputField fieldName="Amount__c" variant="label-hidden" />
+                        </lightning:layoutItem>
+                        <lightning:layoutItem size="1">
+                          <lightning:buttonIcon iconName="utility:delete" variant="bare" onclick="{!c.handleClick}" alternativeText="Delete" title="Delete" value="{!index}"/>
+                        </lightning:layoutItem>
+                      </lightning:layout>
+                    </lightning:recordViewForm>
+                  </div>
+                </aura:iteration>
+                <div style="text-align: right; margin: 15px 0 0;">
+                  <lightning:button variant="neutral" name="cancel" label="Cancel Order" onclick="{!c.cancelOrder}" />
+                  <lightning:button variant="brand" name="submit" label="Submit Order" onclick="{!c.submitOrder}" />
+                </div>
+                <aura:set attribute="else">
+                  <div style="text-align: right; margin: 15px 0 0;">
+                    <lightning:button variant="neutral" name="cancel" label="Cancel Order" onclick="{!c.cancelOrder}" />
+                  </div>
+                </aura:set>
+              </aura:if>
+            </aura:set>
+          </aura:if>
+        </aura:set>
+      </aura:if> 
+    </div>
+  </lightning:card> 
+</aura:component>

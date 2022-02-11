@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Other_In_Progress_Translations__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Are any other translation organizations currently working on a similar language/translation?</inlineHelpText>
+    <label>Other In-Progress Translations</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Html</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

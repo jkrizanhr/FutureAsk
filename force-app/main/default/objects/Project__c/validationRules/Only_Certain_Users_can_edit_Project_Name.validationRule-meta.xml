@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Only_Certain_Users_can_edit_Project_Name</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND( $Permission.Edit_Project_Name_Field = false, ISCHANGED(Name))</errorConditionFormula>
+    <errorDisplayField>Name</errorDisplayField>
+    <errorMessage>You do not have access to change the Project Name. If you need the name to be changed please contact Sheri Greiner, Angela Hong, Jennifer Garces, or Adam Nash.</errorMessage>
+</ValidationRule>

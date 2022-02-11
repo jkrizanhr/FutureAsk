@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Funding_Need__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Read Only: Total amount comes from the sum of Project Deliverable costs. This should equal Approved Budget.</inlineHelpText>
+    <label>Total Funding Need</label>
+    <summarizedField>Project_Deliverable__c.Funding_Need__c</summarizedField>
+    <summaryFilterItems>
+        <field>Project_Deliverable__c.Status__c</field>
+        <operation>equals</operation>
+        <value>Planning, In Progress, Complete</value>
+    </summaryFilterItems>
+    <summaryForeignKey>Project_Deliverable__c.Project__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

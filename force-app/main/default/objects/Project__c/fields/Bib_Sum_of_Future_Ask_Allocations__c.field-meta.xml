@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Bib_Sum_of_Future_Ask_Allocations__c</fullName>
+    <description>This field was added to help calculate remaining fund raising needs per project.  It is calculated by an apex class and set on a trigger off the Future Ask Allocation Object.  There is a new formula field on the Future Ask Allocation Object that takes the allocation amount and multiplies it by the probability percentage on the future ask object.  Those values are then added and displayed per project in this field - jk 2/2/2022</description>
+    <externalId>false</externalId>
+    <label>Sum of Future Ask Allocations</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+</CustomField>

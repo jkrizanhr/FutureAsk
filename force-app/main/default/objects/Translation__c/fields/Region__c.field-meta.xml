@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Region__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Biblica ministry region</inlineHelpText>
+    <label>Region</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Global</fullName>
+                <default>false</default>
+                <label>Global</label>
+            </value>
+            <value>
+                <fullName>East Asia Pacific</fullName>
+                <default>false</default>
+                <label>East Asia Pacific</label>
+            </value>
+            <value>
+                <fullName>South Asia</fullName>
+                <default>false</default>
+                <label>South Asia</label>
+            </value>
+            <value>
+                <fullName>Eurasia</fullName>
+                <default>false</default>
+                <label>Eurasia</label>
+            </value>
+            <value>
+                <fullName>Latin America</fullName>
+                <default>false</default>
+                <label>Latin America</label>
+            </value>
+            <value>
+                <fullName>MENA</fullName>
+                <default>false</default>
+                <label>MENA</label>
+            </value>
+            <value>
+                <fullName>West Africa</fullName>
+                <default>false</default>
+                <label>West Africa</label>
+            </value>
+            <value>
+                <fullName>North East Africa</fullName>
+                <default>false</default>
+                <label>North East Africa</label>
+            </value>
+            <value>
+                <fullName>Southern Africa</fullName>
+                <default>false</default>
+                <label>Southern Africa</label>
+            </value>
+            <value>
+                <fullName>East Africa</fullName>
+                <default>false</default>
+                <label>East Africa</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

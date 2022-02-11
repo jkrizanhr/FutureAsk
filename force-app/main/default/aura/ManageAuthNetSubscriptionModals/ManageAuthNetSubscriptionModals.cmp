@@ -1,0 +1,302 @@
+<aura:component
+  controller="ManageAuthNetSubscriptionController"
+  description="ModalsForAuthNetSubscription"
+>
+  <aura:attribute name="recordId" type="String" default="" />
+  <aura:attribute name="loading" type="Boolean" default="false" />
+  <aura:attribute name="subscription" type="Object" default="" />
+  <aura:attribute name="modalType" type="String" default="" />
+  <aura:attribute
+    name="paymentMethods"
+    type="List"
+    default="[
+    {'label': 'Credit Card', 'value': 'Credit Card'},
+    {'label': 'Bank Account', 'value': 'Bank Account'}
+  ]"
+  />
+  <aura:attribute
+    name="monthOptions"
+    type="List"
+    default="[
+    {'label': 'Jan', 'value': '1'},
+    {'label': 'Feb', 'value': '2'},
+    {'label': 'Mar', 'value': '3'},
+    {'label': 'Apr', 'value': '4'},
+    {'label': 'May', 'value': '5'},
+    {'label': 'Jun', 'value': '6'},
+    {'label': 'Jul', 'value': '7'},
+    {'label': 'Aug', 'value': '8'},
+    {'label': 'Sep', 'value': '9'},
+    {'label': 'Oct', 'value': '10'},
+    {'label': 'Nov', 'value': '11'},
+    {'label': 'Dec', 'value': '12'}
+  ]"
+  />
+  <aura:attribute
+    name="yearOptions"
+    type="List"
+    default="[
+    {'label': '2020', 'value': '2020'},
+    {'label': '2021', 'value': '2021'},
+    {'label': '2022', 'value': '2022'},
+    {'label': '2023', 'value': '2023'},
+    {'label': '2024', 'value': '2024'},
+    {'label': '2025', 'value': '2025'},
+    {'label': '2026', 'value': '2026'},
+    {'label': '2027', 'value': '2027'},
+    {'label': '2028', 'value': '2028'}
+  ]"
+  />
+  <aura:attribute name="selectedPaymentMethod" type="String" default="Credit Card" />
+  <aura:attribute name="cardNumber" type="String" default="" />
+  <aura:attribute name="cvv" type="String" default="" />
+  <aura:attribute name="selectedMonth" type="String" default="1" />
+  <aura:attribute name="selectedYear" type="String" default="2020" />
+  <aura:attribute name="accountHolder" type="String" default="" />
+  <aura:attribute name="accountNumber" type="String" default="" />
+  <aura:attribute name="routingNumber" type="String" default="" />
+  <aura:attribute name="errorMessage" type="String" default="" />
+  <aura:attribute name="paymentInfo" type="Map" default="{}" />
+  <aura:attribute
+    name="currencyOptions"
+    type="List"
+    default="[
+    {'label': 'USD', 'value': 'USD'},
+    {'label': 'CAD', 'value': 'CAD'},
+    {'label': 'GBP', 'value': 'GBP'},
+    {'label': 'EUR', 'value': 'EUR'},
+    {'label': 'INR', 'value': 'INR'},
+    {'label': 'KES', 'value': 'KES'}
+  ]"
+  />
+  <aura:attribute name="selectedCurrency" type="String" default="USD" />
+
+  <aura:registerEvent name="closeWindow" type="c:ManageAuthNetSubscriptionCloseWindowEvent" />
+
+  <aura:handler name="init" value="{!this}" action="{!c.init}" />
+
+  <section
+    role="dialog"
+    tabindex="-1"
+    aria-labelledby="modal-heading-01"
+    aria-modal="true"
+    aria-describedby="modal-content-id-1"
+    class="slds-modal slds-fade-in-open"
+  >
+    <div class="slds-modal__container">
+      <header class="slds-modal__header">
+        <lightning:button
+          class="slds-modal__close"
+          variant="bare"
+          iconName="utility:close"
+          title="Close"
+          onclick="{!c.closeModal}"
+        />
+        <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{!v.modalType}</h2>
+      </header>
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+        <aura:if isTrue="{!not(v.loading)}">
+          <!-- UPDATE SUBSCRIPTION MODAL -->
+          <aura:if isTrue="{!v.modalType == 'Update Subscription'}">
+            <aura:if isTrue="{!not(empty(v.errorMessage))}">
+              <div class="slds-text-color_error" style="padding-bottom: 10px;">
+                {!v.errorMessage}
+              </div>
+            </aura:if>
+            <lightning:input
+              type="number"
+              name="amount"
+              label="Amount"
+              value="{!v.subscription.amount}"
+              formatter="currency"
+              step="0.01"
+              required="true"
+            />
+            <lightning:select
+              name="currency"
+              label="Currency"
+              required="true"
+              value="{!v.subscription.selectedCurrency}"
+            >
+              <aura:iteration items="{!v.currencyOptions}" var="currency">
+                <option value="{!currency.value}">{!currency.label}</option>
+              </aura:iteration>
+            </lightning:select>
+            <lightning:select
+              name="frequency"
+              label="Frequency"
+              required="true"
+              value="{!v.subscription.installmentPeriod}"
+            >
+              <option value="Weekly">Weekly</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Yearly">Yearly</option>
+            </lightning:select>
+            <lightning:input
+              type="date"
+              name="startDate"
+              label="Start Date"
+              required="true"
+              value="{!v.subscription.startDate}"
+            />
+            <lightning:input
+              type="date"
+              name="endDate"
+              label="End Date"
+              value="{!v.subscription.endDate}"
+            />
+            <div style="padding-top: 15px; padding-bottom: 15px; text-align: center;">
+              <lightning:button
+                class="slds-button slds-button_brand"
+                label="Submit"
+                onclick="{!c.updateSubscription}"
+              />
+            </div>
+          </aura:if>
+
+          <!-- UPDATE PAYMENT METHOD MODAL -->
+          <aura:if isTrue="{!v.modalType == 'Update Payment Method'}">
+            <aura:if isTrue="{!not(empty(v.errorMessage))}">
+              <div class="slds-text-color_error" style="padding-bottom: 10px;">
+                {!v.errorMessage}
+              </div>
+            </aura:if>
+            <div style="text-align: center;">
+              <lightning:radioGroup
+                name="radioGroup"
+                label="Radio Group"
+                options="{! v.paymentMethods }"
+                value="{! v.selectedPaymentMethod }"
+                type="radio"
+                variant="label-hidden"
+                onchange="{!c.handleChange}"
+              />
+            </div>
+            <!-- Update Credit Card -->
+            <aura:if isTrue="{!v.selectedPaymentMethod == 'Credit Card'}">
+              <lightning:input
+                type="text"
+                label="Card Number"
+                aura:id="creditCard"
+                name="Card Number"
+                pattern="[0-9]*"
+                value="{!v.cardNumber}"
+                maxlength="16"
+                required="true"
+              />
+              <lightning:layout>
+                <lightning:layoutItem size="4">
+                  <lightning:input
+                    type="number"
+                    label="CVV"
+                    maxlength="4"
+                    aura:id="cvv"
+                    name="CVV"
+                    value="{!v.cvv}"
+                    required="true"
+                  />
+                </lightning:layoutItem>
+                <lightning:layoutItem size="4" class="slds-p-horizontal_small">
+                  <lightning:select
+                    name="month"
+                    label="Exp. Month"
+                    required="true"
+                    value="{!v.selectedMonth}"
+                  >
+                    <aura:iteration items="{!v.monthOptions}" var="month">
+                      <option value="{!month.value}">{!month.label}</option>
+                    </aura:iteration>
+                  </lightning:select>
+                </lightning:layoutItem>
+                <lightning:layoutItem size="4">
+                  <lightning:select
+                    name="year"
+                    label="Exp. Year"
+                    required="true"
+                    value="{!v.selectedYear}"
+                  >
+                    <aura:iteration items="{!v.yearOptions}" var="year">
+                      <option value="{!year.value}">{!year.label}</option>
+                    </aura:iteration>
+                  </lightning:select>
+                </lightning:layoutItem>
+              </lightning:layout>
+            </aura:if>
+
+            <!-- Update Bank Account -->
+            <aura:if isTrue="{!v.selectedPaymentMethod == 'Bank Account'}">
+              <lightning:input
+                type="text"
+                label="Name of Account Holder"
+                aura:id="accountHolder"
+                name="Name of Account Holder"
+                value="{!v.accountHolder}"
+                required="true"
+              />
+              <lightning:layout>
+                <lightning:layoutItem size="6" class="slds-p-right_x-small">
+                  <lightning:input
+                    type="text"
+                    label="Account Number"
+                    aura:id="accountNumber"
+                    name="Account Number"
+                    pattern="[0-9]*"
+                    value="{!v.accountNumber}"
+                    required="true"
+                  />
+                </lightning:layoutItem>
+                <lightning:layoutItem size="6" class="slds-p-left_x-small">
+                  <lightning:input
+                    type="text"
+                    label="Routing Number"
+                    aura:id="routingNumber"
+                    name="Routing Number"
+                    pattern="[0-9]*"
+                    value="{!v.routingNumber}"
+                    required="true"
+                  />
+                </lightning:layoutItem>
+              </lightning:layout>
+            </aura:if>
+
+            <!-- Submit Button -->
+            <div style="padding-top: 15px; padding-bottom: 15px; text-align: center;">
+              <lightning:button
+                class="slds-button slds-button_brand"
+                label="Submit"
+                onclick="{!c.updatePaymentMethod}"
+              />
+            </div>
+          </aura:if>
+
+          <!-- CANCEL SUBSCRIPTION MODAL -->
+          <aura:if isTrue="{!v.modalType == 'Cancel Subscription'}">
+            <div style="padding-top: 15px; padding-bottom: 15px; text-align: center;">
+              Are you sure you would like to cancel this subscription?
+            </div>
+            <div style="padding-top: 15px; padding-bottom: 15px; text-align: center;">
+              <lightning:button
+                class="slds-button slds-button_neutral"
+                label="Yes"
+                onclick="{!c.cancelSubscription}"
+              />
+              <lightning:button
+                class="slds-button slds-button_brand"
+                label="No"
+                onclick="{!c.closeModal}"
+              />
+            </div>
+          </aura:if>
+
+          <!-- spinner while loading -->
+          <aura:set attribute="else">
+            <div class="modalSpinner">
+              <lightning:spinner alternativeText="Loading" />
+            </div>
+          </aura:set>
+        </aura:if>
+      </div>
+    </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</aura:component>

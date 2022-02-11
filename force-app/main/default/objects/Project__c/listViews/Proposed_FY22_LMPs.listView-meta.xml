@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Proposed_FY22_LMPs</fullName>
+    <columns>NAME</columns>
+    <columns>Approved_Budget__c</columns>
+    <columns>Region__c</columns>
+    <columns>Status__c</columns>
+    <columns>Fiscal_Year__c</columns>
+    <columns>Language_Community__c</columns>
+    <columns>Strategic_Focus__c</columns>
+    <columns>Requested_Budget__c</columns>
+    <columns>Estimated_Reach__c</columns>
+    <columns>LMP_Project_Manager__c</columns>
+    <columns>Partnership_Director__c</columns>
+    <columns>Resources__c</columns>
+    <columns>New_or_Continuation__c</columns>
+    <columns>Approved_by_Publishing__c</columns>
+    <columns>Publishing_Timeline__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Status__c</field>
+        <operation>equals</operation>
+        <value>Proposal Submitted,Proposal Approved</value>
+    </filters>
+    <filters>
+        <field>RECORDTYPE</field>
+        <operation>equals</operation>
+        <value>Project__c.Language_Ministry_Project</value>
+    </filters>
+    <filters>
+        <field>Fiscal_Year__c</field>
+        <operation>includes</operation>
+        <value>FY22</value>
+    </filters>
+    <label>All FY22 LMP Projects</label>
+</ListView>

@@ -1,0 +1,188 @@
+<apex:page id="BiblicaStandardReceiptPDF" controller="DocumentGenerationController" action="{!processDocuments}" renderas="advanced_pdf"
+  showHeader="false" sideBar="false" cache="false" applyHtmlTag="false" readOnly="false" standardStylesheets="false" applyBodyTag="false">
+  <html>
+
+  <head>
+    <title>Thank You</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+      .hidable:empty {
+        display: none;
+      }
+      @page {
+        size: legal;
+        margin-top: 2in;
+        margin-bottom: 0in;
+        margin-left: .75in;
+        margin-right: .75in;
+      }
+      body, html {
+        margin:0px;
+        padding:0px;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size:9pt;
+        line-height: 14px;
+        color:#111111;
+      }
+    </style>
+  </head>
+  <apex:variable var="count" value="{!1}"/>
+
+  <body>
+    <apex:repeat value="{!documents}" var="rec">
+      <div style="height:12in; width:100%; overflow:hidden;">
+        <div>
+
+          <!-- TOP ADDRESS AND DATE -->
+          <div>
+            <p style="text-align: right;">
+              <span>
+                <apex:outputText value="{0,date,MM/dd/yyyy}">
+                  <apex:param value="{!rec['primaryRecord']['CloseDate']}" />
+                </apex:outputText>
+              </span>
+            </p>
+            <br />
+            <span>
+              <apex:outputPanel rendered="{!NOT(ISBLANK(rec['primaryRecord']['Account.npo02__Formal_Greeting__c']))}">{!rec['primaryRecord']['Account.npo02__Formal_Greeting__c']}
+                <br/>
+              </apex:outputPanel>
+              <apex:outputPanel rendered="{!rec['primaryRecord']['Account.RecordtypeId'] = '0123i000000raYNAAY'}">{!rec['primaryRecord']['Account.Name']}
+                <br/>
+              </apex:outputPanel>
+            </span>
+            <div>
+                <span><apex:outputText value="{!rec['primaryRecord']['Account.BillingStreet']}" style="white-space:pre;" escape="false"/></span>
+            </div>
+            <!-- <div class="hidable"><span>&lt;&lt;Address2&gt;&gt;</span></div>
+                <div class="hidable"><span>&lt;&lt;Address3&gt;&gt;</span></div> -->
+            <!-- <div class="hidable"><span>&lt;&lt;Address4&gt;&gt;</span></div> -->
+            <span>
+              {!rec['primaryRecord']['Account.BillingCity']}, {!rec['primaryRecord']['Account.BillingState']} &nbsp;{!rec['primaryRecord']['Account.BillingPostalCode']}
+              <br />
+            </span>
+          </div>
+
+          <!-- BODY OF LETTER -->
+          <div style="height:5.85in;overflow:hidden;margin-top:0.25in;">
+            <p>
+              <span>
+                <span style="font-family:Arial,Helvetica,sans-serif;">
+                  Dear&nbsp;
+                  <apex:outputPanel rendered="{!NOT(ISBLANK(rec['primaryRecord']['Account.npo02__Informal_Greeting__c']))}">{!rec['primaryRecord']['Account.npo02__Informal_Greeting__c']}</apex:outputPanel>
+                  <apex:outputPanel rendered="{!AND(rec['primaryRecord']['Account.RecordtypeId'] = '0123i000000raYNAAY', NOT(ISBLANK(rec['primaryRecord']['npsp__Primary_Contact__c'])))}">{!rec['primaryRecord']['npsp__Primary_Contact__r.FirstName']}</apex:outputPanel>
+                  <apex:outputPanel rendered="{!AND(rec['primaryRecord']['Account.RecordtypeId'] = '0123i000000raYNAAY', ISBLANK(rec['primaryRecord']['npsp__Primary_Contact__c']))}">{!rec['primaryRecord']['Account.Name']}</apex:outputPanel>,
+                </span>
+              </span>
+            </p>
+            <p style="text-align: left;">
+              <span style="font-family:Arial,Helvetica,sans-serif;">
+                <apex:repeat var="alloc" value="{!rec['primaryRecord']['npsp__Allocations__r']}" rows="1">
+                  <apex:outputText value="{!alloc.Receipt_Message__c}" escape="false" />
+                </apex:repeat> 
+              </span>
+            </p>
+            <p>&nbsp;</p>
+            <p style="margin-left: 3in;">
+              <span style="font-family:Arial,Helvetica,sans-serif;">
+                <span>
+                  Your partner in ministry,
+                </span>
+              </span>
+              <br />
+              <span>
+                <apex:image url="{!$Resource.BiblicaReceipt_Signature}" width="80" height="45"/>
+                <br />Geof Morin
+                <br />President/Chief Executive Officer
+                <br />Biblica - The International Bible Society
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <!-- BOTTOM SUMMARY TABLE -->
+        <div style="position: relative; top: 0.25in; left: 3.85in; width: 4.0in;line-height:10px;">
+          <table style="font-style: italic; border:none;">
+            <tr>
+              <td align="left">
+                Receipt Number:
+              </td>
+              <th align="left">
+                {!rec['primaryRecord']['Transaction_Number__c']}
+              </th>
+            </tr>
+            <tr>
+              <td align="left">
+                YTD Total:
+              </td>
+              <th align="left">
+                <!-- Not providing YTD totals during first few weeks of year when still receipting last year gifts-->
+                <!--<apex:outputText value="{0, Number, Currency}">
+                  <apex:param value="{!rec['primaryRecord']['Account.Calendar_YTD_Total_Giving__c']}" />
+                </apex:outputText>-->
+                <!-- Added YTD Picklist to populate this aggregate and added aggregate based on case from Biblica -->
+                <apex:outputPanel rendered="{!rec.aggregateQuerySizes['Biblica_Standard_Receipt:_Aggregate_Query'] = 0}">                            
+                    $0.00
+                </apex:outputPanel> 
+                <apex:outputPanel rendered="{!rec.aggregateQuerySizes['Biblica_Standard_Receipt:_Aggregate_Query'] > 0}">  
+                    <apex:repeat value="{!rec.aggregateQueries['Biblica_Standard_Receipt:_Aggregate_Query']}" var="ar">
+                        <apex:outputText value="{0, Number, Currency}">
+                            <apex:param value="{!ar.amt}" />
+                        </apex:outputText>
+                    </apex:repeat>
+                </apex:outputPanel>
+                </th>
+            </tr>
+            <tr>
+              <td align="left">
+                Gift Amount:
+              </td>
+              <th align="left">
+                <apex:outputText value="{0, Number, Currency}">
+                  <apex:param value="{!rec['primaryRecord']['Amount']}" />
+                </apex:outputText>
+              </th>
+            </tr>
+            <tr>
+              <td align="left">
+                Donation:
+              </td>
+              <th align="left">
+                <apex:repeat var="alloc" value="{!rec['primaryRecord']['npsp__Allocations__r']}">
+                  {!alloc.npsp__General_Accounting_Unit__r.Name}
+                </apex:repeat> 
+              </th>
+            </tr>
+            <tr>
+              <td align="left">
+                Date Received:
+              </td>
+              <th align="left">
+                <apex:outputText value="{0,date,MM/dd/yyyy}">
+                  <apex:param value="{!rec['primaryRecord']['CloseDate']}" />
+                </apex:outputText>
+              </th>
+            </tr>
+          </table>
+        </div>
+
+        <!-- BOTTOM ADDRESS -->
+        <div style="position: relative; left: 3.5in; top: 2.60in; width: 3in;">
+          <p style="text-align: right;">
+            {!rec['primaryRecord']['Account.Account_Number__c']}
+          </p>
+          <div>
+            <apex:outputPanel rendered="{!NOT(ISBLANK(rec['primaryRecord']['Account.npo02__Formal_Greeting__c']))}">{!rec['primaryRecord']['Account.npo02__Formal_Greeting__c']}</apex:outputPanel>
+            <apex:outputPanel rendered="{!rec['primaryRecord']['Account.RecordtypeId'] = '0123i000000raYNAAY'}">{!rec['primaryRecord']['Account.Name']}</apex:outputPanel>
+            <div>
+                <span><apex:outputText value="{!rec['primaryRecord']['Account.BillingStreet']}" style="white-space:pre;" escape="false"/></span>
+            </div>
+            {!rec['primaryRecord']['Account.BillingCity']}, {!rec['primaryRecord']['Account.BillingState']} &nbsp;{!rec['primaryRecord']['Account.BillingPostalCode']}
+            <br />{!rec['primaryRecord']['Account.BillingCountry']}
+          </div>
+        </div>
+      </div>
+    </apex:repeat>
+  </body>
+  </html>
+</apex:page>

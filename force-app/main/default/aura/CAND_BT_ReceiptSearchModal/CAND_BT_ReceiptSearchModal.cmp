@@ -1,0 +1,84 @@
+<aura:component controller="CAND_BT_Controller" description="CAND_BT_ReceiptSearchModal">
+  <aura:attribute name="opportunity" type="Object" default=''/>
+  <aura:attribute name="timer" type="Integer"/>
+
+  <aura:method name="toggleDisplay" action="{!c.toggleDisplay}" access="PUBLIC"/>
+  <aura:registerEvent name="CAND_BT_GetOppAllocations" type="c:CAND_BT_GetOppAllocations"/>
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <div>
+      <section aura:id="ReceiptSearchModalBox" role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal">
+        <div class="slds-modal__container">
+          <header class="slds-modal__header">
+            <button onclick="{!c.toggleDisplay}" class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+              <span class="slds-assistive-text">Close</span>
+              <lightning:icon variant="inverse" iconName="utility:close" alternativeText="close" />
+            </button>
+            Search for a Receipt Number
+          </header>
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+            <div onkeyup="{!c.handleSearch}" class="fullWidth">
+              <lightning:input name="filterText" aura:id="filterText" type="search" label="" placeholder="Search..." class="fullWidth"/>
+            </div>
+
+            <aura:if isTrue="{! not(empty(v.opportunity))}">
+              <div class=" slds-p-bottom_xx-small">
+                <article class="slds-card ">
+                  <div class="slds-card__header slds-grid">
+                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                      <div class="slds-media__figure">
+                        <span class="slds-icon_container slds-icon-standard-opportunity" title="opportunity">
+                          <lightning:icon iconName="standard:opportunity" alternativeText="Opportunity" size="small"/>
+                          <span class="slds-assistive-text">&nbsp;{!v.opportunity.Name}</span>
+                        </span>
+                      </div>
+                      <div class="slds-media__body">
+                        <h2 class="slds-card__header-title">
+                            <span>{!v.opportunity.Name}</span>
+                        </h2>
+                      </div>
+                    </header>
+                  </div>
+                  <div class="slds-p-bottom_small slds-border_bottom slds-card__body slds-card__body_inner slds-card__header-title">
+                    <dl class="slds-grid slds-wrap">
+                      <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                        <dt class="slds-dl_inline__label">Amount:</dt>
+                        <dd class="slds-dl_inline__detail"><ui:outputCurrency value="{!v.opportunity.Amount}"/></dd>
+                      </div>
+                      <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                        <dt class="slds-dl_inline__label">Account:</dt>
+                        <dd class="slds-dl_inline__detail">{!v.opportunity.Account.Name}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <aura:iteration items="{!v.opportunity.npsp__Allocations__r}" var="alloc">
+                    <div class="slds-card__body slds-card__body_inner">
+                      <dl class="slds-grid slds-wrap slds-border_bottom">
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                          <dt class="slds-dl_inline__label">Amount:</dt>
+                          <dd class="slds-dl_inline__detail"><ui:outputCurrency value="{!alloc.npsp__Amount__c}"/></dd>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                          <dt class="slds-dl_inline__label">General Accounting Unit:</dt>
+                          <dd class="slds-dl_inline__detail">{!alloc.npsp__General_Accounting_Unit__r.Name}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  </aura:iteration>
+                </article>
+                <button class="slds-button slds-button_brand slds-float_right" onclick="{!c.copyOppRecord}" value="{!v.opportunity.Id}">Confirm</button>
+                <button class="slds-button slds-button_neutral slds-float_right slds-m-right_x-small" onclick="{!c.clearSearch}">Clear</button>
+              </div>
+            <aura:set attribute="else">
+              <div class='slds-p-left_small slds-p-top_small slds-text-heading_small'>
+                No Opportunities have been found
+              </div>
+            </aura:set>
+            </aura:if>
+          </div>
+        </div>
+      </section>
+      <div aura:id="ReceiptSearchModalBackdrop" class="slds-backdrop"></div>
+    </div>
+
+</aura:component>

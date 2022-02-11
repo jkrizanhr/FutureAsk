@@ -1,0 +1,44 @@
+.THIS svg {
+  fill: rgb(255, 255, 255);
+}
+.THIS .alert-override {
+  text-align:left;
+  margin-bottom: 8px;
+}
+.THIS .alert-override:last-child {
+    margin-bottom: 0px;
+}
+.THIS .article-override {
+  width:75%;
+}
+@media only screen and (max-width: 900px) {
+    .THIS .article-override {
+      width:100%;
+    }
+}
+.THIS .alert-override h3 {
+  border-bottom: solid 1px #efefef;
+  margin-bottom: 10px;
+  text-transform: capitalize;
+}
+.THIS .detail-override {
+  font-size:17px;
+  font-weight:300;
+}
+.THIS .title-override {
+  font-size:20px;
+  font-weight:300;
+}
+.THIS hr {
+    color:#FFFFFF;
+}
+.THIS .help-text {
+    margin-top: -3px;
+    position: absolute;
+}
+.THIS .dark-color {
+    border-bottom: solid 1px #333333 !important;
+}
+.THIS .message-field {
+  margin-left:20px;
+}

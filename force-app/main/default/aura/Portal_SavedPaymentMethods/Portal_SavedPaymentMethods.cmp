@@ -1,0 +1,93 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" controller="Portal_Controller">
+  <aura:attribute name="isMobile" type="Boolean" default="false"/>
+  <aura:attribute name="isLoading" type="Boolean" default="true"/>
+  <aura:attribute name="paymentMethods" type="List"/>
+  <aura:attribute name="modalType" type="String" default=""/>
+  <aura:attribute name="selectedPaymentMethod" type="String" default=""/>
+
+  <aura:handler event="force:refreshView" action="{!c.doInit}"/>
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  <aura:handler name="closeWindow" event="c:Portal_SavedPaymentMethodsCloseWindowEvent" action="{!c.closeModal}"/>
+  <aura:handler name="refresh" event="c:Portal_SavedPaymentMethodsRefreshEvent" action="{!c.doInit}"/>
+  
+  <aura:if isTrue="{!v.isLoading}">
+    <lightning:spinner/>
+  </aura:if>
+  <!-- SAVED PAYMENT METHOD TABLE -->
+  <div>
+    <lightning:layout>
+      <!-- Header -->
+      <lightning:layoutItem size="10">
+        <div class="header">
+          <h1>Saved Payment Methods</h1>
+        </div>
+      </lightning:layoutItem>
+      <!-- Add New Payment Method Button -->
+      <lightning:layoutItem size="2">
+        <div style="float:right; padding-top: 20px;">
+          <lightning:button variant="brand" name="add" label="Add" onclick="{!c.handleNew}" /> 
+        </div>
+      </lightning:layoutItem>
+    </lightning:layout>
+    <!-- Saved Payment Methods Table -->
+    <table style="width:100%">
+      <!-- Table Headers -->
+      <aura:if isTrue="{!not(v.isMobile)}">
+        <tr>
+          <th><div class="th-cell">Type</div></th>
+          <th><div class="th-cell">Brand</div></th>
+          <th><div class="th-cell">Exp. Date</div></th>
+          <th><div class="th-cell">Last 4</div></th>
+          <th><div class="th-cell">Actions</div></th>
+        </tr>
+      </aura:if>
+      <aura:if isTrue="{!v.isMobile}">
+        <tr>
+          <th class="th-cell">Type</th>
+          <th class="th-cell">Brand</th>
+          <th class="th-cell">Exp. Date</th>
+          <th class="th-cell">Last 4</th>
+          <th class="th-cell">Actions</th>
+        </tr>
+      </aura:if>
+      <!-- Table Body -->
+      <aura:iteration items="{!v.paymentMethods}" var="pm">
+        <tr>
+          <td>{!pm.paymentMethod}</td>
+          <!-- Credit Card Columns -->
+          <aura:if isTrue="{!pm.paymentMethod == 'Credit Card'}">
+            <td>{!pm.cardType}</td>
+            <td>{!pm.expirationDate}</td>
+            <td>{!pm.cardLastFour}</td>
+          </aura:if>
+          <!-- Bank Account Columns -->
+          <aura:if isTrue="{!pm.paymentMethod == 'EFT'}">
+            <td>{!pm.bankName}</td>
+            <td>N/A</td>
+            <td>{!pm.accountNumber}</td>
+          </aura:if>
+          <!-- Update/Delete Buttons -->
+          <td>
+            <lightning:button class="link" variant="base" value="{!pm.id}" onclick="{!c.handleUpdate}" label="Update"/>
+            <aura:if isTrue="{!not(v.isMobile)}">&nbsp;|&nbsp;</aura:if>
+            <lightning:button class="link" variant="base" value="{!pm.id}" disabled="{!pm.hasActiveSubscription}" onclick="{!c.handleDelete}" label="Delete"/>
+            <aura:if isTrue="{!pm.hasActiveSubscription}">
+              <lightning:helptext content="If a Payment Method is used for an Active Recurring Donation it cannot be deleted."/>
+            </aura:if>
+          </td>
+        </tr>
+      </aura:iteration>
+    </table>
+    <aura:if isTrue="{!and(empty(v.paymentMethods), not(v.isLoading))}">
+  	  <p style="text-align: center; font-size: 14px; padding: 20px;">
+        You do not currently have any saved payment methods.
+      </p>  
+    </aura:if>
+  </div>
+
+  <!-- PAYMENT METHOD MANAGEMENT MODALS -->
+  <aura:if isTrue="{!not(empty(v.modalType))}">
+    <c:Portal_SavedPaymentMethodsModals modalType="{!v.modalType}" isMobile="{!v.isMobile}" paymentMethod="{!v.selectedPaymentMethod}"/>
+  </aura:if>
+
+</aura:component>

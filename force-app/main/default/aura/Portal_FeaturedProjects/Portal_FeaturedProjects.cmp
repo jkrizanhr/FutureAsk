@@ -1,0 +1,43 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" controller="Portal_Controller">
+<ltng:require styles="{!$Resource.FontAwesome + '/css/fontawesome-all.min.css'}" scripts="{!$Resource.jquery}" />
+  <aura:attribute name="year" type="String"/>
+  <aura:attribute name="projects" type="List"/>
+  <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+  
+  <div style="padding-left: 30px;">
+    <lightning:layout>
+      <div class="header">
+        <h1>Featured {!v.year} Projects</h1>
+      </div>
+    </lightning:layout>
+    <aura:iteration items="{!v.projects}" var="proj">
+      <lightning:layout class="slds-m-bottom_large">
+        <lightning:layoutItem size="5">
+          <aura:if isTrue="{!not(empty(proj.Project_Image_URL__c))}">
+            <div style="height: 150px; width: 92%; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+              <img src="{!proj.Project_Image_URL__c}" alt="" style="border-radius: 10px; width: 92%; height: 150px;"/>
+            </div>
+            <aura:set attribute="else">
+              <div class="picture">
+                <p style="padding-top: 65px; text-align: center;">Missing Image</p>
+              </div>
+            </aura:set>
+          </aura:if>
+        </lightning:layoutItem>
+        <lightning:layoutItem size="7">
+          <h2>{!if(not(empty(proj.Public_Name__c)), proj.Public_Name__c, proj.Name)}</h2>
+          <p>{!proj.Public_Description__c}</p>
+          <div style="float: left;">
+            <!-- <a href="https://www.facebook.com/dialog/share?app_id=364529934800542?display=popup?redirect_uri=https%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fexplorer"><span><i class="font-icon fab fa-facebook icon"></i></span></a>
+            <span><i class="font-icon fab fa-instagram icon"></i></span> -->
+            <!-- Twitter -->
+            <!-- <a href="{!'https://twitter.com/intent/tweet?text=' + proj.Name + '%0a' + proj.twitterMessage + '%0a' + 'https://www.biblica.com/'}" class="twitter-share-button" hashtag="biblica" data-show-count="false">
+            <span><i class="font-icon fab fa-twitter icon"></i></span></a> -->
+            <lightning:button class="link" variant="base" label="Donate" value="{!proj.General_Accounting_Unit__c}" onclick="{!c.openDonateTab}"/>
+          </div>
+        </lightning:layoutItem>
+      </lightning:layout>
+    </aura:iteration>
+  </div>
+
+</aura:component>

@@ -1,0 +1,18 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" access="global" controller="DonationPageSettingsService">
+  <aura:attribute name="recordId" type="String" />
+  <aura:attribute name="campaignFields" type="Object" />
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  
+  <aura:if isTrue="{!v.campaignFields.campaign.RecordType.Name == 'Donation Page'}">
+    <div class="slds-box slds-theme__default" style="background-color: #ffffff">
+      <ui:outputText value="Donation Page Code Snippet:" class="slds-text-heading_small"/>
+      <br /><br />
+      <ui:outputText value="&lt;iframe id=&quot;donationFormIframe&quot; scrolling=&quot;no&quot; style=&quot;border:none; width:100%; padding:none; margin:none; height:2300px;&quot; src=&quot;"/>
+      
+      <ui:outputText value="{!v.campaignFields.campaign.DP_Link_to_Donation_Form__c}" />
+      <ui:outputText value="&quot;&gt;&lt;/iframe&gt;&lt;script type=&quot;text/javascript&quot; src=&quot;" />
+      <ui:outputText value="{!v.campaignFields.baseUrl + '/donationPageEmbedJavascript'}" />
+      <ui:outputText value="&quot; /&gt;" />
+    </div>
+  </aura:if>
+</aura:component>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>x80_20__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>A principle of the 80/20 Rule is to focus on the &quot;critical few&quot; efforts that produce the majority of the results. In light of other needs and opportunities in your region, why is this an &quot;80/20&quot; project that warrants priority funding?</inlineHelpText>
+    <label>&quot;80/20&quot;</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

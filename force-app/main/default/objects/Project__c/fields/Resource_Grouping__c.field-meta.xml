@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Resource_Grouping__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>If you are group resource together for this LMP, describe how each resource will uniquely benefit this language community and address the need in each of the different contexts?</inlineHelpText>
+    <label>Resource Grouping</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Html</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

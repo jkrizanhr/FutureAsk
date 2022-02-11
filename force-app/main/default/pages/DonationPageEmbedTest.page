@@ -1,0 +1,9 @@
+<apex:page showHeader="false" applyBodyTag="false">
+    <body style="background:efefef;width:100%;height:100%;padding:50px;">
+        <div style="margin-left:33.33%;width:33.33%;padding:25px;border:1px solid #999999;border-radius:15px;">
+        <iframe id="donationFormIframe" scrolling="no" style="border:none; width:100%; padding:none; margin:none; height:2300px;" src="https://biblica.secure.force.com/donate/DonationPage?id=7013i000000IMooAAG"></iframe>
+        <script type="text/javascript" src="https://biblica.secure.force.com/donate/donationPageEmbedJavascript"></script>
+
+        </div>
+    </body>
+</apex:page>

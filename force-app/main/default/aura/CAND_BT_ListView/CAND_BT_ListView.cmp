@@ -1,0 +1,186 @@
+<aura:component controller="CAND_BT_Controller" description="CAND_BT_ListView">
+  <aura:attribute name="actionColumns" type="List" default="[]"/>
+  <aura:attribute name="btSettings" type="Object"/>
+  <aura:attribute name="columns" type="Object[]"/>
+  <aura:attribute name="enableInfiniteLoading" type="Boolean" default="true"/>
+  <aura:attribute name="formRecord" type="Object"/>
+  <aura:attribute name="lastChunkLimit" type="Integer"/>
+  <aura:attribute name="loadMoreStatus" type="String" default=""/>
+  <aura:attribute name="listViewFilters" type="List" default="[]"/>
+  <aura:attribute name="maxTableSize" type="Integer" default="200"/> <!-- Object array breaks when I tested with 10,000 records. With 5,000 it was incredibly slow -->
+  <aura:attribute name="parentRecord" type="Object"/>
+  <aura:attribute name="recordList" type="Object[]"/>
+  <aura:attribute name="recordListToCheckForSearch" type="Object[]"/>
+  <aura:attribute name="rowIndex" type="Integer" default="-1"/>
+  <aura:attribute name="selectedFilter" type="String"/>
+  <aura:attribute name="showActionColumn" type="Boolean" default="false"/>
+  <aura:attribute name="sObjectName" type="String"/>
+  <aura:attribute name="sObjectAPIName" type="String"/>
+  <aura:attribute name="shouldShowSpinner" type="Boolean"/>
+  <aura:attribute name="sortedBy" type="String" default="CreatedDate"/>
+  <aura:attribute name="sortedDirection" type="String" default="DESC"/>
+  <aura:attribute name="displayedOnBatchRecord" type="Boolean" default="true"/>
+  <aura:attribute name="batchRecordId" type="String" default=""/>
+  <aura:attribute name="batchSearch" type="Boolean" default="false"/>
+  <aura:attribute name="numberReceipted" type="String"/>
+  <aura:attribute name="recordListSize" type="String"/>
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  <aura:registerEvent name="CAND_BT_filloutOppForm" type="c:CAND_BT_FilloutOppForm"/>
+  <aura:method name="refreshList" action="{!c.doInit}" access="PUBLIC"/>
+
+
+  <!--Header Section If/Else-->
+  <aura:if isTrue="{!v.displayedOnBatchRecord}">
+    <div class="slds-page-header slds-clearfix" role="banner">
+      <!--List view title-->
+      <div class="slds-float--left slds-text-title_caps slds-grow">
+        {!v.sObjectName} List View
+      </div>
+
+      <div class="slds-float--right">
+
+        <aura:if isTrue="{!v.selectedFilter == 'CreatedDate = TODAY'}">
+          <div class="slds-float_left slds-p-top_large slds-p-right_large">
+            {!v.numberReceipted} receipted out of {!v.recordListSize}
+          </div>
+        </aura:if>
+
+        <div class="slds-float_left slds-p-right_medium">
+          <div onkeyup="{!c.handleBatchSearch}" class="fullWidth">
+            <lightning:input name="batchFilter" aura:id="batchFilter" type="search" label="" placeholder="search by name..." class="fullWidth"/>
+          </div>
+        </div>
+
+        <!--Metadata defined filter-->
+        <div class="slds-float--left slds-p-right--large">
+          <lightning:select aura:id="filter" name="filter" label="" onchange="{!c.filterRecords}" value="{!v.selectedFilter}">
+            <aura:iteration items="{!v.listViewFilters}" var="settingFilter">
+              <option value="{!settingFilter.value}"
+                      text="{!settingFilter.text}"
+                      selected="{!equals(v.selectedFilter, settingFilter.value)}"></option>
+            </aura:iteration>
+          </lightning:select>
+        </div>
+
+        <div class="slds-float--right">
+          <div class="slds-p-top_medium">
+            <lightning:button label="Refresh" iconName="action:refresh" onclick="{!c.onClickRefresh}"/>
+            <lightning:button label="New Batch" iconName="action:new" onclick="{!c.onClickCreate}"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <aura:set attribute="else">
+    <div class="slds-page-header slds-grid slds-wrap">
+      <div class="slds-size_1-of-1 slds-text-title slds-grow slds-float-right"> 
+        <h3 class="slds-text-heading_small ">Related Opportunity List</h3>
+      </div>
+      <aura:if isTrue="{! !empty(v.recordListToCheckForSearch)}">
+        <div class="slds-size_12-of-12 slds-grid">
+          <div onkeyup="{!c.handleFilterSearch}" class="fullWidth">
+            <lightning:input name="filterText" aura:id="filterText" type="search" label="" placeholder="Search..." class="fullWidth"/>
+          </div>
+          <lightning:helptext class="slds-p-top_large slds-p-right_small" content="Search for an Opportunity by Name, Donor Account, Contact, Amount, or Receipt Number."/>
+        </div>
+        <aura:set attribute="else">
+          No Opportunities for this Batch found
+        </aura:set>
+      </aura:if>
+    </div>
+  </aura:set>
+
+  </aura:if>
+  
+  <lightning:notificationsLibrary aura:id="notifLib"/>
+    
+  <!--List Section If/Else-->
+  <aura:if isTrue="{!v.displayedOnBatchRecord}">
+
+    <div style="height:80%">
+      <lightning:datatable columns="{!v.columns}"
+                          class="slds-scrollable"
+                          data="{!v.recordList}"
+                          enableInfiniteLoading="{!v.enableInfiniteLoading}"
+                          hideCheckboxColumn="true"
+                          keyField="Id"
+                          onrowaction="{!c.handleRowAction}"
+                          onsort="{!c.sortColumns}"
+                          onloadmore="{!c.loadMoreData}"
+                          sortedBy="{!v.sortedBy}"
+                          showRowNumberColumn="true"
+                          maxColumnWidth="2000"
+                          sortedDirection="{!v.sortedDirection}"/>
+    </div>
+
+  <aura:set attribute="else">
+    <div class="slds-scrollable_y" style="max-height: 70vh">
+      <aura:iteration items="{!v.recordList}" var="record">
+        <div class="slds-border_bottom slds-p-bottom_xx-small">
+          <article class="slds-card ">
+            <div class="slds-card__header slds-grid">
+              <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                  <span class="slds-icon_container slds-icon-standard-opportunity" title="opportunity">
+                    <lightning:icon iconName="standard:opportunity" alternativeText="Opportunity" size="small"/>
+                    <span class="slds-assistive-text">&nbsp;{!record.Name}</span>
+                  </span>
+                </div>
+                <div class="slds-media__body">
+                  <h2 class="slds-card__header-title">
+                      <a href="{!'/' + record.Id}"><span>{!record.Name}</span></a>
+                  </h2>
+                </div>
+                <div class="slds-no-flex">
+                  <button label="Edit" class="slds-button slds-button_neutral" onclick="{!c.editOppRecordInPage}" value="{!record.Id}">Edit</button>
+                </div>
+              </header>
+            </div>
+            <div class="slds-card__body slds-card__body_inner slds-grid">
+              <div class="slds-grid slds-size_1-of-1">
+                <dl class="slds-grid slds-wrap slds-size_1-of-1">
+                  <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                    <dt class="slds-dl_inline__label"><b>Amount:</b></dt>
+                    <dd class="slds-dl_inline__detail"><lightning:formattedNumber style="currency" currencyCode="USD" value="{!record.Amount}"/></dd>
+                  </div>
+                  <aura:if isTrue="{!(record.Original_Currency__c != 'USD')}">
+                    <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                      <dt class="slds-dl_inline__label"><b>Original Amount:</b></dt>
+                      <dd class="slds-dl_inline__detail"><lightning:formattedNumber style="currency" currencyCode="{!record.Original_Currency__c}" value="{!record.Original_Amount__c}"/></dd>
+                    </div>
+                  </aura:if>
+                  <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-1">
+                    <dt class="slds-dl_inline__label"><b>Allocations:</b></dt>
+                  </div>
+                  <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-1">
+                    <dd class="slds-dl_inline__detail">
+                      <aura:iteration items="{!record.npsp__Allocations__r}" var="all">
+                        {!all.Campaign__r.Name}:&nbsp;&nbsp;{!all.npsp__General_Accounting_Unit__r.Name}&nbsp;-
+                          <lightning:formattedNumber style="currency" currencyCode="USD" value="{!all.npsp__Amount__c}"/>&nbsp;
+                          <aura:if isTrue="{!(all.Original_Currency__c != 'USD')}">
+                            (<lightning:formattedNumber style="currency" currencyCode="{!all.Original_Currency__c}" value="{!all.Original_Amount__c}"/>)
+                          </aura:if>
+                          <br/>
+                      </aura:iteration>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          </article>
+        </div>
+      </aura:iteration>
+    </div>
+  </aura:set>
+  </aura:if>
+
+  <aura:if isTrue="{!v.shouldShowSpinner}">
+    <lightning:spinner aura:id="listViewSpinner"/>
+  </aura:if>
+
+  <c:CAND_BT_BatchModal aura:id="modal"
+                        btSettings="{!v.btSettings}"
+                        recordId="{!v.batchRecordId}"/>
+
+</aura:component>

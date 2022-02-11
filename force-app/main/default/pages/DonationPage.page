@@ -1,0 +1,1377 @@
+<apex:page controller="DonationPageController" showHeader="false" sidebar="false" docType="HTML-5.0" standardStylesheets="false">
+  <html ng-app="app">
+
+  <head>
+    <title>{!title}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!--[if lt IE 9]><script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="pragma" content="no-cache" />
+
+
+    <apex:outputPanel rendered="{!renderStripe}">
+      <script src="https://js.stripe.com/v3/"></script>
+    </apex:outputPanel>
+    <apex:outputPanel rendered="{!AND(renderAuthNet, testMode)}">
+      <script type="text/javascript" src="https://jstest.authorize.net/v1/Accept.js" charset="utf-8">
+      </script>
+    </apex:outputPanel>
+    <apex:outputPanel rendered="{!AND(renderAuthNet, NOT(testMode))}">
+      <script type="text/javascript" src="https://js.authorize.net/v1/Accept.js" charset="utf-8">
+      </script>
+    </apex:outputPanel>
+
+    <!-- <link rel="stylesheet" href="{!URLFOR($Resource.DonationPageResource, 'resources/bootstrap/css/bootstrap.min.css')}"></link> -->
+    <link rel="stylesheet" href="{!URLFOR($Resource.DonationPageResource, 'resources/bootstrapFour/css/bootstrap.css')}"></link>
+    <link rel="stylesheet" href="{!URLFOR($Resource.DonationPageResource, 'resources/font-awesome/css/font-awesome.min.css')}"></link>
+    <!-- <link rel="stylesheet" href="{!URLFOR($Resource.DonationPageResource, 'resources/ng-sweetAlert/sweet-alert.css')}"></link> -->
+    <link rel="stylesheet" href="{!URLFOR($Resource.DonationPageResource, 'resources/ng-busy/angular-busy.min.css')}"></link>
+    <link rel="stylesheet" href="{!URLFOR($Resource.DonationPageResource, 'resources/ng-animate/animate.css')}"></link>
+    <link rel="stylesheet" href="{!URLFOR($Resource.DonationPageResource, 'css/app.css')}"></link>
+
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/angular/angular.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/angular-sanitize/angular-sanitize.min.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/angular-messages/angular-messages.min.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/ng-animate/angular-animate.min.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/angular-bootstrap/ui-bootstrap-tpls.min.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/ng-busy/angular-busy.min.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/moment/moment.js')}"></script>
+    <!-- <script src="{!URLFOR($Resource.DonationPageResource, 'resources/ng-sweetAlert/sweet-alert.min.js')}"></script> -->
+    <!-- <script src="{!URLFOR($Resource.DonationPageResource, 'resources/ng-sweetAlert/ng-sweet-alert.min.js')}"></script> -->
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/sweet-alert-2/sweetalert2.all.min.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/ui-mask/mask.min.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/ui-validate/validate.min.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/angular-credit-cards/angular-credit-cards.js')}"></script>
+
+    <script>
+      window.DONATION_PAGE_APP = {
+        resourceUrl: "{!URLFOR($Resource.DonationPageResource, '')}",
+        campaignId: "{!campaignId}",
+        vfRemoting: {
+          appService: {
+            loadData: '{!$RemoteAction.DonationPageController.loadData}',
+            submitForm: '{!$RemoteAction.DonationPageController.submitForm}',
+            submitPayment: '{!$RemoteAction.DonationPageController.submitPayment}',
+            processDonation: '{!$RemoteAction.DonationPageController.processDonation}',
+            convertDonationAmount: '{!$RemoteAction.DonationPageController.convertDonationAmount}',
+            getAccountData: '{!$RemoteAction.DonationPageController.getAccountData}',
+            getContactData: '{!$RemoteAction.DonationPageController.getContactData}'
+          }
+        }
+      };
+
+      function OpenSocialPopup(url, socialName) {
+        window.open(url, socialName, "width=600,height=500,left=10,top=150");
+      }
+    </script>
+
+    <base href="/"></base>
+  </head>
+
+  <body ng-controller="appCtrl" id="body" cg-busy="busyPromise" ng-cloak="true">
+    <div class="alert alert-warning fail-message" ng-show="pageFail" ng-hide="!pageFail">
+      <h3 class="alert-heading">Page not available</h3>
+      <hr /> Sorry but the donation page you are looking is not active at this time. Please visit our
+      <a href="https://www.biblica.com" alt="homepage link">homepage</a> to see otherways that you can give
+    </div>
+    <div class="container" ng-show="!pageFail" ng-hide="pageFail">
+      <!-- TEST MODE BANNER -->
+      <div class="row" ng-if="pageSettings.Test_Mode__c == true">
+        <div class="col-md-12">
+          <div class="alert alert-danger text-center" style="margin-top:10px;" role="alert">This donation page is in test mode. Test credit cards must be used in order to submit the form.</div>
+        </div>
+      </div>
+      <!-- / TEST MODE BANNER -->
+      <!-- PAGE HEADER -->
+      <div class="row">
+        <div class="col-sm-12" ng-if="pageSettings.Show_Page_Title__c">
+          <h2 class="main-header">{{pageSettings.Donation_Page_Title__c}}</h2>
+        </div>
+        <div class="col-sm-4" ng-if="pageSettings.Banner_Image_URL__c">
+          <img ng-src="{{pageSettings.Banner_Image_URL__c}}" class="img-rounded" style="max-height: 200px;" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <span ng-if="!!pageSettings.Header_Text__c">
+            <div ng-bind-html="trustAsHtml(pageSettings.Header_Text__c)" class="paddedText"></div>
+          </span>
+        </div>
+      </div>
+      <!-- / PAGE HEADER -->
+      <!-- Social media -->
+      <!-- Commented out for time being, not sure if Biblica are going to use social icons in this area.
+        Making sure they don't show when setting URL's for the success modal -->
+      <!-- <div class="row" ng-if="pageSettings.facebook_campaign_url__c || pageSettings.twitter_campaign_url__c">
+        <div class="col-sm-12">
+          <div class="social-button-container main-page-social">
+            <div class="social-button" ng-if="pageSettings.facebook_campaign_url__c" ng-click="OpenSocialPopup(pageSettings.facebook_campaign_url__c, 'Facebook')">
+              <img src="{!URLFOR($Resource.DonationPageResource, 'imgs/Facebook_ico.png')}" />
+            </div>
+            <div class="social-button" ng-if="pageSettings.twitter_campaign_url__c" ng-click="OpenSocialPopup(pageSettings.twitter_campaign_url__c, 'Twitter')">
+              <img src="{!URLFOR($Resource.DonationPageResource, 'imgs/Twitter_ico.png')}" />
+            </div>
+          </div>
+        </div>
+      </div> -->
+      <!-- / Social media -->
+      <!-- Progress Bar -->
+      <div class="row" ng-if="pageSettings.Show_Progress_Bar__c">
+        <div class="campaign-progress-container col-sm-12">
+          <div class="progress-container">
+            <div class="progress">
+              <div class="progress-bar blue-background" id="progress-bar" style="width: {{progressPercentage}}%" role="progressbar" aria-valuenow="{{progressPercentage}}"
+                aria-valuemin="0" aria-valuemax="100">
+                <div class="percentage-label">
+                  <div class="small-label" ng-if="progressPercentage < 15">{{progressPercentage}}%</div>
+                  <div ng-if="progressPercentage >= 15">${{progressLabel | number: currency}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="progress-total-information" ng-if="progressPercentage < 15">
+            <span class="blue-total">${{progressLabel | number: currency}}</span>/${{progressTotalAmount | number: currency}}</div>
+          <div class="progress-total-information orange-text" ng-if="progressPercentage >= 15">GOAL ${{progressTotalAmount | number: currency}}</div>
+        </div>
+      </div>
+      <hr ng-if="pageSettings.Show_Progress_Bar__c" />
+      <!-- / Progress Bar -->
+      <!-- FORM -->
+      <form class="form" name="donationForm" ng-submit="submitForm(donationForm)" novalidate="true" ng-keypress="preventSubmitOnEnter($event)">
+        <!-- DONATION OPTIONS -->
+        <div class="row">
+          <div class="col-sm-12">
+            <h3 class="title">{{pageSettings.Donation_Option_Section_Header__c}}</h3>
+          </div>
+        </div>
+        <!-- LABELS -->
+        <div class="form-group row">
+          <div class="col-lg-6 col-sm-12" ng-if="pageSettings.Allow_Foreign_Transactions__c">
+            <div class="row">
+              <label class="col-sm-12 currency-label">Currency:</label>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+                <select class="form-control" name="currency" ng-model="chosenCurrency.currency" ng-options="opt.label for opt in currencyOptions"></select>
+              </div>
+            </div>
+          </div>
+          <!-- This element is hidden on small screens and duplicated below options for small screens -->
+          <div class="d-none d-lg-block col-lg-6" ng-if="pageSettings.Matching_Multiplier__c">
+            <div class="row">
+              <label class="col-sm-12 currency-label">Match:</label>
+            </div>
+            <div class="row">
+              <!-- Donation Multiplier -->
+              <!-- IF matching and donation towards items at specific cost -->
+              <div class="donation-multiplier-total orange-text col" ng-if="pageSettings.Matching_Multiplier__c > 1 && pageSettings.Donation_Option_Unit_Cost__c != null && pageSettings.Donation_Option_Unit_Cost__c > 0">
+                {{chosenCurrency.currency.symbol}}{{getSubtotal()}} + {{chosenCurrency.currency.symbol}}{{getMatchedAmount()}} Match / {{chosenCurrency.currency.symbol}}{{getCurrencyAmount()}}
+                = {{getNumberOfDonationUnits()}}&nbsp;{{pageSettings.Donation_Option_Unit_Type__c}}
+              </div>
+              <!-- IF matching but not specifying specific item cost -->
+              <div class="donation-multiplier-total orange-text col-sm-12" ng-if="pageSettings.Matching_Multiplier__c > 1 && (pageSettings.Donation_Option_Unit_Cost__c == null || pageSettings.Donation_Option_Unit_Cost__c === 0)">
+                {{chosenCurrency.currency.symbol}}{{getSubtotal()}} + {{chosenCurrency.currency.symbol}}{{getMatchedAmount()}} Match = {{chosenCurrency.currency.symbol}}{{getMatchedTotal()}}
+              </div>
+              <!-- / Donation Multiplier -->
+            </div>
+          </div>
+        </div>
+        <div class="row" style="padding-bottom: 20px;">
+          <!-- <div ng-repeat="donOpt in donationOptions"> -->
+          <div ng-repeat="donOpt in donationOptions" class="col-sm-4" style="padding-bottom: 10px;">
+            <!-- custom input group -->
+            <div class="input-group" ng-if="donOpt.option.Allow_Custom_Amount__c">
+              <div class="input-group-prepend">
+                <button class="btn btn-outline-secondary interior-btn" type="button" id="button-addon1" ng-class="{active: optIsChosen(donOpt.option.Id)}"
+                  ng-click="handleDonationOptionChange(donOpt, pageSettings.Allow_Multiple_Designations__c)">
+                  Best Gift
+                </button>
+              </div>
+              <input ng-click="handleDonationOptionChange(donOpt, pageSettings.Allow_Multiple_Designations__c)" name="bestGift" type="number" class="form-control input-height-auto number-input"
+                placeholder="" step="0.01" aria-label="Custom gift amount" aria-describedby="button-addon1" ng-model="donOpt.amount"
+                ng-keydown="checkKey($event)" />
+            </div>
+            <button type="button" ng-if="!donOpt.option.Allow_Custom_Amount__c" ng-click="handleDonationOptionChange(donOpt, pageSettings.Allow_Multiple_Designations__c)"
+              ng-class="{active: optIsChosen(donOpt.option.Id)}" class="btn btn-outline-secondary interior-btn">
+              {{getOptionLabel(donOpt)}}
+            </button>
+          </div>
+          <!-- </div> -->
+        </div>
+        <!-- / DONATION OPTIONS -->
+        <!-- small screen match -->
+        <div class="row mobile-match-box">
+          <div class="d-lg-none col-sm-12" ng-if="pageSettings.Matching_Multiplier__c">
+            <div class="row">
+              <label class="col-sm-12 currency-label">Match:</label>
+            </div>
+            <div class="row">
+              <!-- Donation Multiplier -->
+              <!-- IF matching and donation towards items at specific cost -->
+              <div class="donation-multiplier-total orange-text col" ng-if="pageSettings.Matching_Multiplier__c > 1 && pageSettings.Donation_Option_Unit_Cost__c != null && pageSettings.Donation_Option_Unit_Cost__c > 0">
+                {{chosenCurrency.currency.symbol}}{{getSubtotal()}} + {{chosenCurrency.currency.symbol}}{{getMatchedAmount()}} Match / {{chosenCurrency.currency.symbol}}{{getCurrencyAmount()}}
+                = {{getNumberOfDonationUnits()}}&nbsp;{{pageSettings.Donation_Option_Unit_Type__c}}
+              </div>
+              <!-- IF matching but not specifying specific item cost -->
+              <div class="donation-multiplier-total orange-text col-sm-12" ng-if="pageSettings.Matching_Multiplier__c > 1 && (pageSettings.Donation_Option_Unit_Cost__c == null || pageSettings.Donation_Option_Unit_Cost__c === 0)">
+                {{chosenCurrency.currency.symbol}}{{getSubtotal()}} + {{chosenCurrency.currency.symbol}}{{getMatchedAmount()}} Match = {{chosenCurrency.currency.symbol}}{{getMatchedTotal()}}
+              </div>
+              <!-- / Donation Multiplier -->
+            </div>
+          </div>
+        </div>
+        <hr />
+        <!-- RECURRING DONATIONS -->
+        <div ng-if="pageSettings.Allow_Recurring_Donations__c">
+          <div ng-if="!pageSettings.Options_Have_Different_Frequencies__c">
+            <div class="row">
+              <div class="col-sm-12">
+                <h3 class="title">{{pageSettings.Recurring_Donation_Section_Header__c}}</h3>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="btn-group btnGroupSpacing">
+                  <button type="button" ng-repeat="freq in frequencyOptions" ng-click="selectFrequency(freq)" ng-class="{active: freq === form.dfs.Frequency__c, }"
+                    class="btn btn-outline-primary">
+                    {{freq}}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div ng-if="form.dfs.Frequency__c != 'One-time'">
+              <div class="row">
+                <div class="col-sm-12">
+                  <p>Choose a start date for your recurring donation. Optionally, click the calendar icon to select a future
+                    date. You may select up to 90 days out from today's date to start your recurring donation.
+                  </p>
+                </div>
+                <div class="col-sm-4">
+                  <div class="input-group mb-3">
+                    <input type="text" class="form-control input-height-auto" uib-datepicker-popup="MM/dd/yyyy" ng-model="selectedStartDate.date"
+                      datepicker-options="dateOptions" is-open="recurringStartDatepicker.opened" ng-required="true" close-text="Close"
+                      onkeydown="return false" />
+                    <div class="input-group-append">
+                      <!-- Restrict the date picker at some point -->
+                      <!-- <input type="date" class="form-control" name="recurringStartDate" ng-model="form.dfs.Recurring_Start_Date__c" /> -->
+                      <button type="button" class="btn btn-outline-secondary blue-icon" ng-click="openDatepicker()" ng-class="{active: recurringStartDatepicker.opened}">
+                        <i class="fa fa-calendar"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="radio" ng-repeat="opt in recurringLevelOptions" ng-if="pageSettings.Allow_Limited_Recurring_Donations__c">
+                    <label>
+                      <input type="radio" name="recurringLevelOptionRadio" ng-model="form.dfs.Number_of_Recurring_Payments__c" value="{{opt.value}}"
+                      /> {{opt.label}}
+                    </label>
+                    <span ng-if="!opt.foreverGiving">
+                      <input type="number" min="0" max="9998" ng-model="numberOfPayments.value" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div ng-if="pageSettings.Options_Have_Different_Frequencies__c && form.chosenOptions.length > 0">
+            <div class="row">
+              <div class="col-sm-12">
+                <h3 class="title">{{pageSettings.Recurring_Donation_Section_Header__c}}</h3>
+              </div>
+            </div>
+            <table class="table table-hover">
+              <tr>
+                <th class="col-sm-4">Selection</th>
+                <th class="col-sm-4">{{pageSettings.Recurring_Donation_Section_Header__c}}</th>
+                <th class="col-sm-2" ng-if="pageSettings.Allow_Limited_Recurring_Donations__c">Number of Payments&nbsp;
+                  <span class="glyphicon glyphicon-info-sign" uib-tooltip="Leave blank if you wish to give indefinitely" tooltip-placement="top"
+                    tooltip-trigger="mouseenter outsideClick"></span>
+                </th>
+              </tr>
+              <tr ng-repeat="option in form.chosenOptions">
+                <td class="col-sm-4 donationOptionFrequency">{{option.option.Donation_Option_Display_Text__c}}</td>
+                <td class="col-sm-4">
+                  <div class="btn-group btnGroupSpacing">
+                    <button type="button" ng-repeat="freq in frequencyOptions" ng-click="selectOptionFrequency(option.option.Id, freq)" ng-class="{active: freq === option.frequency}"
+                      class="btn btn-outline-primary">
+                      {{freq}}
+                    </button>
+                  </div>
+                </td>
+                <td class="col-sm-2" ng-if="pageSettings.Allow_Limited_Recurring_Donations__c">
+                  <input class="form-control" type="number" min="1" max="9998" ng-model="option.numPayments" ng-disabled="option.frequency === 'One-time'"
+                  />
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <!-- / RECURRING DONATIONS -->
+        <hr />
+        <!-- CONTACT INFORMATION -->
+        <div class="row">
+          <div class="col-sm-12">
+            <h3 class="title">{{pageSettings.Contact_Information_Section_Header__c}}</h3>
+          </div>
+        </div>
+        <div class="row" ng-if="pageSettings.Allow_Organization_Donations__c">
+          <div class="col-sm-12">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="isOrgDonationCheckbox" ng-model="form.dfs.Organization_Donation__c" /> I am giving my donation on behalf of an organization
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="row" ng-if="form.dfs.Organization_Donation__c">
+          <div class="col-sm-12">
+            <div class="form-group" ng-class="donationForm.organizationName.$invalid && !donationForm.organizationName.$pristine ? 'has-error':''">
+              <label>
+                Organization Name&nbsp;
+                <span class="required">*</span>
+                <span ng-show="donationForm.organizationName.$invalid && !donationForm.organizationName.$pristine" class="red">Organization Name is required</span>
+              </label>
+              <input class="form-control" name="organizationName" ng-model="form.dfs.Organization_Name__c" required="true" maxlength="50"/>
+              <div class="text-danger" ng-messages="donationForm.organizationName.$error" ng-show="donationForm.organizationName.$touched">
+                <div ng-message="required">Organization Name is required.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div ng-class="{'col-sm-5': pageSettings.Add_Suffix_Field_to_Names__c, 'col-sm-6': !pageSettings.Add_Suffix_Field_to_Names__c}">
+            <div class="form-group" ng-class="donationForm.firstName.$invalid && !donationForm.firstName.$pristine ? 'has-error':''">
+              <label>
+                First Name&nbsp;
+                <span class="required">*</span>
+              </label>
+              <input class="form-control" name="firstName" ng-model="form.dfs.First_Name__c" required="true" maxlength="50"/>
+              <div class="text-danger" ng-messages="donationForm.firstName.$error" ng-show="donationForm.firstName.$touched">
+                <div ng-message="required">First Name is required.</div>
+              </div>
+            </div>
+          </div>
+          <div ng-class="{'col-sm-5': pageSettings.Add_Suffix_Field_to_Names__c, 'col-sm-6': !pageSettings.Add_Suffix_Field_to_Names__c}">
+            <div class="form-group" ng-class="donationForm.lastName.$invalid && !donationForm.lastName.$pristine ? 'has-error':''">
+              <label>
+                Last Name&nbsp;
+                <span class="required">*</span>
+                <span ng-show="donationForm.lastName.$invalid && !donationForm.lastName.$pristine" class="red">Field is required</span>
+              </label>
+              <input class="form-control" name="lastName" ng-model="form.dfs.Last_Name__c" required="true" maxlength="50"/>
+              <div class="text-danger" ng-messages="donationForm.lastName.$error" ng-show="donationForm.lastName.$touched">
+                <div ng-message="required">Last Name is required.</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-2" ng-if="pageSettings.Add_Suffix_Field_to_Names__c">
+            <div class="form-group">
+              <label>Suffix</label>
+              <input class="form-control" name="suffix" ng-model="form.dfs.Suffix__c" />
+            </div>
+          </div>
+        </div>
+        <div ng-if="contactAddressVisible">
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group" ng-class="donationForm.streetAddress1.$invalid && !donationForm.streetAddress1.$pristine ? 'has-error':''">
+                <label>
+                  Street Address&nbsp;
+                  <span class="required" ng-if="contactAddressRequired">*</span>
+                  <span ng-show="donationForm.streetAddress1.$invalid && !donationForm.streetAddress1.$pristine" class="red">Field is required</span>
+                </label>
+                <input class="form-control" name="streetAddress1" ng-model="form.dfs.Street_Address__c" ng-required="contactAddressRequired" maxlength="60"
+                />
+                <div class="text-danger" ng-messages="donationForm.streetAddress1.$error" ng-show="donationForm.streetAddress1.$touched">
+                  <div ng-message="required">Street Address is required.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" ng-class="donationForm.city.$invalid && !donationForm.city.$pristine ? 'has-error':''">
+                <label>
+                  City&nbsp;
+                  <span class="required" ng-if="contactAddressRequired">*</span>
+                  <span ng-show="donationForm.city.$invalid && !donationForm.city.$pristine" class="red">Field is required</span>
+                </label>
+                <input class="form-control" name="city" ng-model="form.dfs.City__c" ng-required="contactAddressRequired" maxlength="40"/>
+                <div class="text-danger" ng-messages="donationForm.city.$error" ng-show="donationForm.city.$touched">
+                  <div ng-message="required">City is required.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3" ng-if="form.dfs.Selected_Country__c === 'United States'">
+              <div class="form-group" ng-class="donationForm.state.$invalid && !donationForm.state.$pristine ? 'has-error':''">
+                <label>
+                  State/Province&nbsp;
+                  <span class="required" ng-if="contactAddressRequired">*</span>
+                  <span ng-show="donationForm.state.$invalid && !donationForm.state.$pristine" class="red">Field is required</span>
+                </label>
+                <select class="form-control" name="state" ng-model="form.dfs.State_Province__c" ng-options="opt.value as opt.label for opt in selectOptions.state"
+                  ng-required="contactAddressRequired"></select>
+                <div class="text-danger" ng-messages="donationForm.state.$error" ng-show="donationForm.state.$touched">
+                  <div ng-message="required">State is required.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3" ng-if="form.dfs.Selected_Country__c !== 'United States'">
+              <div class="form-group" ng-class="donationForm.state.$invalid && !donationForm.state.$pristine ? 'has-error':''">
+                <label>
+                  State/Province&nbsp;
+                  <span class="required" ng-if="contactAddressRequired && form.dfs.Selected_Country__c === 'Canada'">*</span>
+                  <span ng-show="donationForm.state.$invalid && !donationForm.state.$pristine" class="red">Field is required</span>
+                </label>
+                <input type="text" class="form-control" name="state" ng-model="form.dfs.State_Province__c" ng-required="contactAddressRequired && form.dfs.Selected_Country__c === 'Canada'" maxlength="40"></input>
+                <div class="text-danger" ng-messages="donationForm.state.$error" ng-show="donationForm.state.$touched">
+                  <div ng-message="required">State is required.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3" ng-if="form.dfs.Selected_Country__c === 'United States'">
+              <div class="form-group" ng-class="donationForm.zip.$invalid && !donationForm.zip.$pristine ? 'has-error':''">
+                <label>
+                  Zip Code&nbsp;
+                  <span class="required" ng-if="contactAddressRequired">*</span>
+                  <span ng-show="donationForm.zip.$invalid && !donationForm.zip.$pristine" class="red">Field is required</span>
+                </label>
+                <input class="form-control" name="zip" ng-model="form.dfs.Postal_Code__c" ng-required="contactAddressRequired" />
+                <div class="text-danger" ng-messages="donationForm.zip.$error" ng-show="donationForm.zip.$touched">
+                  <div ng-message="required">Zip Code is required.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3" ng-if="form.dfs.Selected_Country__c !== 'United States'">
+              <div class="form-group" ng-class="donationForm.zip.$invalid && !donationForm.zip.$pristine ? 'has-error':''">
+                <label>
+                  Zip Code&nbsp;
+                  <span class="required" ng-if="contactAddressRequired">*</span>
+                  <span ng-show="donationForm.zip.$invalid && !donationForm.zip.$pristine" class="red">Field is required</span>
+                </label>
+                <input class="form-control" name="zip" ng-model="form.dfs.Postal_Code__c"
+                  ng-required="contactAddressRequired" maxlength="20"/>
+                <div class="text-danger" ng-messages="donationForm.zip.$error" ng-show="donationForm.zip.$touched">
+                  <div ng-message="required">Zip Code is required.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-6" ng-if="contactCountryVisible">
+            <div class="form-group" ng-class="donationForm.country.$invalid && !donationForm.country.$pristine ? 'has-error':''">
+              <label>
+                Country&nbsp;
+                <span class="required" ng-if="contactCountryRequired">*</span>
+                <span ng-show="donationForm.country.$invalid && !donationForm.country.$pristine" class="red">Field is required</span>
+              </label>
+              <select class="form-control" name="country" ng-model="form.dfs.Selected_Country__c" ng-options="opt.value as opt.label for opt in selectOptions.country"
+                ng-required="contactCountryRequired"></select>
+              <div class="text-danger" ng-messages="donationForm.country.$error" ng-show="donationForm.country.$touched">
+                <div ng-message="required">Country is required.</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6" ng-if="contactPhoneVisible && form.dfs.Selected_Country__c === 'United States'">
+            <div class="form-group" ng-class="donationForm.phone.$invalid && !donationForm.phone.$pristine ? 'has-error':''">
+              <label>
+                Primary Phone&nbsp;
+                <span class="required" ng-if="contactPhoneRequired">*</span>
+                <span ng-show="donationForm.phone.$invalid && !donationForm.phone.$pristine" class="red">Field is required</span>
+              </label>
+              <input class="form-control" name="phone" ng-model="form.dfs.Phone__c" ng-required="contactPhoneRequired" ui-mask="(999) 999-9999"
+                ui-mask-placeholder="" />
+              <div class="text-danger" ng-messages="donationForm.phone.$error" ng-show="donationForm.phone.$touched">
+                <div ng-message="required, mask">Phone is required.</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6" ng-if="contactPhoneVisible && form.dfs.Selected_Country__c !== 'United States'">
+            <div class="form-group" ng-class="donationForm.phone.$invalid && !donationForm.phone.$pristine ? 'has-error':''">
+              <label>
+                Primary Phone&nbsp;
+                <span class="required" ng-if="contactPhoneRequired">*</span>
+                <span ng-show="donationForm.phone.$invalid && !donationForm.phone.$pristine" class="red">Field is required</span>
+              </label>
+              <input class="form-control" name="phone" ng-model="form.dfs.Phone__c" ng-required="contactPhoneRequired" maxlength="25"/>
+              <div class="text-danger" ng-messages="donationForm.phone.$error" ng-show="donationForm.phone.$touched">
+                <div ng-message="required, mask">Phone is required.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div ng-if="emailVisible">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" ng-class="donationForm.email.$invalid && !donationForm.email.$pristine ? 'has-error':''">
+                <label>
+                  Email&nbsp;
+                  <span class="required" ng-if="emailRequired">*</span>
+                  <span ng-show="donationForm.email.$invalid && !donationForm.email.$pristine" class="red">Invalid Email.</span>
+                </label>
+                <input type="email" class="form-control" name="email" ng-model="form.dfs.Email__c" ng-required="emailRequired" />
+                <div class="text-danger" ng-messages="donationForm.email.$error" ng-show="donationForm.email.$touched">
+                  <div ng-message="required">Email is required.</div>
+                  <div ng-message="email">Email is invalid.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" ng-class="donationForm.emailConfirm.$invalid && !donationForm.emailConfirm.$pristine ? 'has-error':''">
+                <label>
+                  Confirm Email&nbsp;
+                  <span class="required" ng-if="emailRequired">*</span>
+                  <span ng-show="(donationForm.emailConfirm.$error.email || donationForm.emailConfirm.$error.required) && !donationForm.emailConfirm.$pristine"
+                    class="red">Invalid Email.</span>
+                  <span ng-show="donationForm.emailConfirm.$error.validator" class="red">Email does not match</span>
+                </label>
+                <input type="email" class="form-control" name="emailConfirm" ng-model="emailConfirm" ng-required="emailRequired" ui-validate="'$value==form.dfs.Email__c'"
+                  ui-validate-watch="'form.dfs.Email__c'" />
+                <div class="text-danger" ng-messages="donationForm.emailConfirm.$error" ng-show="donationForm.emailConfirm.$touched">
+                  <div ng-message="required">Email is required.</div>
+                  <div ng-message="email">Email is invalid.</div>
+                  <div ng-message="validator">Email does not match.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row" ng-if="birthdateVisible">
+          <div class="col-sm-12">
+            <label>
+              Birthdate (MM/DD/YYYY)&nbsp;
+              <span class="required" ng-if="birthdateRequired">*</span>
+            </label>
+          </div>
+          <div class="col-sm-4">
+            <div class="input-group mb-3">
+              <input type="text" name="birthDate" class="form-control input-height-auto" uib-datepicker-popup="MM/dd/yyyy" ng-model="selectedBirthdate.date"
+                datepicker-options="birthdateOptions" is-open="birthdatepicker.opened" ng-required="birthdateRequired" close-text="Close"
+                alt-input-formats="altInputFormats" placeholder="MM/DD/YYYY"/>
+              <div class="input-group-append">
+                <!-- Restrict the date picker at some point -->
+                <!-- <input type="date" class="form-control" name="recurringStartDate" ng-model="form.dfs.Recurring_Start_Date__c" /> -->
+                <button type="button" class="btn btn-outline-secondary blue-icon" ng-click="openBirthdatepicker()" ng-class="{active: birthdatepicker.opened}">
+                  <i class="fa fa-calendar"></i>
+                </button>
+              </div>
+            </div>
+            <div class="text-danger" ng-messages="donationForm.birthDate.$error" ng-show="donationForm.birthDate.$touched">
+              <div ng-message="required">Birthdate is required.</div>
+              <div ng-message="date">Date format is invalid.</div>
+            </div>
+          </div>
+        </div>
+        <!-- / CONTACT INFORMATION -->
+        <hr />
+        <!-- TRIBUTE INFORMATION -->
+        <div ng-if="pageSettings.Allow_Tribute_Information__c">
+          <div class="row">
+            <div class="col-sm-12">
+              <h3 class="title">{{pageSettings.Tribute_Information_Section_Header__c}}</h3>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="dedicateDonationCheckbox" ng-model="dedicateDonation" /> Dedicate my donation in honor or memory of someone
+                </label>
+              </div>
+            </div>
+          </div>
+          <div ng-if="dedicateDonation">
+            <div class="row">
+              <div class="col-sm-5">
+                <p>My donation is made:</p>
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="tributeRadio" ng-model="form.dfs.Donation_Tribute_Type__c" value="Honor" /> In honor of
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                    <input type="radio" name="tributeRadio" ng-model="form.dfs.Donation_Tribute_Type__c" value="Memory" /> In memory of
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group" ng-class="donationForm.honoreeName.$invalid && !donationForm.honoreeName.$pristine ? 'has-error':''">
+                  <label>
+                    Honoree/Memorial Name&nbsp;
+                    <span class="required">*</span>
+                    <span ng-show="donationForm.honoreeName.$invalid && !donationForm.honoreeName.$pristine" class="red">Field is required</span>
+                  </label>
+                  <input class="form-control" name="honoreeName" ng-model="form.dfs.Honoree_Name__c" required="true" />
+                  <div class="text-danger" ng-messages="donationForm.honoreeName.$error" ng-show="donationForm.honoreeName.$touched">
+                    <div ng-message="required">Name is required.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group" ng-class="donationForm.tributeFrom.$invalid && !donationForm.tributeFrom.$pristine ? 'has-error':''">
+                  <label>
+                    From&nbsp;
+                    <span class="required">*</span>
+                    <span ng-show="donationForm.tributeFrom.$invalid && !donationForm.tributeFrom.$pristine" class="red">Field is required</span>
+                  </label>
+                  <input class="form-control" name="tributeFrom" ng-model="form.dfs.Tribute_From__c" required="true" />
+                  <div class="text-danger" ng-messages="donationForm.tributeFrom.$error" ng-show="donationForm.tributeFrom.$touched">
+                    <div ng-message="required">Name is required.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="form-group">
+                  <label for="tributeMessage">Note</label>
+                  <textarea class="form-control" id="tributeMessage" rows="3" maxlength="32000" ng-model="form.dfs.Tribute_Message__c"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="notifyCheckbox" ng-model="form.dfs.Notify_Someone_of_Donation__c" /> Notify someone of my donation
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div ng-if="form.dfs.Notify_Someone_of_Donation__c">
+              <div class="row">
+                <div ng-class="{'col-sm-5': pageSettings.Add_Suffix_Field_to_Names__c, 'col-sm-6': !pageSettings.Add_Suffix_Field_to_Names__c}">
+                  <div class="form-group" ng-class="donationForm.notifyFirstName.$invalid && !donationForm.notifyFirstName.$pristine ? 'has-error':''">
+                    <label>
+                      First Name&nbsp;
+                      <span class="required">*</span>
+                      <span ng-show="donationForm.notifyFirstName.$invalid && !donationForm.notifyFirstName.$pristine" class="red">Field is required</span>
+                    </label>
+                    <input class="form-control" name="notifyFirstName" ng-model="form.dfs.Notify_First_Name__c" required="true" maxlength="50"/>
+                    <div class="text-danger" ng-messages="donationForm.notifyFirstName.$error" ng-show="donationForm.notifyFirstName.$touched">
+                      <div ng-message="required">First Name is required.</div>
+                    </div>
+                  </div>
+                </div>
+                <div ng-class="{'col-sm-5': pageSettings.Add_Suffix_Field_to_Names__c, 'col-sm-6': !pageSettings.Add_Suffix_Field_to_Names__c}">
+                  <div class="form-group" ng-class="donationForm.notifyLastName.$invalid && !donationForm.notifyLastName.$pristine ? 'has-error':''">
+                    <label>
+                      Last Name&nbsp;
+                      <span class="required">*</span>
+                      <span ng-show="donationForm.notifyLastName.$invalid && !donationForm.notifyLastName.$pristine" class="red">Field is required</span>
+                    </label>
+                    <input class="form-control" name="notifyLastName" ng-model="form.dfs.Notify_Last_Name__c" required="true" maxlength="50"/>
+                    <div class="text-danger" ng-messages="donationForm.notifyLastName.$error" ng-show="donationForm.notifyLastName.$touched">
+                      <div ng-message="required">Last Name is required.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-2" ng-if="pageSettings.Add_Suffix_Field_to_Names__c">
+                  <div class="form-group">
+                    <label>Suffix</label>
+                    <input class="form-control" name="suffix" ng-model="form.dfs.Notify_Suffix__c" />
+                  </div>
+                </div>
+              </div>
+              <div ng-if="tributeAddressVisible">
+                <div class="row">
+                  <div class="col-sm-12">
+                    <div class="form-group" ng-class="donationForm.notifyStreetAddress1.$invalid && !donationForm.notifyStreetAddress1.$pristine ? 'has-error':''">
+                      <label>
+                        Street Address&nbsp;
+                        <span class="required" ng-if="tributeAddressRequired">*</span>
+                        <span ng-show="donationForm.notifyStreetAddress1.$invalid && !donationForm.notifyStreetAddress1.$pristine" class="red">Field is required</span>
+                      </label>
+                      <input class="form-control" name="notifyStreetAddress1" ng-model="form.dfs.Notify_Street_Address__c" ng-required="tributeAddressRequired" maxlength="60"
+                      />
+                      <div class="text-danger" ng-messages="donationForm.notifyStreetAddress1.$error" ng-show="donationForm.notifyStreetAddress1.$touched">
+                        <div ng-message="required">Street Address is required.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group" ng-class="donationForm.notifyCity.$invalid && !donationForm.notifyCity.$pristine ? 'has-error':''">
+                      <label>
+                        City&nbsp;
+                        <span class="required" ng-if="tributeAddressRequired">*</span>
+                        <span ng-show="donationForm.notifyCity.$invalid && !donationForm.notifyCity.$pristine" class="red">Field is required</span>
+                      </label>
+                      <input class="form-control" name="notifyCity" ng-model="form.dfs.Notify_City__c" ng-required="tributeAddressRequired" maxlength="40"/>
+                      <div class="text-danger" ng-messages="donationForm.notifyCity.$error" ng-show="donationForm.notifyCity.$touched">
+                        <div ng-message="required">City is required.</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-3" ng-if="form.dfs.Selected_Notify_Country__c === 'United States'">
+                    <div class="form-group" ng-class="donationForm.notifyState.$invalid && !donationForm.notifyState.$pristine ? 'has-error':''">
+                      <label>
+                        State/Province&nbsp;
+                        <span class="required" ng-if="tributeAddressRequired">*</span>
+                        <span ng-show="donationForm.notifyState.$invalid && !donationForm.notifyState.$pristine" class="red">Field is required</span>
+                      </label>
+                      <select class="form-control" name="notifyState" ng-model="form.dfs.Notify_State_Province__c" ng-options="opt.value as opt.label for opt in selectOptions.state"
+                        ng-required="tributeAddressRequired"></select>
+                      <div class="text-danger" ng-messages="donationForm.notifyState.$error" ng-show="donationForm.notifyState.$touched">
+                        <div ng-message="required">State is required.</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-3" ng-if="form.dfs.Selected_Notify_Country__c !== 'United States'">
+                    <div class="form-group" ng-class="donationForm.notifyState.$invalid && !donationForm.notifyState.$pristine ? 'has-error':''">
+                      <label>
+                        State/Province&nbsp;
+                        <span class="required" ng-if="tributeAddressRequired && form.dfs.Selected_Notify_Country__c === 'Canada'">*</span>
+                        <span ng-show="donationForm.notifyState.$invalid && !donationForm.notifyState.$pristine" class="red">Field is required</span>
+                      </label>
+                      <input type="text" class="form-control" name="notifyState" ng-model="form.dfs.Notify_State_Province__c" ng-required="tributeAddressRequired && form.dfs.Selected_Notify_Country__c === 'Canada'" maxlength="40"></input>
+                      <div class="text-danger" ng-messages="donationForm.notifyState.$error" ng-show="donationForm.notifyState.$touched">
+                        <div ng-message="required">State is required.</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-3" ng-if="form.dfs.Selected_Notify_Country__c === 'United States'">
+                    <div class="form-group" ng-class="donationForm.notifyZip.$invalid && !donationForm.notifyZip.$pristine ? 'has-error':''">
+                      <label>
+                        Zip Code&nbsp;
+                        <span class="required" ng-if="tributeAddressRequired">*</span>
+                        <span ng-show="donationForm.notifyZip.$invalid && !donationForm.notifyZip.$pristine" class="red">Field is required</span>
+                      </label>
+                      <input class="form-control" name="notifyZip" ng-model="form.dfs.Notify_Postal_Code__c" ng-required="tributeAddressRequired" />
+                      <div class="text-danger" ng-messages="donationForm.notifyZip.$error" ng-show="donationForm.notifyZip.$touched">
+                        <div ng-message="required">Zip Code is required.</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-3" ng-if="form.dfs.Selected_Notify_Country__c !== 'United States'">
+                    <div class="form-group" ng-class="donationForm.notifyZip.$invalid && !donationForm.notifyZip.$pristine ? 'has-error':''">
+                      <label>
+                        Zip Code&nbsp;
+                        <span class="required" ng-if="tributeAddressRequired">*</span>
+                        <span ng-show="donationForm.notifyZip.$invalid && !donationForm.notifyZip.$pristine" class="red">Field is required</span>
+                      </label>
+                      <input class="form-control" name="notifyZip" ng-model="form.dfs.Notify_Postal_Code__c"
+                        ng-required="tributeAddressRequired" maxlength="20"/>
+                      <div class="text-danger" ng-messages="donationForm.notifyZip.$error" ng-show="donationForm.notifyZip.$touched">
+                        <div ng-message="required">Zip Code is required.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6" ng-if="tributeCountryVisible">
+                  <div class="form-group" ng-class="donationForm.notifyCountry.$invalid && !donationForm.notifyCountry.$pristine ? 'has-error':''">
+                    <label>
+                      Country&nbsp;
+                      <span class="required" ng-if="tributeCountryRequired">*</span>
+                      <span ng-show="donationForm.notifyCountry.$invalid && !donationForm.notifyCountry.$pristine" class="red">Field is required</span>
+                    </label>
+                    <select class="form-control" name="notifyCountry" ng-model="form.dfs.Selected_Notify_Country__c" ng-options="opt.value as opt.label for opt in selectOptions.country"
+                      ng-required="tributeCountryRequired"></select>
+                    <div class="text-danger" ng-messages="donationForm.notifyCountry.$error" ng-show="donationForm.notifyCountry.$touched">
+                      <div ng-message="required">Country is required.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6" ng-if="tributePhoneVisible">
+                  <div class="form-group" ng-class="donationForm.notifyPhone.$invalid && !donationForm.notifyPhone.$pristine ? 'has-error':''">
+                    <label>
+                      Primary Phone&nbsp;
+                      <span class="required" ng-if="tributePhoneRequired">*</span>
+                      <span ng-show="donationForm.notifyPhone.$invalid && !donationForm.notifyPhone.$pristine" class="red">Field is required</span>
+                    </label>
+                    <input class="form-control" name="notifyPhone" ng-model="form.dfs.Notify_Phone__c" ng-required="tributePhoneRequired" ui-mask="(999) 999-9999"
+                      ui-mask-placeholder="" />
+                    <div class="text-danger" ng-messages="donationForm.notifyPhone.$error" ng-show="donationForm.notifyPhone.$touched">
+                      <div ng-message="required, mask">Phone is required.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row" ng-if="emailVisible">
+                <div class="col-sm-6">
+                  <div class="form-group" ng-class="donationForm.notifyEmail.$invalid && !donationForm.notifyEmail.$pristine ? 'has-error':''">
+                    <label>
+                      Email&nbsp;
+                      <span class="required" ng-if="emailRequired">*</span>
+                      <span ng-show="donationForm.notifyEmail.$invalid && !donationForm.notifyEmail.$pristine" class="red">Invalid Email.</span>
+                    </label>
+                    <input type="email" class="form-control" name="notifyEmail" ng-model="form.dfs.Notify_Email__c" ng-required="emailRequired"
+                    />
+                    <div class="text-danger" ng-messages="donationForm.notifyEmail.$error" ng-show="donationForm.notifyEmail.$touched">
+                      <div ng-message="required">Email is required.</div>
+                      <div ng-message="email">Email is invalid.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group" ng-class="donationForm.notifyEmailConfirm.$invalid && !donationForm.notifyEmailConfirm.$pristine ? 'has-error':''">
+                    <label>
+                      Confirm Email&nbsp;
+                      <span class="required" ng-if="emailRequired">*</span>
+                      <span ng-show="(donationForm.notifyEmailConfirm.$error.email || donationForm.notifyEmailConfirm.$error.required) && !donationForm.notifyEmailConfirm.$pristine"
+                        class="red">Invalid Email.</span>
+                      <span ng-show="donationForm.notifyEmailConfirm.$error.validator" class="red">Email does not match</span>
+                    </label>
+                    <input type="email" class="form-control" name="notifyEmailConfirm" ng-model="notifyEmailConfirm" ng-required="emailRequired"
+                      ui-validate="'$value==form.dfs.Notify_Email__c'" ui-validate-watch="'form.dfs.Notify_Email__c'" />
+                    <div class="text-danger" ng-messages="donationForm.notifyEmailConfirm.$error" ng-show="donationForm.notifyEmailConfirm.$touched">
+                      <div ng-message="required">Email is required.</div>
+                      <div ng-message="email">Email is invalid.</div>
+                      <div ng-message="validator">Email does not match.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr />
+        </div>
+        <!-- / TRIBUTE INFORMATION -->
+        <!-- BILLING INFORMATION -->
+        <div class="row">
+          <div class="col-sm-12">
+            <h3 class="title">{{pageSettings.Billing_Information_Section_Header__c}}</h3>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="useContactInfoCheckbox" ng-model="useContactInfoForBilling" /> Use {{pageSettings.Contact_Information_Section_Header__c}} as {{pageSettings.Billing_Information_Section_Header__c}}
+              </label>
+            </div>
+          </div>
+        </div>
+        <div ng-if="!useContactInfoForBilling">
+          <div class="row">
+            <div ng-class="{'col-sm-5': pageSettings.Add_Suffix_Field_to_Names__c, 'col-sm-6': !pageSettings.Add_Suffix_Field_to_Names__c}">
+              <div class="form-group" ng-class="donationForm.billingFirstName.$invalid && !donationForm.billingFirstName.$pristine ? 'has-error':''">
+                <label>
+                  First Name&nbsp;
+                  <span class="required">*</span>
+                  <span ng-show="donationForm.billingFirstName.$invalid && !donationForm.billingFirstName.$pristine" class="red">Field is required</span>
+                </label>
+                <input class="form-control" name="billingFirstName" ng-model="form.dfs.Billing_First_Name__c" required="true" maxlength="50"/>
+                <div class="text-danger" ng-messages="donationForm.billingFirstName.$error" ng-show="donationForm.billingFirstName.$touched">
+                  <div ng-message="required">First Name is required.</div>
+                </div>
+              </div>
+            </div>
+            <div ng-class="{'col-sm-5': pageSettings.Add_Suffix_Field_to_Names__c, 'col-sm-6': !pageSettings.Add_Suffix_Field_to_Names__c}">
+              <div class="form-group" ng-class="donationForm.billingLastName.$invalid && !donationForm.billingLastName.$pristine ? 'has-error':''">
+                <label>
+                  Last Name&nbsp;
+                  <span class="required">*</span>
+                  <span ng-show="donationForm.billingLastName.$invalid && !donationForm.billingLastName.$pristine" class="red">Field is required</span>
+                </label>
+                <input class="form-control" name="billingLastName" ng-model="form.dfs.Billing_Last_Name__c" required="true" maxlength="50"/>
+                <div class="text-danger" ng-messages="donationForm.billingLastName.$error" ng-show="donationForm.billingLastName.$touched">
+                  <div ng-message="required">Last Name is required.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-2" ng-if="pageSettings.Add_Suffix_Field_to_Names__c">
+              <div class="form-group">
+                <label>Suffix</label>
+                <input class="form-control" name="suffix" ng-model="form.dfs.Billing_Suffix__c" />
+              </div>
+            </div>
+          </div>
+          <div ng-if="billingAddressVisible">
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="form-group" ng-class="donationForm.billingStreetAddress1.$invalid && !donationForm.billingStreetAddress1.$pristine ? 'has-error':''">
+                  <label>
+                    Street Address&nbsp;
+                    <span class="required" ng-if="billingAddressRequired">*</span>
+                    <span ng-show="donationForm.billingStreetAddress1.$invalid && !donationForm.billingStreetAddress1.$pristine" class="red">Field is required</span>
+                  </label>
+                  <input class="form-control" name="billingStreetAddress1" ng-model="form.dfs.Billing_Street_Address__c" ng-required="billingAddressRequired" maxlength="60"
+                  />
+                  <div class="text-danger" ng-messages="donationForm.billingStreetAddress1.$error" ng-show="donationForm.billingStreetAddress1.$touched">
+                    <div ng-message="required">Street Address is required.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group" ng-class="donationForm.billingCity.$invalid && !donationForm.billingCity.$pristine ? 'has-error':''">
+                  <label>
+                    City&nbsp;
+                    <span class="required" ng-if="billingAddressRequired">*</span>
+                    <span ng-show="donationForm.billingCity.$invalid && !donationForm.billingCity.$pristine" class="red">Field is required</span>
+                  </label>
+                  <input class="form-control" name="billingCity" ng-model="form.dfs.Billing_City__c" ng-required="billingAddressRequired" maxlength="40"/>
+                  <div class="text-danger" ng-messages="donationForm.billingCity.$error" ng-show="donationForm.billingCity.$touched">
+                    <div ng-message="required">City is required.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3" ng-if="form.dfs.Selected_Billing_Country__c === 'United States'">
+                <div class="form-group" ng-class="donationForm.billingState.$invalid && !donationForm.billingState.$pristine ? 'has-error':''">
+                  <label>
+                    State/Province&nbsp;
+                    <span class="required" ng-if="billingAddressRequired">*</span>
+                    <span ng-show="donationForm.billingState.$invalid && !donationForm.billingState.$pristine" class="red">Field is required</span>
+                  </label>
+                  <select class="form-control" name="billingState" ng-model="form.dfs.Billing_State_Province__c" ng-options="opt.value as opt.label for opt in selectOptions.state"
+                    ng-required="billingAddressRequired"></select>
+                  <div class="text-danger" ng-messages="donationForm.billingState.$error" ng-show="donationForm.billingState.$touched">
+                    <div ng-message="required">State is required.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3" ng-if="form.dfs.Selected_Billing_Country__c !== 'United States'">
+                <div class="form-group" ng-class="donationForm.billingState.$invalid && !donationForm.billingState.$pristine ? 'has-error':''">
+                  <label>
+                    State/Province&nbsp;
+                    <span class="required" ng-if="billingAddressRequired && form.dfs.Selected_Billing_Country__c === 'Canada'">*</span>
+                    <span ng-show="donationForm.billingState.$invalid && !donationForm.billingState.$pristine" class="red">Field is required</span>
+                  </label>
+                  <input type="text" class="form-control" name="billingState" ng-model="form.dfs.Billing_State_Province__c" ng-required="billingAddressRequired && form.dfs.Selected_Billing_Country__c === 'Canada'" maxlength="40"></input>
+                  <div class="text-danger" ng-messages="donationForm.billingState.$error" ng-show="donationForm.billingState.$touched">
+                    <div ng-message="required">State is required.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3" ng-if="form.dfs.Selected_Billing_Country__c === 'United States'">
+                <div class="form-group" ng-class="donationForm.billingZip.$invalid && !donationForm.billingZip.$pristine ? 'has-error':''">
+                  <label>
+                    Zip Code&nbsp;
+                    <span class="required" ng-if="billingAddressRequired">*</span>
+                    <span ng-show="donationForm.billingZip.$invalid && !donationForm.billingZip.$pristine" class="red">Field is required</span>
+                  </label>
+                  <input class="form-control" name="billingZip" ng-model="form.dfs.Billing_Postal_Code__c" ng-required="billingAddressRequired" />
+                  <div class="text-danger" ng-messages="donationForm.billingZip.$error" ng-show="donationForm.billingZip.$touched">
+                    <div ng-message="required">Zip Code is required.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3" ng-if="form.dfs.Selected_Billing_Country__c !== 'United States'">
+                <div class="form-group" ng-class="donationForm.billingZip.$invalid && !donationForm.billingZip.$pristine ? 'has-error':''">
+                  <label>
+                    Zip Code&nbsp;
+                    <span class="required" ng-if="billingAddressRequired">*</span>
+                    <span ng-show="donationForm.billingZip.$invalid && !donationForm.billingZip.$pristine" class="red">Field is required</span>
+                  </label>
+                  <input class="form-control" name="billingZip" ng-model="form.dfs.Billing_Postal_Code__c"
+                    ng-required="billingAddressRequired" maxlength="20"/>
+                  <div class="text-danger" ng-messages="donationForm.billingZip.$error" ng-show="donationForm.billingZip.$touched">
+                    <div ng-message="required">Zip Code is required.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6" ng-if="billingCountryVisible">
+              <div class="form-group" ng-class="donationForm.billingCountry.$invalid && !donationForm.billingCountry.$pristine ? 'has-error':''">
+                <label>
+                  Country&nbsp;
+                  <span class="required" ng-if="billingCountryRequired">*</span>
+                  <span ng-show="donationForm.billingCountry.$invalid && !donationForm.billingCountry.$pristine" class="red">Field is required</span>
+                </label>
+                <select class="form-control" name="billingCountry" ng-model="form.dfs.Selected_Billing_Country__c" ng-options="opt.value as opt.label for opt in selectOptions.country"
+                  ng-required="billingCountryRequired"></select>
+                <div class="text-danger" ng-messages="donationForm.billingCountry.$error" ng-show="donationForm.billingCountry.$touched">
+                  <div ng-message="required">Country is required.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6" ng-if="billingPhoneVisible && form.dfs.Selected_Billing_Country__c === 'United States'">
+              <div class="form-group" ng-class="donationForm.billingPhone.$invalid && !donationForm.billingPhone.$pristine ? 'has-error':''">
+                <label>
+                  Primary Phone&nbsp;
+                  <span class="required" ng-if="billingPhoneRequired">*</span>
+                  <span ng-show="donationForm.billingPhone.$invalid && !donationForm.billingPhone.$pristine" class="red">Field is required</span>
+                </label>
+                <input class="form-control" name="billingPhone" ng-model="form.dfs.Billing_Phone__c" ng-required="billingPhoneRequired" ui-mask="(999) 999-9999"
+                  ui-mask-placeholder="" />
+                <div class="text-danger" ng-messages="donationForm.billingPhone.$error" ng-show="donationForm.billingPhone.$touched">
+                  <div ng-message="required, mask">Phone is required.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6" ng-if="billingPhoneVisible && form.dfs.Selected_Billing_Country__c !== 'United States'">
+              <div class="form-group" ng-class="donationForm.billingPhone.$invalid && !donationForm.billingPhone.$pristine ? 'has-error':''">
+                <label>
+                  Primary Phone&nbsp;
+                  <span class="required" ng-if="billingPhoneRequired">*</span>
+                  <span ng-show="donationForm.billingPhone.$invalid && !donationForm.billingPhone.$pristine" class="red">Field is required</span>
+                </label>
+                <input class="form-control" name="billingPhone" ng-model="form.dfs.Billing_Phone__c" ng-required="billingPhoneRequired" />
+                <div class="text-danger" ng-messages="donationForm.billingPhone.$error" ng-show="donationForm.billingPhone.$touched">
+                  <div ng-message="required, mask">Phone is required.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row" ng-if="emailVisible">
+            <div class="col-sm-6">
+              <div class="form-group" ng-class="donationForm.billingEmail.$invalid && !donationForm.billingEmail.$pristine ? 'has-error':''">
+                <label>
+                  Email&nbsp;
+                  <span class="required" ng-if="emailRequired">*</span>
+                  <span ng-show="donationForm.billingEmail.$invalid && !donationForm.billingEmail.$pristine" class="red">Invalid Email.</span>
+                </label>
+                <input type="email" class="form-control" name="billingEmail" ng-model="form.dfs.Billing_Email__c" ng-required="emailRequired"
+                />
+                <div class="text-danger" ng-messages="donationForm.billingEmail.$error" ng-show="donationForm.billingEmail.$touched">
+                  <div ng-message="required">Email is required.</div>
+                  <div ng-message="email">Email is invalid.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" ng-class="donationForm.billingEmailConfirm.$invalid && !donationForm.billingEmailConfirm.$pristine ? 'has-error':''">
+                <label>
+                  Confirm Email&nbsp;
+                  <span class="required" ng-if="emailRequired">*</span>
+                  <span ng-show="(donationForm.billingEmailConfirm.$error.email || donationForm.billingEmailConfirm.$error.required) && !donationForm.billingEmailConfirm.$pristine"
+                    class="red">Invalid Email.</span>
+                  <span ng-show="donationForm.billingEmailConfirm.$error.validator" class="red">Email does not match</span>
+                </label>
+                <input type="email" class="form-control" name="billingEmailConfirm" ng-model="billingEmailConfirm" ng-required="emailRequired"
+                  ui-validate="'$value==form.dfs.Billing_Email__c'" ui-validate-watch="'form.dfs.Billing_Email__c'" />
+                <div class="text-danger" ng-messages="donationForm.billingEmailConfirm.$error" ng-show="donationForm.billingEmailConfirm.$touched">
+                  <div ng-message="required">Email is required.</div>
+                  <div ng-message="email">Email is invalid.</div>
+                  <div ng-message="validator">Email does not match.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- / BILLING INFORMATION -->
+        <hr />
+        <!-- PAYMENT INFORMATION -->
+        <div class="row">
+          <div class="col-sm-12">
+            <h3 class="title">{{pageSettings.Payment_Method_Section_Header__c}}</h3>
+            <div class="btn-group btnGroupSpacing">
+              <button type="button" ng-repeat="paymentMethod in paymentMethods" ng-click="selectPaymentMethod(paymentMethod)" ng-class="{active: paymentMethod === form.dfs.Payment_Method__c}"
+                class="btn btn-outline-primary">
+                {{paymentMethod}}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <!-- CREDIT CARD -->
+            <div ng-if="form.dfs.Payment_Method__c === 'Credit Card'">
+              <!-- STRIPE -->
+              <div ng-if="pageSettings.Payment_Processor__c === 'Stripe'">
+                <div id="card-element" class="field form-control">
+                </div>
+                <div id="card-errors" role="alert"></div>
+              </div>
+              <!-- / STRIPE -->
+              <!-- AUTHORIZE.NET -->
+              <div ng-if="pageSettings.Payment_Processor__c === 'Authorize.net'">
+                <div class="row">
+                  <div class="col-sm-4">
+                    <div class="form-group" ng-class="donationForm.creditCardNumber.$invalid && !donationForm.creditCardNumber.$pristine ? 'has-error':''">
+                      <label for="creditCardNumber" class="col-form-label">Credit Card Number&nbsp;
+                        <span class="required">*</span>
+                        <span ng-if="donationForm.creditCardNumber.$ccEagerType" ng-model="form.dfs.Credit_Card_Type__c">({{donationForm.creditCardNumber.$ccEagerType}})</span>
+                      </label>
+                      <input type="text" class="form-control" name="creditCardNumber" id="creditCardNumber" ng-model="payment.cardNumber" cc-number="true"
+                        cc-format="true" cc-eager-type="true" required="true" />
+                      <div class="text-danger" ng-messages="donationForm.creditCardNumber.$error" ng-show="donationForm.creditCardNumber.$touched">
+                        <div ng-message="required">Credit Card Number is required.</div>
+                        <div ng-message="ccNumber">Credit Card Number is invalid.</div>
+                        <div ng-message="ccNumberType">Credit Card Type is invalid.</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-2">
+                    <div class="form-group" ng-class="donationForm.cvvCode.$invalid && !donationForm.cvvCode.$pristine ? 'has-error':''">
+                      <label for="cvvCode" class="col-form-label">CVV&nbsp;
+                        <span class="required" ng-if="pageSettings.Require_CVV2_Code__c === true">*</span>
+                      </label>
+                      <input type="text" class="form-control" name="cvvCode" id="cvvCode" ng-model="payment.cardCVVCode" cc-cvc="true" ng-required="pageSettings.Require_CVV2_Code__c === true"
+                      />
+                      <div class="text-danger" ng-messages="donationForm.cvvCode.$error" ng-show="donationForm.cvvCode.$touched">
+                        <div ng-message="required">CVV is required.</div>
+                        <div ng-message="ccCvc">CVV Code is invalid.</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-3">
+                    <div class="form-group" ng-class="donationForm.expirationMonth.$invalid && !donationForm.expirationMonth.$pristine ? 'has-error':''">
+                      <label for="expirationMonth" class="col-form-label">Expiration Month&nbsp;
+                        <span class="required">*</span>
+                      </label>
+                      <select id="expirationMonth" name="expirationMonth" class="form-control" ng-model="payment.cardExpirationMonth" required="true">
+                        <option value="01">1 (January)</option>
+                        <option value="02">2 (February)</option>
+                        <option value="03">3 (March)</option>
+                        <option value="04">4 (April)</option>
+                        <option value="05">5 (May)</option>
+                        <option value="06">6 (June)</option>
+                        <option value="07">7 (July)</option>
+                        <option value="08">8 (August)</option>
+                        <option value="09">9 (September)</option>
+                        <option value="10">10 (October)</option>
+                        <option value="11">11 (November)</option>
+                        <option value="12">12 (December)</option>
+                      </select>
+                      <div class="text-danger" ng-messages="donationForm.expirationMonth.$error" ng-show="donationForm.expirationMonth.$touched"
+                        required="true">
+                        <div ng-message="required">Expiration Month is required.</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-3">
+                    <div class="form-group" ng-class="donationForm.expirationYear.$invalid && !donationForm.expirationYear.$pristine ? 'has-error':''">
+                      <label for="expirationYear" class="col-form-label">Expiration Year&nbsp;
+                        <span class="required">*</span>
+                      </label>
+                      <select id="expirationYear" name="expirationYear" class="form-control" ng-model="payment.cardExpirationYear" required="true">
+                        <option ng-repeat="expirationYear in expirationYears" value="{{expirationYear.value}}">{{expirationYear.label}}</option>
+                      </select>
+                      <div class="text-danger" ng-messages="donationForm.expirationYear.$error" ng-show="donationForm.expirationYear.$touched">
+                        <div ng-message="required">Expiration Year is required.</div>
+                      </div>
+                      <div class="text-danger" ng-show="donationForm.expirationYear.$touched && cardDateIsExpired()">
+                        <p>This card has expired.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- / AUTHORIZE.NET -->
+            </div>
+            <!-- / CREDIT CARD -->
+            <!-- EFT -->
+            <div ng-if="form.dfs.Payment_Method__c === 'EFT' && pageSettings.Payment_Processor__c !== 'Stripe'">
+              <div class="row">
+                <div class="col-sm-4">
+                  <div class="form-group" ng-class="donationForm.nameOnAccount.$invalid && !donationForm.nameOnAccount.$pristine ? 'has-error':''">
+                    <label for="nameOnAccount" class="col-form-label">Name on Account&nbsp;
+                      <span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" name="nameOnAccount" id="nameOnAccount" ng-model="payment.nameOnAccount" required="true"
+                    />
+                    <div class="text-danger" ng-messages="donationForm.nameOnAccount.$error" ng-show="donationForm.nameOnAccount.$touched">
+                      <div ng-message="required">Account Name is required.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                  <div class="form-group" ng-class="donationForm.accountType.$invalid && !donationForm.accountType.$pristine ? 'has-error':''">
+                    <label for="accountType" class="col-form-label">Account Type&nbsp;
+                      <span class="required">*</span>
+                    </label>
+                    <select id="accountType" name="accountType" class="form-control" ng-model="payment.accountType" required="true">
+                      <option value="checking">Checking</option>
+                      <option value="savings">Savings</option>
+                    </select>
+                    <div class="text-danger" ng-messages="donationForm.accountType.$error" ng-show="donationForm.accountType.$touched">
+                      <div ng-message="required">Account Type is required.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="form-group" ng-class="donationForm.routingNumber.$invalid && !donationForm.routingNumber.$pristine ? 'has-error':''">
+                    <label for="routingNumber" class="col-form-label">Routing Number&nbsp;
+                      <span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" name="routingNumber" id="routingNumber" ng-model="payment.routingNumber" required="true"
+                    />
+                    <div class="text-danger" ng-messages="donationForm.routingNumber.$error" ng-show="donationForm.routingNumber.$touched">
+                      <div ng-message="required">Routing Number is required.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="form-group" ng-class="donationForm.accountNumber.$invalid && !donationForm.accountNumber.$pristine ? 'has-error':''">
+                    <label for="accountNumber" class="col-form-label">Account Number&nbsp;
+                      <span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" name="accountNumber" id="accountNumber" ng-model="payment.accountNumber" required="true"
+                    />
+                    <div class="text-danger" ng-messages="donationForm.accountNumber.$error" ng-show="donationForm.accountNumber.$touched">
+                      <div ng-message="required">Account Number is required.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- / EFT -->
+            <!-- CHECK -->
+            <div ng-show="form.dfs.Payment_Method__c === 'Check'">
+              <span ng-bind-html="trustAsHtml(pageSettings.Check_Giving_Instructions__c)" class="ng-binding cont"></span>
+            </div>
+            <!-- / CHECK -->
+          </div>
+        </div>
+        <div class="row" ng-if="pageSettings.Option_to_Cover_Processing_Fees__c">
+          <div class="col-sm-12">
+            <div class="checkbox">
+              <div ng-if="form.dfs.Payment_Method__c === 'Credit Card'">
+                <label>
+                  <input type="checkbox" name="coverFeesCheckbox" ng-model="form.dfs.Will_Cover_Processing_Fees__c" /> Increase my donation to cover credit card processing fees
+                </label>
+              </div>
+              <div ng-if="form.dfs.Payment_Method__c === 'EFT'">
+                <label>
+                  <input type="checkbox" name="coverFeesCheckbox" ng-model="form.dfs.Will_Cover_Processing_Fees__c" /> Increase my donation to cover EFT processing fees
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- / PAYMENT INFORMATION -->
+        <hr />
+        <!-- ADDITIONAL INFORMATION -->
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="row">
+              <div class="col-lg-6 col-sm-12">
+                <div class="row" ng-if="pageSettings.Option_to_Opt_In_for_Communications__c">
+                  <div class="col-sm-12">
+                    <div class="form-group row" ng-if="pageSettings.Allow_Foreign_Transactions__c">
+                      <div class="col-sm-12">
+                        <label class="currency-label">Receipt Language:</label>
+                        <div>
+                          <select class="form-control" name="language" ng-model="chosenLanguage.language" ng-options="opt.name for opt in languageOptions"></select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-12">
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" name="optInCommunicationsCheckbox" ng-model="form.dfs.Opted_In_to_Receive_Communications__c" /> {{pageSettings.Opt_In_for_Communication_Message__c}}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div ng-if="hearAboutUsVisible">
+                  <div class="row minorPaddingTop">
+                    <div class="col-sm-12">
+                      <div class="form-group" ng-class="donationForm.hearAboutUs.$invalid && !donationForm.hearAboutUs.$pristine ? 'has-error':''">
+                        <label>
+                          {{pageSettings.How_Did_You_Hear_About_Us_Label__c}}&nbsp;
+                          <span class="required" ng-if="hearAboutUsRequired">*</span>
+                          <span ng-show="donationForm.hearAboutUs.$invalid && !donationForm.hearAboutUs.$pristine" class="red">Field is required</span>
+                        </label>
+                        <select class="form-control" name="hearAboutUs" ng-model="form.dfs.How_Did_You_Hear_About_Us__c" ng-options="opt.value as opt.label for opt in selectOptions.hearAboutUs"
+                          ng-required="hearAboutUsOtherRequired"></select>
+                        <div class="text-danger" ng-messages="donationForm.hearAboutUs.$error" ng-show="donationForm.hearAboutUs.$touched">
+                          <div ng-message="required">Field is required.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row minorPaddingTop" ng-if="form.dfs.How_Did_You_Hear_About_Us__c === 'Other'">
+                    <div class="col-sm-12">
+                      <div class="form-group" ng-class="donationForm.hearAboutUsOther.$invalid && !donationForm.hearAboutUsOther.$pristine ? 'has-error':''">
+                        <label for="hearAboutUsOther" class="col-form-label">Please Specify:&nbsp;
+                          <span class="required" ng-if="hearAboutUsRequired">*</span>
+                        </label>
+                        <input type="text" class="form-control" name="hearAboutUsOther" id="hearAboutUsOther" ng-model="form.dfs.How_Did_You_Hear_About_Us_Text__c"
+                          ng-required="hearAboutUsRequired" />
+                        <div class="text-danger" ng-messages="donationForm.hearAboutUsOther.$error" ng-show="donationForm.hearAboutUsOther.$touched">
+                          <div ng-message="required">Field is required.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 col-sm-12">
+                <div class="row" ng-if="pageSettings.Show_Comments_Field__c">
+                  <div class="col-sm-12">
+                    <div class="form-group" ng-class="donationForm.comments.$invalid && !donationForm.comments.$pristine ? 'has-error':''">
+                      <label for="comments" class="col-form-label">{{pageSettings.Comments_Label__c}}</label>
+                      <textarea maxlength="1000" class="form-control" rows="5" name="comments" id="comments" ng-model="form.dfs.Comments__c" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- / ADDITIONAL INFORMATION -->
+        <hr />
+        <!-- PURPOSE CODE -->
+        <div class="row" ng-if="internalDonation === true">
+          <div class="col-sm-6">
+            <div class="form-group" ng-class="donationForm.purposeCode.$invalid && !donationForm.purposeCode.$pristine ? 'has-error':''">
+              <label for="purposeCode" class="col-form-label">Purpose Code (Will default to {{form.chosenOptions[0].option.Fund__r.Name}} if left blank)</label>
+              <input type="text" class="form-control" name="purposeCode" id="purposeCode" ng-model="form.dfs.GAU_Purpose_Code__c" />
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group" ng-class="donationForm.campaignInput.$invalid && !donationForm.campaignInput.$pristine ? 'has-error':''">
+              <label for="campaignInput" class="col-form-label">Campaign (Will default to {{campaign.Name}} if left blank)</label>
+              <input type="text" class="form-control" name="campaignInput" id="campaignInput" ng-model="form.dfs.Campaign_Input__c" />
+            </div>
+          </div>
+        </div>
+        <!-- / PURPOSE CODE -->
+        <!-- TOTAL & SUBMIT -->
+        <div class="row">
+          <div class="col-sm-12">
+            <h3 class="total-amount">Total: {{chosenCurrency.currency.symbol}}{{getTotal()}}</h3>
+          </div>
+        </div>
+        <hr />
+        <!-- <pre>{{donationForm.$valid | json}}</pre> -->
+        <div class="row" ng-if="fieldErrors">
+          <div class="col-sm-12">
+            <p class="required">Please review the form, correct any indicated errors, and complete all required fields before submitting again.</p>
+            <p class="required" ng-if="fieldErrorsString && fieldErrorsString !== ''">The following fields have errors: {{fieldErrorsString}}</p>
+          </div>
+        </div>
+        <div class="row justify-content-around">
+          <div class="col-lg-8 col-xs-10">
+            <button type="submit" class="btn btn-primary btn-lg submit-button" ng-disabled="formSubmitting">
+              <span ng-if="!formSubmitting">{{pageSettings.Submit_Button_Label__c}}</span>
+              <span ng-if="formSubmitting">Submitting
+                <i class="fa fa-spinner fa-spin"></i>
+              </span>
+            </button>
+          </div>
+        </div>
+        <!-- / TOTAL & SUBMIT -->
+      </form>
+      <!-- / FORM -->
+      <!-- PAGE FOOTER -->
+      <div class="row">
+        <div class="col-sm-12">
+          <span ng-if="!!pageSettings.Footer_Text__c">
+            <div ng-bind-html="trustAsHtml(pageSettings.Footer_Text__c)" class="paddedText"></div>
+          </span>
+        </div>
+      </div>
+      <!-- / PAGE FOOTER -->
+    </div>
+    <style ng-bind-html="trustAsHtml(pageSettings.Custom_Page_CSS__c)" type="text/css"></style>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'js/app.js')}"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'js/controller.js')}"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"></script>
+    <script src="{!URLFOR($Resource.DonationPageResource, 'resources/bootstrapFour/js/bootstrap.min.js')}"></script>
+  </body>
+
+  </html>
+</apex:page>

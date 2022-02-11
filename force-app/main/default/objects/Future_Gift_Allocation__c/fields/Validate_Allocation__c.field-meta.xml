@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Validate_Allocation__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(
+OR(ISPICKVAL(Future_Gift__r.Stage__c, &apos;Commitment Made&apos;),
+ISPICKVAL(Future_Gift__r.Stage__c, &apos;Stewardship&apos;)),
+true,
+false)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Validate Allocation</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,140 @@
+@font-face {
+  font-family: 'Lato-Regular';
+  src: url(/resource/LatoRegularFont); 
+}
+@font-face {
+  font-family: 'Lato-Light';
+  src: url(/resource/LatoLightFont); 
+}
+@font-face {
+  font-family: 'Lato-Bold';
+  src: url(/resource/LatoBoldFont); 
+}
+
+
+/* Component Header */
+.THIS .header {
+  text-align: left;
+  width: 100%;
+}
+.THIS h1 {
+  color: #044f7a;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+/* Fonts */
+.THIS p {
+  color: #696764;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+.THIS .asterisk {
+  color: #54aeff;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 12px;
+  padding-bottom: 14px;
+  display: inline;
+}
+.THIS .italics {
+  font-style: italic !important;
+}
+
+/* Links */
+.THIS .link {
+  color: #54aeff;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  text-decoration: underline;
+  letter-spacing: 1px;
+}
+.THIS .slds-button[disabled] {
+  color: rgb(217, 219, 221) !important;
+}
+.THIS .slds-button:disabled {
+  color: rgb(217, 219, 221) !important;
+}
+
+/* Hide Picklist Label */
+.THIS .slds-form-element__label{ 
+  display: none !important;
+}
+
+/* Make banded table rows */
+.THIS tr:nth-child(even) {
+  background-color: #ffffff;
+}
+.THIS tr:nth-child(odd) {
+  background-color: #ebebeb;
+}
+/* Table header row */
+.THIS th {
+  background-color: #ffffff;
+  color: 	#ffffff;
+  font-family: 'Lato-Light', Sans-serif;
+  font-size: 14px;
+  text-align: center;
+  margin: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-left: 1px solid #696764;
+  border-right: 1px solid #696764;
+  width: 16.666667%;
+}
+.THIS th:first-child {
+  border-left: none;
+  padding-left: 0px !important;
+}
+.THIS th:last-child {
+  border-right: none;
+  padding-right: 0px !important;
+}
+.THIS .th-cell {
+  background-color: #ff6600;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+/* Table detail rows */
+.THIS td {
+  color: 	#696764;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 14px;
+  padding: 5px;
+  text-align: center;
+  border-left: 1px solid #696764;
+  border-right: 1px solid #696764;
+}
+.THIS td:first-child {
+  border-left: none;
+}
+.THIS td:last-child {
+  border-right: none;
+}
+
+/* Portrait Mode */
+@media only screen 
+  and (min-device-width: 320px) 
+  and (max-device-width: 480px)
+  and (-webkit-min-device-pixel-ratio: 2)
+  and (orientation: portrait) 
+{
+  .THIS th {
+    font-size: 12px;
+  }
+  .THIS td {
+    font-size: 11px;
+    padding: 2.5px;
+  }
+  .THIS .mobile-hide {
+    display: none;
+  }
+  .THIS .link {
+    font-size: 11px;
+  }
+}

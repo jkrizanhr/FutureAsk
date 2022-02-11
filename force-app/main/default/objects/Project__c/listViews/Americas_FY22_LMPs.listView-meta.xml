@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Americas_FY22_LMPs</fullName>
+    <columns>NAME</columns>
+    <columns>Language_Community__c</columns>
+    <columns>Region__c</columns>
+    <columns>Resources__c</columns>
+    <columns>Media_Format__c</columns>
+    <columns>Estimated_Reach__c</columns>
+    <columns>Requested_Budget__c</columns>
+    <columns>LMP_Project_Manager__c</columns>
+    <columns>UPDATEDBY_USER</columns>
+    <columns>Partnership_Director__c</columns>
+    <columns>Status__c</columns>
+    <columns>Approved_Budget__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>RECORDTYPE</field>
+        <operation>equals</operation>
+        <value>Project__c.Language_Ministry_Project</value>
+    </filters>
+    <filters>
+        <field>Fiscal_Year__c</field>
+        <operation>includes</operation>
+        <value>FY22</value>
+    </filters>
+    <filters>
+        <field>Region__c</field>
+        <operation>contains</operation>
+        <value>Latin America,North America</value>
+    </filters>
+    <label>Americas FY22 LMPs</label>
+</ListView>

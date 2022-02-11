@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Project_Details__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Consider and describe: What is the ultimate problem(s) this project addresses? What outcomes (changes) will it generate? What are the specific steps to achieve those outcomes? What key resources (“dominoes”) are needed, and are they in place?</inlineHelpText>
+    <label>HOW? - Project Details</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Html</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

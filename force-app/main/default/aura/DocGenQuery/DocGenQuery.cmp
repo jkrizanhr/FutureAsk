@@ -1,0 +1,132 @@
+<aura:component description="DocGenQuery">
+  <aura:attribute name="aggregateQueries" type="String[]"/>
+  <aura:attribute name="aggregateQueryDisplayList" type="List"/>
+  <aura:attribute name="customMetadataQueries" type="String[]"/>
+  <aura:attribute name="customMetadataQueryDisplayList" type="List"/>
+  <aura:attribute name="primarySOQLQuery" type="String"/>
+  <aura:attribute name="secondaryQueries" type="String[]"/>
+  <aura:attribute name="secondaryQueryDisplayList" type="List"/>
+  <aura:attribute name="showPrimaryQuery" type="Boolean" default="false"/>
+
+  <div class="slds-form-element__row slds-p-top--small">
+    <div class="slds-form-element slds-size_1-of-1">
+      <label class="query-label slds-p-right--small">
+        Primary SOQL Query
+      </label>
+      <aura:if isTrue="{!v.showPrimaryQuery}">
+        <lightning:buttonIcon iconName="utility:chevrondown"
+                              size="x-small"
+                              onclick="{!c.onClickTogglePrimaryQueryDisplay}"
+                              alternativeText="Show Query"/>
+        <textarea id="textarea-id-01" class="slds-textarea" disabled="true">
+          {!v.primarySOQLQuery}
+        </textarea>
+        <aura:set attribute="else">
+          <lightning:buttonIcon iconName="utility:chevronright"
+                                size="x-small"
+                                onclick="{!c.onClickTogglePrimaryQueryDisplay}"
+                                alternativeText="Show Query"/>
+        </aura:set>
+      </aura:if>
+    </div>
+  </div>
+
+  <aura:if isTrue="{!not(empty(v.secondaryQueries))}">
+    <aura:iteration items="{!v.secondaryQueries}" var="query" indexVar="index">
+      <div class="slds-form-element__row slds-p-top--small">
+        <div class="slds-form-element slds-size_1-of-1">
+          <label class="query-label slds-p-right--small">
+            Secondary SOQL Query
+          </label>
+          <aura:iteration items="{!v.secondaryQueryDisplayList}" var="queryDisplay" indexVar="idx">
+            <aura:if isTrue="{!and(idx == index, queryDisplay == true)}">
+              <lightning:buttonIcon iconName="utility:chevrondown"
+                                    size="x-small"
+                                    onclick="{!c.onClickToggleSecondaryQueryDisplay}"
+                                    value="{!idx}"
+                                    alternativeText="Show Query"/>
+              <textarea id="textarea-id-02" class="slds-textarea" style="height:13vh;" disabled="true">
+                {!query}
+              </textarea>
+              <aura:set attribute="else">
+                <aura:if isTrue="{!idx == index}">
+                  <lightning:buttonIcon iconName="utility:chevronright"
+                                        size="x-small"
+                                        onclick="{!c.onClickToggleSecondaryQueryDisplay}"
+                                        value="{!idx}"
+                                        alternativeText="Show Query"/>
+                </aura:if>
+              </aura:set>
+            </aura:if>
+          </aura:iteration>
+        </div>
+      </div>
+    </aura:iteration>
+  </aura:if>
+
+  <aura:if isTrue="{!not(empty(v.aggregateQueries))}">
+    <aura:iteration items="{!v.aggregateQueries}" var="query" indexVar="index">
+      <div class="slds-form-element__row slds-p-top--small">
+        <div class="slds-form-element slds-size_1-of-1">
+          <label class="query-label slds-p-right--small">
+            Aggregate SOQL Query
+          </label>
+          <aura:iteration items="{!v.aggregateQueryDisplayList}" var="queryDisplay" indexVar="idx">
+            <aura:if isTrue="{!and(idx == index, queryDisplay == true)}">
+              <lightning:buttonIcon iconName="utility:chevrondown"
+                                    size="x-small"
+                                    onclick="{!c.onClickToggleAggregateQueryDisplay}"
+                                    value="{!idx}"
+                                    alternativeText="Show Query"/>
+              <textarea id="textarea-id-02" class="slds-textarea" style="height:13vh;" disabled="true">
+                {!query}
+              </textarea>
+              <aura:set attribute="else">
+                <aura:if isTrue="{!idx == index}">
+                  <lightning:buttonIcon iconName="utility:chevronright"
+                                        size="x-small"
+                                        onclick="{!c.onClickToggleAggregateQueryDisplay}"
+                                        value="{!idx}"
+                                        alternativeText="Show Query"/>
+                </aura:if>
+              </aura:set>
+            </aura:if>
+          </aura:iteration>
+        </div>
+      </div>
+    </aura:iteration>
+  </aura:if>
+
+  <aura:if isTrue="{!not(empty(v.customMetadataQueries))}">
+    <aura:iteration items="{!v.customMetadataQueries}" var="query" indexVar="index">
+      <div class="slds-form-element__row slds-p-top--small">
+        <div class="slds-form-element slds-size_1-of-1">
+          <label class="query-label slds-p-right--small">
+            Custom Metadata SOQL Query
+          </label>
+          <aura:iteration items="{!v.customMetadataQueryDisplayList}" var="queryDisplay" indexVar="idx">
+            <aura:if isTrue="{!and(idx == index, queryDisplay == true)}">
+              <lightning:buttonIcon iconName="utility:chevrondown"
+                                    size="x-small"
+                                    onclick="{!c.onClickToggleCustomMetadataQueryDisplay}"
+                                    value="{!idx}"
+                                    alternativeText="Show Query"/>
+              <textarea id="textarea-id-02" class="slds-textarea" style="height:13vh;" disabled="true">
+                {!query}
+              </textarea>
+              <aura:set attribute="else">
+                <aura:if isTrue="{!idx == index}">
+                  <lightning:buttonIcon iconName="utility:chevronright"
+                                        size="x-small"
+                                        onclick="{!c.onClickToggleCustomMetadataQueryDisplay}"
+                                        value="{!idx}"
+                                        alternativeText="Show Query"/>
+                </aura:if>
+              </aura:set>
+            </aura:if>
+          </aura:iteration>
+        </div>
+      </div>
+    </aura:iteration>
+  </aura:if>
+</aura:component>

@@ -1,0 +1,157 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes,lightning:isUrlAddressable" access="global" controller="Portal_Controller">
+  <!-- AURA ATTRIBUTES -->
+  <!-- Booleans for Page Load/Validity Checks -->
+  <aura:attribute name="processing" type="Boolean" default="false"/>
+  <aura:attribute name="isLoading" type="Boolean" default="true"/>
+  <aura:attribute name="contactValid" type="Boolean" default="true"/>
+  <aura:attribute name="processingFees" type="Boolean" default="false"/>
+  <!-- Information for the Donation Page -->
+  <aura:attribute name="donationPageInfo" type="object"/>
+  <aura:attribute name="frequency" type="List" 
+    default="[{label: 'One-Time', value: 'One-Time'}, {label: 'Monthly', value: 'Monthly'}, {label: 'Yearly', value: 'Yearly'}]"/>
+  <aura:attribute name="paymentMethods" type="List" default=""/>
+  <!-- Collected info from donation page stored in these variables -->
+  <aura:attribute name="currency" type="String" default="USD"/>
+  <aura:attribute name="freq" type="String" default="One-Time"/>
+  <aura:attribute name="date" type="Date" />
+  <aura:attribute name="subtotal" type="Double"/>
+  <aura:attribute name="total" type="Double"/>
+  <!-- Modal -->
+  <aura:attribute name="showModal" type="Boolean" default="false"/>
+  <aura:attribute name="title" type="String" default="Action Required"/>
+  <aura:attribute name="message" type="String" default="Error Message: This was not successful."/>
+  <aura:handler event="force:refreshView" action="{!c.doInit}"/>
+  
+  <!-- AURA HANDLERS -->
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  
+  <!-- DONATION PAGE COMPONENT -->
+  <aura:if isTrue="{!not(v.isLoading)}">
+    <aura:if isTrue="{!v.processing}"><lightning:spinner/></aura:if>
+    <div>
+      <!-- UPDATE CONTACT INFORMATION -->
+      <lightning:layout>
+        <i><p>Want to update your contact information?&nbsp;<lightning:button class="link" variant="base" onclick="{!c.goToMyProfilePage}" name="recDon" label="Click here to go to My Profile."/></p></i>
+      </lightning:layout>
+      <!-- Contact information incomplete error -->
+      <aura:if isTrue="{!not(v.contactValid)}"><lightning:layout class="slds-p-top_xx-small">
+        <p style="color: #ff6600;">Your contact information is incomplete. Please go to the My Profile page to update your name, phone, email, and address information before submitting a donation.</p>
+      </lightning:layout></aura:if>
+      
+      <!-- FORM FIELDS -->
+      <lightning:layout multipleRows="true" class="slds-p-top_medium">
+        <!-- Currency -->
+        <lightning:layoutItem size="6" class="slds-p-right_medium slds-p-top_small">
+          <label class="field-label" for="FirstName">Currency</label>  
+          <lightning:select aura:id="currency" name="cur" label="Currency" value="{!v.currency}" onchange="{!c.calculateTotal}">
+            <aura:iteration items="{!v.donationPageInfo.currencyTypes.picklistValues}" var="cur">
+              <option value="{!cur.value}">{!cur.label}</option>
+            </aura:iteration>
+          </lightning:select>
+        </lightning:layoutItem>
+        <!-- Start Date -->
+        <aura:if isTrue="{!v.freq != 'One-Time'}">
+          <lightning:layoutItem size="6" class="slds-p-right_medium slds-p-top_small">
+            <label class="field-label" for="FirstName">Start Date</label>  
+            <lightning:input type="date" name="startDate" value="{!v.date}" label="Date" />
+          </lightning:layoutItem>
+        </aura:if>
+      </lightning:layout>
+      <lightning:layout multipleRows="true">
+        <!-- Frequency -->
+        <lightning:layoutItem size="12" class="slds-p-right_medium slds-p-top_small">
+          <label class="field-label" for="FirstName">Frequency</label>  
+          <lightning:radioGroup class="slds-button_stretch" name="frequency" label="Frequency" value="{!v.freq}" options="{!v.frequency}" type="button"/>
+        </lightning:layoutItem>
+      </lightning:layout>
+      <lightning:layout multipleRows="true">
+        <!-- Fund -->
+        <lightning:layoutItem size="6" class="slds-p-right_medium slds-p-top_small">
+          <lightning:layout multipleRows="true">
+            <!-- if multiple funds make selected funds plural -->
+            <aura:if isTrue="{!v.donationPageInfo.selectedFunds.length > 1}">
+              <lightning:layoutItem size="6"><label class="field-label" for="fund">Selected Funds</label></lightning:layoutItem>
+              <aura:set attribute="else">
+                <lightning:layoutItem size="6"><label class="field-label" for="fund">Selected Fund</label></lightning:layoutItem>
+              </aura:set>
+            </aura:if>
+            <lightning:layoutItem size="6"><label class="field-label" for="amts">Amount</label></lightning:layoutItem>
+          </lightning:layout>
+          <aura:iteration items="{!v.donationPageInfo.selectedFunds}" var="fund">
+            <lightning:layout multipleRows="true">
+              <lightning:layoutItem size="6">
+                <lightning:input name="{!fund.name}" readonly="true" value="{!(fund.name)}" label="" />
+              </lightning:layoutItem>
+              <lightning:layoutItem size="6">
+                <lightning:input type="number" name="amount" label="Amount" step="0.01" value="{!fund.amount}" readOnly="{!donationPageInfo.selectedFunds.length == 1}" onblur="{!c.calculateTotal}"/>
+              </lightning:layoutItem>
+            </lightning:layout>
+          </aura:iteration>
+        </lightning:layoutItem>
+        <!-- Payment Method -->
+        <lightning:layoutItem size="6" class="slds-p-right_medium slds-p-top_small">
+          <label class="field-label" for="FirstName">Payment Method</label>  
+          <lightning:select aura:id="pm" name="pm" label="Payment Method">
+            <aura:iteration items="{!v.paymentMethods}" var="pm">
+              <option value="{!pm.id}">{!pm.label}</option>
+            </aura:iteration>
+          </lightning:select>
+        </lightning:layoutItem>
+      </lightning:layout>
+      
+      <!-- UPDATE PAYMENT METHODS -->
+      <lightning:layout class="slds-p-top_small">
+        <i><p>Want to add a new payment method?&nbsp;<lightning:button class="link" variant="base" onclick="{!c.goToMyProfilePage}" label="Click here to go to My Profile."/></p></i>
+      </lightning:layout>
+      <!-- No payment methods error -->
+      <aura:if isTrue="{!empty(v.paymentMethods)}"><lightning:layout class="slds-p-top_xx-small">
+        <p style="color: #ff6600;">We are unable to find any stored payment methods. Please add a new saved payment method and try again. Thank you.</p>
+      </lightning:layout></aura:if>
+      
+      <!-- PROCESSING FEES -->
+      <lightning:layout class="slds-p-top_large">
+        <lightning:input aura:id="processingFees" type="checkbox" checked="{!v.processingFees}" onchange="{!c.calculateTotal}"/>
+        <p>I will cover credit card processing fee</p>
+      </lightning:layout>
+      
+      <!-- TOTAL -->
+      <lightning:layout class="slds-p-top_small">
+        <h1>Total: <lightning:formattedNumber value="{!if(v.total != null, v.total, 0)}" style="currency" currencyCode="{!v.currency}"/></h1>
+      </lightning:layout>
+      
+      <!-- SUBMIT BUTTON -->
+      <lightning:layout class="slds-p-top_medium">
+        <lightning:button variant="brand" label="DONATE" onclick="{!c.handleSubmit}" 
+        disabled="{!or(or(v.total == null, v.total le 0), or(not(v.contactValid), empty(v.paymentMethods)))}" />
+      </lightning:layout>
+ 
+    </div>
+    <!-- SPINNER WHILE LOADING -->
+    <aura:set attribute="else">
+      <lightning:spinner />
+    </aura:set>
+  </aura:if>
+
+  <!-- ERROR/SUCCESS MODAL -->
+  <aura:if isTrue="{!v.showModal}">
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+      <div class="slds-modal__container">
+        <header class="slds-modal__header slds-modal__header_empty">
+          <lightning:buttonIcon class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" alternativeText="Close" iconName="utility:close" onclick="{!c.toggleModal}"/>
+        </header>
+        <div style="text-align: center;" class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+          <aura:if isTrue="{!v.title == 'Action Required'}">
+            <lightning:icon variant="error" width="100px" iconName="utility:clear" size="large"/>
+            <aura:set attribute="else"><lightning:icon variant="success" width="100px" height="100px" iconName="utility:success" size="large"/></aura:set>
+          </aura:if>
+          <p class="modal-heading">{!v.title}</p>
+          <p class="modal-body">{!v.message}</p>
+          <div style="text-align: center; padding-top: 10px;">
+            <lightning:button variant="brand" label="OK" onclick="{!c.toggleModal}"/>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </aura:if>
+</aura:component>

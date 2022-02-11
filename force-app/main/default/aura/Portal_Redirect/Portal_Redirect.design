@@ -1,0 +1,3 @@
+<design:component >
+  <design:attribute name="redirect" label="Redirect To" description="Enter the name of the page as appears in the URL without the /s/. Default naming is the page name in all lowercase with spaces replaced by a hyphen."/>
+</design:component>

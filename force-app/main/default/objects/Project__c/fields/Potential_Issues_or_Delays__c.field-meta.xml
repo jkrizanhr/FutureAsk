@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Potential_Issues_or_Delays__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>What issues could potentially delay or jeopardize this project? (economic, geographic, political issues, partners, etc.)</inlineHelpText>
+    <label>Potential Issues or Delays</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

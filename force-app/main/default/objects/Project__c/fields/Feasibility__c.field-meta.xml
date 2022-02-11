@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Feasibility__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Please discuss the factors necessary to implement this project effectively, and why, in light of those factors, you feel this project will be successful.</inlineHelpText>
+    <label>Feasibility</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

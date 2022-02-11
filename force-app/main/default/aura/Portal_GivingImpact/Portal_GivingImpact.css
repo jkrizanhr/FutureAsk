@@ -1,0 +1,56 @@
+@font-face {
+  font-family: 'Catamaran-Regular';
+  src: url(/resource/CatamaranRegularFont); 
+}
+@font-face {
+  font-family: 'Catamaran-Bold';
+  src: url(/resource/CatamaranBoldFont); 
+}
+@font-face {
+  font-family: 'Lato-Regular';
+  src: url(/resource/LatoRegularFont); 
+}
+@font-face {
+  font-family: 'Lato-Light';
+  src: url(/resource/LatoLightFont); 
+}
+
+.THIS .header {
+  text-align: center;
+  width: 100%;
+}
+
+.THIS h1 {
+  color: #044f7a;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.THIS p {
+  color: 	#696764;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+.THIS .title-row {
+  background-color: #ff6600;
+  color: 	#ffffff;
+  font-family: 'Lato-Light', Sans-serif;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.THIS .detail-row {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  text-align: center;
+  width: 100%;
+}

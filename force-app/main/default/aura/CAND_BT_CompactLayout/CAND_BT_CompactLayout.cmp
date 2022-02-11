@@ -1,0 +1,158 @@
+<aura:component description="CAND_BT_CompactLayout">
+  <aura:attribute name="parentRecord" type="Object"/>
+
+  <aura:if isTrue="{!$Browser.formFactor == 'DESKTOP'}">
+  <div class="slds-float--left" style="width:100%;">
+    <table class="slds-table slds-no-row-hover">
+      <thead>
+        <tr class="slds-line-height_reset">
+          <th class="" scope="col">Name</th>
+          <th class="" scope="col">Status</th>
+          <th class="" scope="col">Date</th>
+          <th class="" scope="col">Type</th>
+          <th class="" scope="col">Batch Control Total (USD)</th>
+          <th class="" scope="col">Records included in Batch</th>
+          <th class="" scope="col">Total included in Batch (USD)</th>
+          <th class="" scope="col">Balance (USD)</th>
+          <aura:if isTrue="{!not(empty(v.parentRecord.Opportunity_Type__c))}">
+            <th class="" scope="col">Opportunity Type</th>
+          </aura:if>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="slds-hint-parent" style="font-size: 15px">
+          <td data-label="Record Name" onclick="{!c.showModal}"><div class="slds-truncate"><a >{!v.parentRecord.Name}</a></div></td>
+          <td data-label="Status"><div class="slds-truncate">{!v.parentRecord.Status__c}</div></td>
+          <td data-label="Posting Date"><div class="slds-truncate"><lightning:formattedDateTime value="{!v.parentRecord.Date__c}" year="numeric" month="numeric" day="numeric" timeZone="UTC"/></div></td>
+          <td data-label="Status"><div class="slds-truncate">{!v.parentRecord.Type__c}</div></td>
+          <aura:if isTrue="{!empty(v.parentRecord.Control_Batch_Total__c)}">
+            <td data-label="Batch Control Size"><div class="slds-truncate">$0.00</div></td>
+            <aura:set attribute="else">
+            <td data-label="Control Batch Total"><div class="slds-truncate"><ui:outputCurrency value="{!v.parentRecord.Control_Batch_Total__c}"/>
+              <aura:if isTrue="{!(v.parentRecord.Original_Currency__c != 'USD')}">
+                (<lightning:formattedNumber style="currency" currencyCode="{!v.parentRecord.Original_Currency__c}" value="{!v.parentRecord.Original_Control_Batch_Total__c}"/>)<br/>
+              </aura:if>
+            </div></td>
+            </aura:set>
+          </aura:if>
+          <aura:if isTrue="{!empty(v.parentRecord.Records_Included_in_Batch__c)}">
+            <td data-label="Batch Control Size"><div class="slds-truncate">0</div></td>
+            <aura:set attribute="else">
+          <td data-label="Records included in Batch"><div class="slds-truncate">{!v.parentRecord.Records_Included_in_Batch__c}</div></td>
+            </aura:set>
+          </aura:if>
+          <aura:if isTrue="{!empty(v.parentRecord.Total_Included_in_Batch__c)}">
+            <td data-label="Batch Control Size"><div class="slds-truncate">$0.00</div></td>
+            <aura:set attribute="else">
+              <td data-label="Total included in Batch"><div class="slds-truncate"><ui:outputCurrency value="{!v.parentRecord.Total_Included_in_Batch__c}"/>
+                <aura:if isTrue="{!(v.parentRecord.Original_Currency__c != 'USD')}">
+                  (<lightning:formattedNumber style="currency" currencyCode="{!v.parentRecord.Original_Currency__c}" value="{!v.parentRecord.Original_Total_Included_in_Batch__c}"/>)<br/>
+                </aura:if>
+              </div></td>
+            </aura:set>
+          </aura:if>
+          <aura:if isTrue="{!empty(v.parentRecord.Balance__c)}">
+          <td data-label="Batch Control Size"><div class="slds-truncate">$0.00</div></td>
+            <aura:set attribute="else">
+              <td data-label="Total included in Batch"><div class="slds-truncate"><ui:outputCurrency value="{!v.parentRecord.Balance__c}"/>
+                <aura:if isTrue="{!(v.parentRecord.Original_Currency__c != 'USD')}">
+                  (<lightning:formattedNumber style="currency" currencyCode="{!v.parentRecord.Original_Currency__c}" value="{!v.parentRecord.Original_Balance__c}"/>)<br/>
+                </aura:if>
+              </div></td>
+            </aura:set>
+          </aura:if>
+          <aura:if isTrue="{!not(empty(v.parentRecord.Opportunity_Type__c))}">
+            <td data-label="Opportunity Type"><div class="slds-truncate">{!v.parentRecord.Opportunity_Type__c}</div></td>
+          </aura:if>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <aura:set attribute="else">
+      <div class="slds-card">
+        <div class="slds-card__body slds-card__body_inner slds-grid">
+          <div class="slds-grid slds-size_1-of-1">
+            <dl class="slds-grid slds-wrap slds-size_1-of-1">
+              <div class="slds-col slds-size_1-of-1">
+                <dt class="slds-dl_inline__label"><strong>Record Name:</strong></dt>
+                <dd class="slds-dl_inline__detail" onclick="{!c.showModal}"><a>{!v.parentRecord.Name}</a></dd>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-p-top_small">
+                <dt class="slds-dl_inline__label"><strong>Status:</strong></dt>
+                <dd class="slds-dl_inline__detail">{!v.parentRecord.Status__c}</dd>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-p-top_small">
+                <dt class="slds-dl_inline__label"><strong>Date:</strong></dt>
+                <dd class="slds-dl_inline__detail"><lightning:formattedDateTime value="{!v.parentRecord.Date__c}" year="numeric" month="numeric" day="numeric" timeZone="UTC"/></dd>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-p-top_small">
+                <dt class="slds-dl_inline__label"><strong>Type:</strong></dt>
+                <dd class="slds-dl_inline__detail">{!v.parentRecord.Type__c}</dd>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-p-top_small">
+                <dt class="slds-dl_inline__label"><strong>Batch Control Total:</strong></dt>
+                <dd class="slds-dl_inline__detail">
+                  <aura:if isTrue="{!empty(v.parentRecord.Control_Batch_Total__c)}">
+                    $0.00
+                    <aura:set attribute="else">
+                      <ui:outputCurrency value="{!v.parentRecord.Control_Batch_Total__c}"/>
+                      <aura:if isTrue="{!(v.parentRecord.Original_Currency__c != 'USD')}">
+                        (<lightning:formattedNumber style="currency" currencyCode="{!v.parentRecord.Original_Currency__c}" value="{!v.parentRecord.Original_Control_Batch_Total__c}"/>)<br/>
+                      </aura:if>
+                    </aura:set>
+                  </aura:if>
+                </dd>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-p-top_small">
+                <dt class="slds-dl_inline__label"><strong>Records included in Batch:</strong></dt>
+                <dd class="slds-dl_inline__detail">
+                  <aura:if isTrue="{!empty(v.parentRecord.Records_Included_in_Batch__c)}">
+                    0
+                  <aura:set attribute="else">
+                    {!v.parentRecord.Records_Included_in_Batch__c}
+                  </aura:set>
+                  </aura:if>
+                </dd>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-p-top_small">
+                <dt class="slds-dl_inline__label"><strong>Total included in Batch:</strong></dt>
+                <dd class="slds-dl_inline__detail">
+                  <aura:if isTrue="{!empty(v.parentRecord.Total_Included_in_Batch__c)}">
+                    $0.00
+                  <aura:set attribute="else">
+                    <ui:outputCurrency value="{!v.parentRecord.Total_Included_in_Batch__c}"/>
+                  </aura:set>
+                  </aura:if>
+                </dd>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-p-top_small">
+                <dt class="slds-dl_inline__label"><strong>Balance:</strong></dt>
+                <dd class="slds-dl_inline__detail">
+                  <aura:if isTrue="{!empty(v.parentRecord.Balance__c)}">
+                    $0.00
+                  <aura:set attribute="else">
+                    <ui:outputCurrency value="{!v.parentRecord.Balance__c}"/>
+                  </aura:set>
+                  </aura:if>                  
+                </dd>
+              </div>
+              <aura:if isTrue="{!not(empty(v.parentRecord.Opportunity_Type__c))}">
+                <div class="slds-col slds-size_1-of-1 slds-p-top_small">
+                  <dt class="slds-dl_inline__label"><strong>Opportunity_Type__c:</strong></dt>
+                  <dd class="slds-dl_inline__detail">{!v.parentRecord.Opportunity_Type__c}</dd>
+                </div>
+              </aura:if>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+  </aura:set>
+</aura:if>
+
+
+
+  <c:CAND_BT_BatchModal aura:id="modal"
+                        btSettings="{!v.btSettings}"
+                        recordId="{!v.parentRecord.Id}"/>
+</aura:component>

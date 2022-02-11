@@ -1,0 +1,97 @@
+<aura:component controller="Portal_Controller" description="Modal for donors to manage their auth.net payment methods">
+  <!-- Variables Passed from Parent Component -->
+  <aura:attribute name="recordId" type="String" default="" />
+  <aura:attribute name="loading" type="Boolean" default="false" />
+  <aura:attribute name="isMobile" type="Boolean" default="false" />
+  <aura:attribute name="subscription" type="Object" default="" />
+  <aura:attribute name="modalType" type="String" default="" />
+  
+  <aura:attribute name="paymentMethods" type="List" default="[]"/>
+  <aura:attribute name="loadingPaymentMethods" type="Boolean" default="true"/>
+  
+  <!-- Events/Handlers -->
+  <aura:registerEvent name="closeWindow" type="c:Portal_RecurringDonationsCloseWindowEvent" />
+  <aura:handler name="init" value="{!this}" action="{!c.init}" />
+
+  <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+    <div class="slds-modal__container">
+      <header class="slds-modal__header slds-modal__header_empty">
+        <lightning:buttonIcon class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" alternativeText="Close" iconName="utility:close" onclick="{!c.closeModal}"/>
+      </header>
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+        <aura:if isTrue="{!not(v.loading)}">
+          
+          <!-- UPDATE PAYMENT METHOD MODAL -->
+          <aura:if isTrue="{!v.modalType == 'Update Payment Method'}">
+            <!-- VIEW CURRENT PAYMENT METHOD -->
+            <h1>Current Payment Method</h1>
+            <!-- Show Current Credit Card Information -->
+            <aura:if isTrue="{!(v.subscription.paymentMethod == 'Credit Card')}">
+              <lightning:layout>
+                <lightning:layoutItem size="6" class="slds-form-element__label">Card Number</lightning:layoutItem>
+              </lightning:layout>
+              <lightning:layout>
+                <lightning:layoutItem size="6">XXXXXX{!v.subscription.cardNumber}</lightning:layoutItem>
+              </lightning:layout>
+            </aura:if>
+            <!-- Show Current Bank Account Information -->
+            <aura:if isTrue="{!(v.subscription.paymentMethod == 'Bank Account')}">
+              <lightning:layout>
+                <lightning:layoutItem size="6" class="slds-form-element__label">Account Number</lightning:layoutItem>
+                <lightning:layoutItem size="6" class="slds-form-element__label">Routing Number</lightning:layoutItem>
+              </lightning:layout>
+              <lightning:layout>
+                <lightning:layoutItem size="6">{!v.subscription.accountNumber}</lightning:layoutItem>
+                <lightning:layoutItem size="6">{!v.subscription.routingNumber}</lightning:layoutItem>
+              </lightning:layout>
+            </aura:if>
+            <hr style="margin-top: 5px !important;"/>
+            
+            <!-- UPDATE PAYMENT METHOD -->
+            <h1>Update Payment Method</h1>
+            <!-- Show Error Message -->
+            <aura:if isTrue="{!not(empty(v.errorMessage))}">
+              <div class="slds-text-color_error" style="padding-bottom: 10px;">
+                {!v.errorMessage}
+              </div>
+            </aura:if>
+            <!-- Show Saved Payment Method picklist -->
+            <aura:if isTrue="{!not(v.loadingPaymentMethods)}">
+              <aura:if isTrue="{!not(empty(v.paymentMethods))}">
+                <lightning:layout>
+                  <lightning:layoutItem size="12" class="slds-p-right_medium">
+                    <lightning:select aura:id="pm" name="pm" label="Payment Method">
+                      <aura:iteration items="{!v.paymentMethods}" var="pm">
+                        <option value="{!pm.id}">{!pm.label}</option>
+                      </aura:iteration>
+                    </lightning:select>
+                  </lightning:layoutItem>
+                </lightning:layout>
+                <aura:set attribute="else">
+                  We are unable to find any stored payment methods. Please add a new saved payment method and try again. Thank you.
+                </aura:set>
+              </aura:if>
+              <aura:set attribute="else">
+                <lightning:spinner size="small"/>
+              </aura:set>
+            </aura:if>
+
+            <!-- Submit Button -->
+            <div style="padding-top: 15px; padding-bottom: 15px; text-align: center;">
+              <lightning:button class="neutral" label="Cancel" onclick="{!c.closeModal}"/>
+            <lightning:button class="slds-button slds-button_brand" label="Submit" onclick="{!c.updatePaymentMethod}"/>
+            </div>
+          </aura:if>
+
+          <!-- spinner while loading -->
+          <aura:set attribute="else">
+            <div class="modalSpinner">
+              <lightning:spinner alternativeText="Loading" />
+            </div>
+          </aura:set>
+        </aura:if>
+      </div>
+    </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</aura:component>

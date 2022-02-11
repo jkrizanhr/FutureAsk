@@ -1,0 +1,194 @@
+<aura:component controller="Portal_Controller" description="Modal for donors to manage their auth.net payment methods">
+  <!-- Variables Passed from Parent Component -->
+  <aura:attribute name="contactId" type="String" default="" />
+  <aura:attribute name="loading" type="Boolean" default="false" />
+  <aura:attribute name="isMobile" type="Boolean" default="false" />
+  <aura:attribute name="paymentMethod" type="Object" default="" />
+  <aura:attribute name="modalType" type="String" default="" />
+  <!-- Variables used in Child Component -->
+  <aura:attribute name="cardNumber" type="String" default="" />
+  <aura:attribute name="cvv" type="String" default="" />
+  <aura:attribute name="selectedPaymentMethod" type="String" default="Credit Card" />
+  <aura:attribute name="selectedMonth" type="String"  />
+  <aura:attribute name="selectedYear" type="String" />
+  <aura:attribute name="accountHolder" type="String" default="" />
+  <aura:attribute name="accountNumber" type="String" default="" />
+  <aura:attribute name="routingNumber" type="String" default="" />
+  <aura:attribute name="errorMessage" type="String" default="" />
+  <aura:attribute name="successMessage" type="String" default="" />
+  <aura:attribute name="paymentInfo" type="Map" default="{}" />
+  <!-- Picklist Options -->
+  <aura:attribute name="monthOptions" type="List" />
+  <aura:attribute name="yearOptions" type="List" />
+  <aura:attribute name="paymentMethods" type="List" default="[
+    {'label': 'Credit Card', 'value': 'Credit Card'},
+    {'label': 'Bank Account', 'value': 'Bank Account'}]"
+  />
+
+  <!-- Events/Handlers -->
+  <aura:registerEvent name="refresh" type="c:Portal_SavedPaymentMethodsRefreshEvent" />
+  <aura:registerEvent name="closeWindow" type="c:Portal_SavedPaymentMethodsCloseWindowEvent" />
+  <aura:handler name="init" value="{!this}" action="{!c.init}" />
+
+  <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+    <div class="slds-modal__container">
+      <header class="slds-modal__header slds-modal__header_empty">
+        <lightning:buttonIcon class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" alternativeText="Close" iconName="utility:close" onclick="{!c.closeModal}"/>
+      </header>
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+        <aura:if isTrue="{!not(v.loading)}">
+                    
+          <!-- UPDATE/ADD PAYMENT METHOD MODAL -->
+          <aura:if isTrue="{!or(v.modalType == 'Update Payment Method', v.modalType == 'Add Payment Method')}">
+            <!-- VIEW CURRENT PAYMENT METHOD -->
+            <aura:if isTrue="{!v.modalType == 'Update Payment Method'}">
+              <h1>Current Payment Method</h1>
+              <!-- Show Current Credit Card Information -->
+              <aura:if isTrue="{!(v.paymentMethod.paymentMethod == 'Credit Card')}">
+                <lightning:layout>
+                  <lightning:layoutItem size="6" class="slds-form-element__label">Card Number</lightning:layoutItem>
+                  <lightning:layoutItem size="6" class="slds-form-element__label">Expiration Date</lightning:layoutItem>
+                </lightning:layout>
+                <lightning:layout>
+                  <lightning:layoutItem size="6">{!v.paymentMethod.cardLastFour}</lightning:layoutItem>
+                  <lightning:layoutItem size="6">{!v.paymentMethod.expirationDate}</lightning:layoutItem>
+                </lightning:layout>
+              </aura:if>
+              <!-- Show Current Bank Account Information -->
+              <aura:if isTrue="{!(v.paymentMethod.paymentMethod == 'EFT')}">
+                <lightning:layout>
+                  <lightning:layoutItem size="6" class="slds-form-element__label">Account Number</lightning:layoutItem>
+                  <lightning:layoutItem size="6" class="slds-form-element__label">Routing Number</lightning:layoutItem>
+                </lightning:layout>
+                <lightning:layout>
+                  <lightning:layoutItem size="6">{!v.paymentMethod.accountNumber}</lightning:layoutItem>
+                  <lightning:layoutItem size="6">{!v.paymentMethod.routingNumber}</lightning:layoutItem>
+                </lightning:layout>
+              </aura:if>
+              <hr style="margin-top: 5px !important;"/>
+              <!-- UPDATE PAYMENT METHOD -->
+              <h1>Update Payment Method</h1>
+
+              <aura:set attribute="else"> 
+                <!-- ADD PAYMENT METHOD -->
+                <h1>Add Payment Method</h1>
+              </aura:set>
+            </aura:if>
+            
+            <!-- Show Error Message -->
+            <aura:if isTrue="{!not(empty(v.errorMessage))}">
+              <div class="slds-text-color_error" style="padding-bottom: 10px;">
+                {!v.errorMessage}
+              </div>
+            </aura:if>
+            <!-- Choose Credit Card or Bank Account -->
+            <div style="text-align: left; width: 100%;">
+              <lightning:radioGroup name="radioGroup" label="Radio Group" options="{! v.paymentMethods }" value="{! v.selectedPaymentMethod }" type="radio" variant="label-hidden" onchange="{!c.handleChange}" />
+            </div>
+            <!-- Update Credit Card -->
+            <aura:if isTrue="{!v.selectedPaymentMethod == 'Credit Card'}">
+              <!-- Credit Card Number -->
+              <lightning:input type="text" label="Card Number" aura:id="creditCard" name="Card Number" pattern="[0-9]*" value="{!v.cardNumber}" maxlength="16" required="true"/>
+              <lightning:layout>
+                <!-- Credit Card CVV -->  
+                <lightning:layoutItem size="4">
+                  <lightning:input type="number" label="CVV" maxlength="4" aura:id="cvv" name="CVV" value="{!v.cvv}" required="true" />
+                </lightning:layoutItem>
+                <!-- Credit Card Month -->
+                <lightning:layoutItem size="4" class="slds-p-horizontal_small">
+                  <lightning:select name="month" label="{!if(v.isMobile == true, 'Month', 'Exp. Month')}" required="true" value="{!v.selectedMonth}">
+                    <aura:iteration items="{!v.monthOptions}" var="month">
+                      <option value="{!month.value}">{!month.label}</option>
+                    </aura:iteration>
+                  </lightning:select>
+                </lightning:layoutItem>
+                <!-- Credit Card Year -->
+                <lightning:layoutItem size="4">
+                  <lightning:select name="year" label="{!if(v.isMobile == true, 'Year', 'Exp. Year')}" required="true" value="{!v.selectedYear}">
+                    <aura:iteration items="{!v.yearOptions}" var="year">
+                      <option value="{!year.value}">{!year.label}</option>
+                    </aura:iteration>
+                  </lightning:select>
+                </lightning:layoutItem>
+              </lightning:layout>
+            </aura:if>
+            <!-- Update Bank Account -->
+            <aura:if isTrue="{!v.selectedPaymentMethod == 'Bank Account'}">
+              <!-- BA Account Holder -->
+              <lightning:input type="text" label="Name of Account Holder" aura:id="accountHolder" name="Name of Account Holder" value="{!v.accountHolder}" required="true"/>
+              <lightning:layout>
+                <!-- BA Account Number -->
+                <lightning:layoutItem size="6" class="slds-p-right_x-small">
+                  <lightning:input type="text" label="Account Number" aura:id="accountNumber" name="Account Number" pattern="[0-9]*" value="{!v.accountNumber}" required="true"/>
+                </lightning:layoutItem>
+                <!-- BA Routing Number -->
+                <lightning:layoutItem size="6" class="slds-p-left_x-small">
+                  <lightning:input type="text" label="Routing Number" aura:id="routingNumber" name="Routing Number" pattern="[0-9]*" value="{!v.routingNumber}" required="true"/>
+                </lightning:layoutItem>
+              </lightning:layout>
+            </aura:if>
+            <!-- Submit Button -->
+            <div style="padding-top: 15px; padding-bottom: 15px; text-align: center;">
+              <lightning:button class="neutral" label="Cancel" onclick="{!c.closeModal}"/>
+              <lightning:button class="slds-button slds-button_brand" label="Submit" onclick="{!c.handleBuildPaymentMethod}"/>
+            </div>
+          </aura:if>
+
+          <!-- DELETE PAYMENT METHOD MODAL -->
+          <aura:if isTrue="{!v.modalType == 'Delete Payment Method'}">
+            <!-- VIEW SELECTED PAYMENT METHOD -->
+            <h1>Delete Payment Method</h1>
+            <!-- Show Current Credit Card Information -->
+            <p style="font-size: 16px;">Are you sure you would like to remove the payment method 
+              <aura:if isTrue="{!v.paymentMethod.paymentMethod == 'Credit Card'}">
+                for the credit card ending in {!v.paymentMethod.cardLastFour} and expiring on {!v.paymentMethod.expirationDate}?
+              </aura:if>
+              <aura:if isTrue="{!v.paymentMethod.paymentMethod == 'EFT'}">
+                for the account number ending in {!v.paymentMethod.accountNumber}?
+              </aura:if>
+            </p>
+            <hr style="margin: 20px 0 !important;"/>
+            <div style="padding-top: 10px; padding-bottom: 15px; text-align: center;">
+              <lightning:button class="neutral" label="Cancel" onclick="{!c.closeModal}"/>
+              <lightning:button class="slds-button slds-button_brand" label="Delete" onclick="{!c.handleDeletePaymentMethod}"/>
+            </div>
+          </aura:if>
+
+          <!-- SUCCESS MODAL -->
+          <aura:if isTrue="{!v.modalType == 'Success Modal'}">
+            <!-- Header -->
+            <h1>Success!</h1>
+            <!-- Show Current Credit Card Information -->
+            <p style="font-size: 16px;">
+              {!v.successMessage}
+            </p>
+            <div style="padding-top: 10px; padding-bottom: 15px; text-align: center;">
+              <lightning:button class="bare" label="Close" onclick="{!c.closeModal}"/>
+            </div>
+          </aura:if>
+          
+          <!-- ERROR MODAL -->
+          <aura:if isTrue="{!v.modalType == 'Error Modal'}">
+            <!-- Header -->
+            <h1>Oops! Something went wrong.</h1>
+            <!-- Show Current Credit Card Information -->
+            <p style="font-size: 16px;">
+              Error: {!v.errorMessage}
+            </p>
+            <div style="padding-top: 10px; padding-bottom: 15px; text-align: center;">
+              <lightning:button class="bare" label="Close" onclick="{!c.closeModal}"/>
+            </div>
+          </aura:if>
+
+          <!-- spinner while loading -->
+          <aura:set attribute="else">
+            <div class="modalSpinner">
+              <lightning:spinner alternativeText="Loading" />
+            </div>
+          </aura:set>
+        </aura:if>
+      </div>
+    </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</aura:component>

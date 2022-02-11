@@ -1,0 +1,121 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" controller="Portal_Controller">
+  <aura:attribute name="isMobile" type="Boolean"/>
+  <aura:attribute name="opportunityList" type="List" />
+	<aura:attribute name="paginationList" type="List"/>
+	<aura:attribute name="pageSize" type="Integer" default="25"/>
+	<aura:attribute name="totalSize" type="Integer"/>
+	<aura:attribute name="startIndex" type="Integer" />
+	<aura:attribute name="endIndex" type="Integer"/>
+  <aura:attribute name="year" type="String"/>
+  <aura:attribute name="yearOptions" type="List"/>
+  
+  <!-- Aura Handlers -->
+  <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+  
+  <div>
+    <lightning:layout class="slds-p-vertical_small">
+      <p>Select a year and click print to download your annual giving statement</p>
+    </lightning:layout>
+    <lightning:layout>
+      <lightning:layoutItem size="{!if(v.isMobile == true, 9, 3)}" class="slds-p-right_medium">
+        <lightning:select name="year" label="Exp. Year" required="true" value="{!v.year}">
+          <aura:iteration items="{!v.yearOptions}" var="year">
+            <option value="{!year.value}">{!year.label}</option>
+          </aura:iteration>
+        </lightning:select>
+      </lightning:layoutItem>
+      <lightning:layoutItem size="{!if(v.isMobile == true, 3, 1)}">
+        <lightning:button variant="brand" name="print" label="PRINT" onclick="{!c.printYearEndReceipt}"/> 
+      </lightning:layoutItem>
+      <lightning:layoutItem size="{!if(v.isMobile == true, 0, 8)}"></lightning:layoutItem>
+    </lightning:layout>
+    <hr/>
+    <table style="width:100%">
+      <aura:if isTrue="{!not(v.isMobile)}">
+        <tr>
+          <th><div class="th-cell">Date</div></th>
+          <th><div class="th-cell">Fund</div></th>
+          <th><div class="th-cell">Amount</div></th>
+          <th><div class="th-cell">Payment Method</div></th>
+          <th><div class="th-cell">Actions</div></th>
+        </tr>
+      </aura:if>
+      <aura:if isTrue="{!v.isMobile}">
+        <tr>
+          <th class="th-cell">Date</th>
+          <th class="th-cell">Fund</th>
+          <th class="th-cell">Amount</th>
+          <th class="th-cell">Payment Method</th>
+          <th class="th-cell">Actions</th>
+        </tr>
+      </aura:if>
+      <aura:iteration items="{!v.paginationList}" var="gift" indexVar="index">
+        <tr>
+          <td>
+            <ui:outputDate value="{!gift.closeDate}" format="M/d/yyyy"/>
+          </td>
+          <td>{!gift.fund}<p class="asterisk">*</p>
+          </td>
+          <td>
+            <lightning:formattedNumber value="{!gift.amount}" style="currency" currencyCode="{!gift.currencyType}"/>
+          </td>
+          <td>{!gift.paymentMethod}</td>
+          <td>
+            <lightning:button class="link" variant="base" onclick="{!c.printStandardReceipt}" name="receipt" label="{!if(v.isMobile == true, 'Print', 'Print Receipt')}" value="{!gift.id}"/>
+            <aura:if isTrue="{!not(v.isMobile)}">&nbsp;|&nbsp;</aura:if>
+            <lightning:button class="link" variant="base" onclick="{!c.goToGivePage}" name="donate" value="{!gift.oppId}" label="{!if(v.isMobile == true, 'Donate', 'Donate Again')}"/>
+          </td>
+        </tr>
+        <aura:iteration items="{!gift.additionalAllocations}" var="alloc" indexVar="index">
+            <tr style="height: 42px;">
+              <td><lightning:icon iconName="utility:level_down" size="x-small"></lightning:icon></td>
+              <td>{!alloc.fund}<p class="asterisk">*</p></td>
+              <td>
+                <lightning:formattedNumber value="{!alloc.amount}" style="currency" currencyCode="{!alloc.currencyType}"/>
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
+        </aura:iteration>
+      </aura:iteration>
+    </table>
+      
+    <aura:if isTrue="{!empty(v.opportunityList)}">
+  	  <p style="text-align: center; font-size: 14px; padding: 20px;">
+        We couldn't find any donations associated with your account.
+      </p>  
+    </aura:if>
+    
+    <lightning:layout class="slds-p-bottom_large" multipleRows="true">
+      <lightning:layoutItem size="{!if(v.isMobile == true, 12, 2)}">
+        <p><p class="asterisk">*</p>designation</p>
+      </lightning:layoutItem>
+      <lightning:layoutItem size="{!if(v.isMobile == true, 12, 8)}" class="slds-p-top_small">
+        <div style="text-align: center;">
+          <lightning:button variant="bare" label="First" disabled="{!v.startIndex == 0}"  value="first" onclick="{!c.handlePagination}" />&nbsp;|
+          <lightning:button variant="bare" label="Previous" disabled="{!v.startIndex == 0}"  value="previous" onclick="{!c.handlePagination}" />&nbsp;|
+          <lightning:button variant="bare" label="Next" disabled="{!v.endIndex >= v.totalSize}" value="next" onclick="{!c.handlePagination}" />&nbsp;|
+          <lightning:button variant="bare" label="Last" disabled="{!v.endIndex >= v.totalSize}" value="last" onclick="{!c.handlePagination}" />
+        </div>
+      </lightning:layoutItem>
+      <lightning:layoutItem size="{!if(v.isMobile == true, 3, 1)}" class="slds-p-right_medium slds-p-top_small">
+        <div style="float: right;"> 
+          <p>Show:</p>
+        </div>
+      </lightning:layoutItem>
+      <lightning:layoutItem size="{!if(v.isMobile == true, 9, 1)}"  class="slds-p-top_x-small">
+        <lightning:select aura:id="records" label="Records" required="false" value="{!v.pageSize}" onchange="{!c.onSelectChange}">
+            <option value="5">5</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="75">75</option>
+            <option value="100">100</option>
+        </lightning:select>  
+      </lightning:layoutItem>
+    </lightning:layout>
+    <lightning:layout>
+      <i><p>Looking for your active recurring donations?&nbsp;<lightning:button class="link" variant="base" onclick="{!c.goToMyProfilePage}" name="recDon" label="Click here to go to My Profile."/></p></i>
+    </lightning:layout>
+  </div>
+
+</aura:component>

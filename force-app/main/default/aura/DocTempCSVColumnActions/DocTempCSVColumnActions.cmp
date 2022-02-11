@@ -1,0 +1,39 @@
+<aura:component description="DocTempCSVColumnActions">
+    <aura:attribute name="column" type="Object"/>
+    <aura:attribute name="idx" type="Integer"/>
+    <aura:attribute name="numColumns" type="Integer"/>
+
+    <aura:registerEvent name="updateColumnEvent" type="c:DocTempUpdateColumnEvent"/>
+
+    <table>
+        <tr>
+            <td>
+                <lightning:buttonIcon iconName="utility:arrowup"
+                                      alternativeText="Move Column Up"
+                                      value="moveUp"
+                                      size="x-small"
+                                      disabled="{!v.idx == 0}"
+                                      onclick="{!c.onclickColumnAction}">
+                </lightning:buttonIcon>
+            </td>
+            <td>
+                <lightning:buttonIcon iconName="utility:arrowdown"
+                                      alternativeText="Move Column Down"
+                                      value="moveDown"
+                                      size="x-small"
+                                      disabled="{!v.idx == v.numColumns-1}"
+                                      onclick="{!c.onclickColumnAction}">
+                </lightning:buttonIcon>
+            </td>
+            <td>
+                <lightning:buttonIcon iconName="utility:close"
+                                      alternativeText="Remove Column"
+                                      class="removeColumnButton"
+                                      value="remove"
+                                      size="x-small"
+                                      onclick="{!c.onclickColumnAction}">
+                </lightning:buttonIcon>
+            </td>
+        </tr>
+    </table>
+</aura:component>

@@ -1,0 +1,674 @@
+<!-- NOTE: This component is very org-specific -->
+<aura:component controller="CAND_BT_Controller" description="CAND_BT_Form">
+  <aura:attribute name="btSettings" type="Object[]"/>
+  <aura:attribute name="sObjectName" type="String"/>
+  <aura:attribute name="sObjectAPIName" type="String"/>
+  <aura:attribute name="parentRecord" type="Object"/>
+  <aura:attribute name="record" type="Object"/>
+  <aura:attribute name="shouldShowSpinner" type="Boolean"/>
+  <aura:attribute name="showAmount" type="Boolean"/> <!-- Used to reset the Amount field -->
+  <aura:attribute name="showSinglePayorInputBox" type="Boolean" default="false"/>
+  <aura:attribute name="showRelatedOpportunityList" type="Boolean" default="false"/>
+  <aura:attribute name="paymentOptions" type="Object[]"/>
+  <aura:attribute name="editingOpportunity" type="Boolean" default="false"/>
+  <aura:attribute name="editOriginalAmount" type="String"/>
+  <aura:attribute name="hasPrivateNotes" type="Boolean"/>
+  <aura:attribute name="isLead" type="Boolean" default="false"/>
+
+  <aura:attribute name="inKindGiftTypeId" type="String"/>
+  <aura:attribute name="matchingGiftTypeId" type="String"/>
+  <aura:attribute name="matchingGiftList" type="Object[]"/>
+  <aura:attribute name="deleteMatchingGiftList" type="Object[]"/>
+  
+  <aura:attribute name="shouldDisableSplits" type="Boolean" default="true"/>
+  <aura:attribute name="deleteRecordSplitList" type="Object[]"/>
+  <aura:attribute name="recordSplitList" type="Object[]"/>
+  <aura:attribute name="maxReceiptLength" type="Integer" default="100"/>
+
+  <aura:attribute name="givingOptions" type="String[]"/>
+  <aura:attribute name="taxOptions" type="String[]"/>
+  <aura:attribute name="receiptTypes" type="String[]"/>
+  <aura:attribute name="languagePreferences" type="String[]"/>
+  <aura:attribute name="donationSources" type="String[]"/>
+  <aura:attribute name="multiples" type="Object[]"/>
+  
+  <aura:attribute name="keyOvers" type="Object[]"/>
+  <aura:attribute name="keyOver" type="String[]"/>
+
+  <aura:attribute name="isAdjustment" type="Boolean" default="false"/>
+  <aura:attribute name="originalOpp" type="Object"/>
+
+  <aura:attribute name="closeDateIsLocked" type="Boolean" default="false"/>
+  <aura:attribute name="paymentMethodIsLocked" type="Boolean" default="false"/>
+  <aura:attribute name="singlePayorIsLocked" type="Boolean" default="false"/>
+  <aura:attribute name="givingMethodIsLocked" type="Boolean" default="false"/>
+  <aura:attribute name="receiptTypeIsLocked" type="Boolean" default="false"/>
+  <aura:attribute name="campaignIsLocked" type="Boolean" default="false"/>
+  <aura:attribute name="gauIsLocked" type="Boolean" default="false"/>
+  <aura:attribute name="checkIsDisabled" type="Boolean" default="false"/>
+  
+  <aura:attribute name="uploadFileOnSave" type="Boolean" default="false"/>
+  <aura:attribute name="uploadFileModal" type="Boolean" default="false"/>
+  <aura:attribute name="uploadFileOppId" type="String" default=""/>
+
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  <aura:handler name="searchEvent" event="c:CAND_BT_LookupEvent" action="{!c.handleLookupEvent}"/>
+  <aura:handler name="closeWindow" event="c:CAND_BT_UploadFileEvent" action="{!c.closeUploadFileModal}"/>
+  <aura:handler name="CAND_BT_filloutOppForm" event="c:CAND_BT_FilloutOppForm" action="{!c.handleFilloutForm}"/>
+  <aura:handler name="CAND_BT_GetOppAllocations" event="c:CAND_BT_GetOppAllocations" action="{!c.handleFilloutAllocations}"/>
+  <aura:handler name="CAND_BT_SelectThisFutureGift" event="c:CAND_BT_SelectThisFutureGift" action="{!c.handleSelectFutureGift}" />
+  <lightning:navigation aura:id="navService"/>
+
+  <div class='slds-is-relative'>
+    <aura:if isTrue="{!v.shouldShowSpinner}">
+      <lightning:spinner aura:id="formSpinner"/>
+    </aura:if>
+  <div>
+    <!--Header-->
+    <div class="slds-card">
+      <div class="slds-clearfix">
+        <c:CAND_BT_CompactLayout parentRecord="{!v.parentRecord}"/>
+      </div>
+    </div>
+    <lightning:notificationsLibrary aura:id="notifLib"/>
+  </div>
+
+  <!-- Parent Record 'Company Layout' -->
+  <div class="slds-grid slds-wrap slds-is-relative slds-p-bottom_xx-large">
+    <!-- Form fields -->
+    <div class="slds-m-top_x-small slds-col slds-large-size_8-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12">
+      <div class="slds-card containerDiv">
+        <form class="slds-form slds-form--compound" >
+          <!-- Outer box-->
+          <fieldset class="slds-box slds-theme-default">
+            <div class="slds-m-around_xx-small slds-m-top_none">
+              <lightning:button variant="none" iconName="utility:undo" label="Back to Batching Tool" onclick="{!c.navigateToBatches}"/>
+              <lightning:buttonGroup class="slds-float_right">
+                <lightning:button variant="neutral" label="Search via Donor" onclick="{!c.showDonorSearchModal}"/>
+                <lightning:button variant="neutral" label="Search via Receipt" onclick="{!c.showReceiptSearchModal}"/>
+                <lightning:button variant="neutral" label="Missing GAU Report" onclick="{!c.linkToGauReport}"/>
+                <lightning:button variant="neutral" label="View Batch Report" onclick="{!c.linkToReport}"/>
+              </lightning:buttonGroup>
+            </div>
+            
+            <div class="slds-form-element__group">
+              <!-- Form group box 1 -->
+              <fieldset class="slds-box slds-theme-default">
+                <!--Indirect Donor Row-->
+                <div class="slds-form-element__row">
+                  <div class="slds-form-element slds-grid slds-size_1-of-2">
+                    <aura:if isTrue="{!v.showSinglePayorInputBox}">
+                      <div class="slds-size_11-of-12">
+                        <c:CAND_BT_LookupSearch btSettings="{!v.btSettings}"
+                          fieldAPIName="AccountId"
+                          isRequired="true"
+                          value="{!v.record.Paid_By__c}"
+                          isDisabled="{!v.singlePayorIsLocked}"
+                          objectAPIName="Account"
+                          objectLabel="Payor or Estate Account"
+                          objectPluralLabel="Accounts"
+                          record="{!v.record}"
+                          selectedObject="{!v.record.Paid_By__r}"/>
+                      </div>
+
+                      <aura:if isTrue="{!v.editingOpportunity == false}">
+                        <div class="slds-size_1-of-12 customPaddingTop slds-p-left_x-small">
+                          <lightning:buttonIcon class="lock"
+                                                iconName="{!v.singlePayorIsLocked ? 'utility:lock' : 'utility:unlock'}"
+                                                onclick="{!c.onclickToggleSinglePayorLock}"
+                                                alternativeText="locked" />
+                        </div>
+                      </aura:if>
+                    </aura:if>
+                  </div>
+                </div>
+
+                <!-- Row 1 -->
+                <div class="slds-form-element__row slds-wrap">
+                  <div class="slds-form-element slds-col slds-large-size_1-of-2 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                    <c:CAND_BT_LookupSearch btSettings="{!v.btSettings}"
+                                            fieldAPIName="AccountId"
+                                            isRequired="true"
+                                            objectAPIName="Account"
+                                            objectLabel="Account"
+                                            objectPluralLabel="Accounts"
+                                            record="{!v.record}"
+                                            selectedObject="{!v.record.Account}"/>
+                  </div>
+                  <div class="slds-form-element slds-col slds-large-size_1-of-2 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                    <div class="slds-form-element__row slds-wrap">
+                      <div class="slds-form-element slds-col slds-large-size_12-of-12 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                        <c:CAND_BT_LookupSearch btSettings="{!v.btSettings}"
+                                                fieldAPIName="npsp__Primary_Contact__c"
+                                                objectAPIName="Contact"
+                                                objectLabel="{!v.isLead ? 'Primary Contact (A Lead has been selected, they will be converted to a Contact on Save)' : 'Primary Contact'}"
+                                                objectPluralLabel="Contacts"
+                                                record="{!v.record}"
+                                                selectedObject="{!v.record.Contact}"/>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="slds-form-element__row slds-wrap">
+                  <aura:if isTrue="{!v.showAmount}"> <!-- This aura if will allow the field to be reset-->
+                    <div class="slds-form-element slds-large-size_1-of-2 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                      <lightning:input aura:id="totalAmount"
+                                      formatter="currency"
+                                      label="{!'Total Gift Amount (' + v.record.Original_Currency__c + ')'}"
+                                      placeholder="0.00"
+                                      required="true"
+                                      step="0.01"
+                                      type="number"
+                                      value="{!v.record.Original_Amount__c}"
+                                      onblur="{!c.updateAllocationAmount}"/>
+                    </div>
+                  </aura:if>
+
+                  <div class="slds-form-element slds-grid slds-large-size_1-of-2 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                    <c:CAND_BT_LookupSearch btSettings="{!v.btSettings}"
+                                            fieldAPIName="Future_Gift__c"
+                                            objectAPIName="Future_Gift__c"
+                                            objectLabel="Future Ask"
+                                            objectPluralLabel="Future Asks"
+                                            record="{!v.record}"
+                                            selectedObject="{!v.record.FutureGift}"/>
+                  </div>
+                </div>
+
+                <!-- Row 4 -->
+                <div class="slds-form-element__row slds-wrap">
+                  <div class="slds-form-element slds-grid slds-large-size_1-of-2 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                    <div class="slds-size_11-of-12">
+                      <lightning:input type="date"
+                      label="Close Date"
+                      value="{!v.record.CloseDate}"
+                      disabled="{!v.closeDateIsLocked}"
+                      required="true"
+                      placeholder="MM/DD/YYYY"/>
+                    </div>
+                    
+                    <aura:if isTrue="{!v.editingOpportunity == false}">
+                      <div class="slds-size_1-of-12 customPaddingTop slds-p-left_x-small">
+                        <lightning:buttonIcon class="lock"
+                        iconName="{!v.closeDateIsLocked ? 'utility:lock' : 'utility:unlock'}"
+                        onclick="{!c.onclickToggleCloseDateLock}"
+                        alternativeText="locked" />
+                      </div>
+                    </aura:if>  
+                  </div>
+                  
+                  <div class="slds-form-element slds-grid slds-wrap slds-large-size_1-of-2 slds-medium-size_2-of-2 slds-small-size_2-of-2 slds-p-top_medium">
+                    <div class="slds-form-element slds-grid slds-wrap slds-large-size_1-of-1 slds-medium-size_1-of-1 slds-small-size_1-of-1">
+                      <div class="slds-size_6-of-12 slds-p-left_small">
+                        <lightning:input type="checkbox" 
+                          label="Anonymous Gift" 
+                          name="Is_Anonymous__c"
+                          onchange="{!c.setAllocationsToAnonymous}"
+                          checked="{!v.record.Is_Anonymous__c}">
+                        </lightning:input>
+                      </div>
+                      <div class="slds-size_6-of-12 slds-p-left_small">
+                        <lightning:input type="checkbox" 
+                          label="Ongoing Check" 
+                          name="Is_Ongoing_Check_Donor__c"
+                          checked="{!v.record.OngoingCheckDonor}">
+                        </lightning:input>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="slds-form-element__row slds-wrap"> 
+                  <div class="slds-form-element slds-grid slds-large-size_1-of-2 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                    <div class="slds-size_12-of-12">
+                      <lightning:select aura:id="Donation_Source__c" 
+                      name="Donation_Source__c" 
+                      value="{!v.record.Donation_Source__c}"
+                      label="Donation Source"
+                      required="true">
+                      <aura:iteration items="{!v.donationSources}" var="option">
+                        <option text="{!option}"/>
+                      </aura:iteration>
+                    </lightning:select>
+                  </div>
+                </div>
+                
+                <aura:if isTrue="{!v.parentRecord.Type__c == 'Adjustments'}">
+                  <div class="slds-form-element slds-grid slds-large-size_1-of-2 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                      <div class="slds-size_6-of-12 slds-p-left_small">
+                        <lightning:input type="checkbox" 
+                                          label="Do Not Acknowledge" 
+                                          name="Do_Not_Acknowledge"
+                                          onchange="{!c.setAllocationsToAnonymous}"
+                                          checked="{!v.record.DoNotAcknowledge}">
+                        </lightning:input>
+                      </div>
+                    </div>
+                  </aura:if>
+                </div>
+
+                <!-- Row 5 -->
+                <div class="slds-form-element__row slds-wrap">
+
+                  <aura:if isTrue="{!v.isAdjustment}">
+                    <div class="slds-form-element slds-grid slds-large-size_1-of-2 slds-medium-size_2-of-2 slds-small-size_2-of-2 slds-p-top_medium">
+                      <div class="slds-size_12-of-12">
+                        Adjustment of {!v.originalOpp.Name}
+                      </div>
+                    </div>
+                  </aura:if>
+                </div>
+              </fieldset>
+
+              <!-- Future Ask Selection -->
+              <div class="slds-p-top_medium">
+                <aura:if isTrue="{!empty(v.record.Account.Id)}">
+                  <c:CAND_BT_SuggestedFutureGifts aura:id="suggestedFutureGifts" accountId="{!v.record.Account.Id}"></c:CAND_BT_SuggestedFutureGifts>
+                  <aura:set attribute="else">
+                    <c:CAND_BT_SuggestedFutureGifts aura:id="suggestedFutureGifts" accountId="{!v.record.Account.Id}"></c:CAND_BT_SuggestedFutureGifts>
+                  </aura:set>
+                </aura:if>
+              </div>
+
+              <!--Allocation List Splits-->
+              <div aura:id="splitListDiv" class="slds-form-element__group slds-p-top_medium">
+                <fieldset class="slds-box slds-theme-default slds-p-top_large slds-p-bottom_medium">
+                  <aura:if isTrue="{!not(v.editingOpportunity)}">
+                    <aura:if isTrue="{!v.campaignIsLocked}">
+                      <lightning:button iconName="utility:lock" label="Unlock Campaigns" onclick="{!c.onclickToggleCampaignLock}" tabindex="-1"/>
+                      <aura:set attribute="else">
+                        <lightning:button iconName="utility:unlock" label="Lock Campaign" onclick="{!c.onclickToggleCampaignLock}" tabindex="-1"/>                    
+                      </aura:set>
+                    </aura:if>
+                    <aura:if isTrue="{!v.gauIsLocked}">
+                      <lightning:button iconName="utility:lock" label="Unlock GAUs" onclick="{!c.onclickToggleGAULock}" tabindex="-1"/>
+                      <aura:set attribute="else">
+                        <lightning:button iconName="utility:unlock" label="Lock GAU" onclick="{!c.onclickToggleGAULock}" tabindex="-1"/>                    
+                      </aura:set>
+                    </aura:if>
+                  </aura:if>
+                  <aura:iteration items="{!v.recordSplitList}" var="split" indexVar="splitIndex">
+                    <div class="slds-form-element__row slds-wrap">
+                      <div class="slds-form-element slds-large-size_2-of-12 slds-medium-size_2-of-2 slds-small-size_2-of-2 slds-grid">
+                          <c:CAND_BT_LookupSearch btSettings="{!v.btSettings}"
+                                                  fieldAPIName="Campaign__c"
+                                                  isDisabled="{!or(v.shouldDisableSplits, and(v.campaignIsLocked, splitIndex == 0))}"
+                                                  isRequired="true"
+                                                  objectAPIName="Campaign"
+                                                  objectIndex="{!splitIndex}"
+                                                  objectLabel="Campaign"
+                                                  objectPluralLabel="Campaigns"
+                                                  record="{!v.record}"
+                                                  selectedObject="{!split.Campaign}"/>
+                      </div>
+                      <div class="slds-large-size_2-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element">
+                        <c:CAND_BT_LookupSearch btSettings="{!v.btSettings}"
+                                                fieldAPIName="npsp__General_Accounting_Unit__c"
+                                                isDisabled="{!or(v.shouldDisableSplits, and(v.gauIsLocked, splitIndex == 0))}"
+                                                isRequired="true"
+                                                objectAPIName="npsp__General_Accounting_Unit__c"
+                                                objectIndex="{!splitIndex}"
+                                                objectLabel="General Accounting Unit"
+                                                objectPluralLabel="General Accounting Units"
+                                                record="{!v.record}"
+                                                selectedObject="{!split.Fund}"/>
+                      </div>
+                      <div class="slds-large-size_2-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element">
+                        <c:CAND_BT_LookupSearch btSettings="{!v.btSettings}"
+                                                fieldAPIName="Fund_GL_Account__c"
+                                                isDisabled="{!v.shouldDisableSplits}"
+                                                isRequired="true"
+                                                objectAPIName="Fund_GL_Account__c"
+                                                objectIndex="{!splitIndex}"
+                                                objectLabel="Fund GL Account"
+                                                objectPluralLabel="Fund GL Accounts"
+                                                record="{!v.record}"
+                                                selectedObject="{!split.glAcct}"
+                                                gauId="{!split.Fund.Id}"/>
+                      </div>
+                      <div class="slds-large-size_2-of-12 slds-medium-size_9-of-12 slds-small-size_9-of-12 slds-form-element">
+                        <lightning:input type="number"
+                                        aura:id="splitAmount"
+                                        disabled="{!v.shouldDisableSplits}"
+                                        label="{!'Amount (' + v.record.Original_Currency__c + ')'}"
+                                        value="{!split.Original_Amount__c}"
+                                        formatter="currency"
+                                        required="true"
+                                        placeholder="0.00"
+                                        step="0.01"/>
+                      </div>
+                      <div class="slds-large-size_2-of-12 slds-medium-size_9-of-12 slds-small-size_9-of-12 slds-form-element">
+                        <lightning:input type="text"
+                                        aura:id="splitDescription"
+                                        disabled="{!v.shouldDisableSplits}"
+                                        label="Description"
+                                        value="{!split.Description__c}"
+                                        required="false"
+                                        placeholder="Description..."/>
+                      </div>
+                      <div class="slds-form-element slds-large-size_2-of-12 slds-medium-size_2-of-2 slds-small-size_2-of-2 slds-grid">
+                        <div class="slds-size_9-of-12 slds-p-top_large">
+                          <lightning:input type="checkbox" 
+                                          label="Tax Deductible" 
+                                          disabled="{!v.shouldDisableSplits}"
+                                          name="Tax_Deductible__c"
+                                          checked="{!split.Tax_Deductible__c}">
+                          </lightning:input>
+                        </div>
+                        <div class="slds-size_3-of-12 customPaddingTop">
+                          <aura:if isTrue="{!v.recordSplitList.length > 1}">
+                            <lightning:buttonIcon class="splitRemovalButton"
+                                                  iconName="utility:close"
+                                                  alternativeText="Remove Split"
+                                                  value="{!splitIndex}"
+                                                  size="large"
+                                                  onclick="{!c.onClickRemoveSplit}"/>
+                          </aura:if>
+                        </div>
+                      </div>
+                    </div>
+                    <aura:if isTrue="{!not(empty(split.Fund.Warning_Message__c))}">
+                        <div class="slds-size_1-of-1 slds-text-align_center slds-text-color_error">
+                          Warning Message: {!split.Fund.Warning_Message__c}
+                        </div>
+                    </aura:if>
+                  </aura:iteration>
+                  <div class="slds-grid slds-grid--align-spread slds-p-top_medium">
+                    <div class="slds-col">
+                      <lightning:button label="Add Allocation" iconName="utility:add" onclick="{!c.onClickAddSplit}"/>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              <!--Matching Gift List-->
+              <aura:if isTrue="{!v.parentRecord.Opportunity_Type__c == 'Matching Gift'}">
+                <div aura:id="matchingGiftsDiv" class="slds-form-element__group slds-p-top_medium">
+                  <fieldset class="slds-box slds-theme-default slds-p-top_large">
+                    <div class="slds-form-element__row slds-wrap">
+                      <aura:iteration items="{!v.matchingGiftList}" var="gift" indexVar="giftIndex">
+                        <div class="slds-large-size_5-of-12 slds-medium-size_11-of-12 slds-small-size_11-of-12 slds-form-element">
+                          <c:CAND_BT_LookupSearch btSettings="{!v.btSettings}"
+                                                  fieldAPIName="OpportunityId"
+                                                  objectAPIName="Opportunity"
+                                                  objectIndex="{!giftIndex}"
+                                                  objectLabel="Matching Gift"
+                                                  objectPluralLabel="Opportunities"
+                                                  record="{!v.record}"
+                                                  selectedObject="{!gift.Gift}"/>
+                        </div>
+                        <div class="slds-large-size_1-of-12 slds-medium-size_1-of-12 slds-small-size_1-of-12 slds-form-element slds-p-left_medium slds-p-top_large">
+                          <lightning:buttonIcon class="splitRemovalButton"
+                                                iconName="utility:close"
+                                                alternativeText="Remove Gift"
+                                                value="{!giftIndex}"
+                                                size="large"
+                                                onclick="{!c.onClickRemoveGift}"/>
+                        </div>
+                      </aura:iteration>
+                    </div>
+                    <div class="slds-grid slds-grid--align-spread slds-p-top_medium">
+                      <div class="slds-col">
+                        <lightning:button label="Add Matching Gift" iconName="utility:add" onclick="{!c.onClickAddGift}"/>
+                      </div>
+                    </div>
+                  </fieldset>
+                </div>
+              </aura:if>
+                            
+              <!--In-Kind Gift Section-->
+              <aura:if isTrue="{!v.parentRecord.Opportunity_Type__c == 'In-Kind Gift'}">
+                <!--In-Kind Gift Section-->
+                  <div aura:id="inKindGiftsDiv" class="slds-form-element__group slds-p-top_medium">
+                    <fieldset class="slds-box slds-theme-default slds-p-top_large">
+                      <div class="slds-form-element__row slds-wrap">
+                        <div class="slds-large-size_4-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element">
+                          <lightning:input aura:id="fairMarketValue"
+                                        label="Fair Market Value"
+                                        required="true"
+                                        type="number"
+                                        formatter="currency"
+                                        value="{!v.record.npsp__Fair_Market_Value__c}"
+                                        placeholder="0.00"
+                                        step="0.01"/>
+                        </div>
+                        <div class="slds-large-size_3-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element slds-p-top_large">
+                          <lightning:input aura:id="donorDeclaredValue"
+                                        label="In-Kind Donor Declared Value"
+                                        type="checkbox"
+                                        value="{!v.record.npsp__In_Kind_Donor_Declared_Value__c}"/>
+                        </div>
+                        <div class="slds-large-size_5-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element">
+                          <lightning:select aura:id="inKindType"
+                                        name="inKindType"
+                                        label="In-Kind Type"
+                                        required="true"
+                                        value="{!v.record.npsp__In_Kind_Type__c}">
+                            <option text="Goods" value="Goods"/>
+                            <option text="Services" value="Services"/>
+                            <option text="Stock" value="Stock"/>
+                          </lightning:select>
+                        </div>
+                      </div>
+                      <div class="slds-form-element__row slds-wrap">
+                        <div class="slds-large-size_12-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element">
+                          <lightning:textarea aura:id="inKindDescription"
+                                          name="In-Kind Description"
+                                          label="In-Kind Description"
+                                          value="{!v.record.npsp__In_Kind_Description__c}"
+                                          placeholder="In-Kind Description..."
+                                          maxlength="32000"/>
+                        </div>
+                      </div>
+                    </fieldset>
+                  </div>
+
+                <div aura:id="inKindGiftsDiv" class="slds-form-element__group slds-p-top_medium">
+                  <fieldset class="slds-box slds-theme-default slds-p-top_large">
+                    <div class="slds-form-element__row slds-wrap">
+                      <div class="slds-large-size_6-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element">
+                        <lightning:input aura:id="stockName"
+                                          label="Stock Name"
+                                          required="false"
+                                          type="false"
+                                          value="{!v.record.Stock_Name__c}"/>
+                      </div>
+                      <div class="slds-large-size_6-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element">
+                        <lightning:input aura:id="StockSymbol"
+                                      label="Stock Symbol"
+                                      required="false"
+                                      type="false"
+                                      value="{!v.record.Stock_Symbol__c}"/>
+                      </div>
+                    </div>
+                    <div class="slds-form-element__row slds-wrap">
+                      <div class="slds-large-size_6-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element">
+                        <lightning:input aura:id="NumberOfShares"
+                                      label="Number of Shares"
+                                      required="false"
+                                      type="number"
+                                      value="{!v.record.Number_of_Shares__c}"/>
+                      </div>
+                      <div class="slds-large-size_6-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-form-element">
+                        <lightning:input aura:id="broker"
+                                      label="Broker"
+                                      required="false"
+                                      type="text"
+                                      value="{!v.record.Broker__c}"/>
+                      </div>
+                    </div>
+                  </fieldset>
+                </div>
+
+              </aura:if>
+
+              <!-- Form group box 3 -->
+              <div class="slds-form-element__group slds-p-top_medium">
+                <fieldset class="slds-box slds-theme-default">
+                  <!-- Row 1 -->
+                  <div class="slds-form-element__row">
+                    <div class="slds-form-element slds-size_1-of-1">
+                      <lightning:textarea aura:id="Description"
+                                          name="Description"
+                                          label="Description"
+                                          value="{!v.record.Description}"
+                                          placeholder="Description..."
+                                          maxlength="32000"/>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+            </div>
+            <!-- End of form fields-->
+
+              <div class="slds-form-element__group slds-p-top_medium">
+                <fieldset class="slds-box slds-theme-default">
+
+                  <!-- Row 1 -->
+                  <div class="slds-form-element__row slds-grid slds-wrap">
+                    <div class="slds-form-element slds-grid slds-large-size_1-of-3 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                      <div class="slds-size_11-of-12">
+                        <lightning:select aura:id="Receipt_Type__c" 
+                                              name="Receipt_Type__c" 
+                                              value="{!v.record.Receipt_Type__c}"
+                                              label="Receipt Type">
+                          <aura:iteration items="{!v.receiptTypes}" var="option">
+                            <option text="{!option}"/>
+                          </aura:iteration>
+                        </lightning:select>
+                      </div>
+                      <div class="slds-size_1-of-12 customPaddingTop slds-p-left_x-small">
+                        <lightning:helptext content="To change the default option for Receipt Type or Language Preference, click the edit button next to the Account."/>
+                      </div>
+                    </div>
+                    
+                    <div class="slds-form-element slds-grid slds-large-size_1-of-3 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                      <div class="slds-size_12-of-12">
+                        <lightning:select aura:id="Language_Preference__c" 
+                                          name="Language_Preference__c" 
+                                          value="{!v.record.Language_Preference__c}"
+                                          label="Language Preference">
+                          <aura:iteration items="{!v.languagePreferences}" var="option">
+                            <option text="{!option}"/>
+                          </aura:iteration>
+                        </lightning:select>
+                      </div>
+                    </div>
+                
+                    <div class="slds-form-element slds-large-size_1-of-3 slds-medium-size_2-of-2 slds-small-size_2-of-2 slds-grid">
+                      <div class="slds-size_11-of-12">
+                        <lightning:select aura:id="Payment_Method__c" 
+                                          name="Payment_Method__c" 
+                                          value="{!v.record.Payment_Method__c}"
+                                          disabled="{!v.paymentMethodIsLocked}"
+                                          label="Choose Payment Method" 
+                                          required="true" 
+                                          onchange="{!c.onChangePaymentMethod}">
+                          <option text="Select an Option..."></option>
+                          <option text="Credit Card"></option>
+                          <option text="Bank Account"></option>
+                          <option text="Check"></option>
+                          <option text="Cash"></option>
+                        </lightning:select>
+                      </div>
+                
+                      <aura:if isTrue="{!v.editingOpportunity == false}">
+                        <div class="slds-size_1-of-12 customPaddingTop slds-p-left_x-small">
+                            <lightning:buttonIcon class="lock"
+                                                  iconName="{!v.paymentMethodIsLocked ? 'utility:lock' : 'utility:unlock'}"
+                                                  onclick="{!c.onclickTogglePaymentMethodLock}"
+                                                  alternativeText="locked" />
+                        </div>
+                      </aura:if>
+                    </div>
+                  </div>
+
+                  <!--Row 2 -->
+                  <div class="slds-form-element__row slds-wrap">
+                    <div class="slds-form-element slds-grid slds-large-size_2-of-3 slds-medium-size_2-of-2 slds-small-size_2-of-2"></div>
+              
+                      <div class="slds-form-element slds-large-size_1-of-3 slds-medium-size_2-of-2 slds-small-size_2-of-2">
+                        <aura:if isTrue="{!v.record.Payment_Method__c == 'Check'}">
+                          <div class="slds-form-element slds-size_2-of-2">
+                            <lightning:input aura:id="Payment_Reference_Number__c"
+                                            name="Payment_Reference_Number__c"
+                                            label="Check Reference Number"
+                                            placeholder="Check Reference Number"
+                                            disabled="{!v.checkIsDisabled}"
+                                            value="{!v.record.Payment_Reference_Number__c}"/>
+                        </div>
+                      </aura:if>
+                    </div>
+                  </div>
+                </fieldset> 
+              </div>
+
+
+            <!-- End of form buttons -->
+            <div class="slds-grid slds-grid--align-spread slds-p-top_medium">
+              <div class="slds-col">
+                <lightning:button variant="destructive" iconName="utility:undo" label="Clear Form" onclick="{!c.onClickClearForm}"/>
+              </div>
+              <div class="slds-col">
+                <div class="slds-grid slds-grid--align-spread">
+                  <div style="padding-right: 5px;" class="slds-col">
+                    <lightning:input  type="checkbox" 
+                    label="Attach a File" 
+                    name="UploadFile"
+                    checked="{!v.uploadFileOnSave}">
+                  </lightning:input>
+                  </div>
+                  <div class="slds-col">
+                    <aura:if isTrue="{! and(v.editingOpportunity == false, v.isAdjustment == false)}">
+                      <lightning:button variant="brand" iconName="utility:save" label="Save Record" onclick="{!c.onSaveClicked}"/>
+                    </aura:if>
+                    <aura:if isTrue="{! and(v.isAdjustment, v.editingOpportunity == false) }">
+                      <lightning:button variant="brand" iconName="utility:save" label="Save Adjustment" onclick="{!c.onSaveClicked}"/>
+                    </aura:if>
+                    <aura:if isTrue="{!v.editingOpportunity}">
+                      <lightning:button variant="brand" iconName="utility:save" label="Save Edited Record" onclick="{!c.onSaveClicked}"/>
+                    </aura:if>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </fieldset>
+          <!-- End of outer box-->
+        </form>
+      </div>
+    </div>
+    
+    <div class="slds-m-top_x-small slds-col slds-large-size_4-of-12 slds-medium-size_12-of-12 slds-small-size_12-of-12 slds-p-bottom_xx-large">
+      <div class="slds-card slds-m-left_small containerDiv">
+        <aura:if isTrue="{!v.showRelatedOpportunityList}">
+          <c:CAND_BT_ListView btSettings="{!v.btSettings}"
+                              sObjectName="{!v.sObjectName}"
+                              sObjectAPIName="{!v.sObjectName}"
+                              formRecord="{!v.record}"
+                              parentRecord="{!v.parentRecord}"
+                              displayedOnBatchRecord="false"
+                              aura:id="opps"/>
+        </aura:if>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <aura:if isTrue="{!v.uploadFileModal}">
+    <c:CAND_BT_UploadFile recordId="{!v.uploadFileOppId}"/>
+  </aura:if>
+
+  <c:CAND_BT_BatchModal aura:id="modal"
+                        btSettings="{!v.btSettings}"
+                        recordId="{!v.parentRecord.Id}"/>
+  <c:CAND_BT_SavedPaymentModal aura:id="paymentModal"
+                        AccountId="{!v.record.Account.Id}"/>
+  <c:CAND_BT_DonorSearchModal aura:id="donorSearchModal"
+                              amount="{!v.record.Original_Amount__c}"/>
+  <c:CAND_BT_ReceiptSearchModal aura:id="receiptSearchModal"/>
+</aura:component>

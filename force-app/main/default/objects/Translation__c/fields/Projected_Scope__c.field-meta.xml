@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Projected_Scope__c</fullName>
+    <externalId>false</externalId>
+    <formula>TEXT(Language_Translation_Plan_LTP__r.Project_Scope__c )</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <inlineHelpText>Project Scope from LTP: Full Bible, New Testament, New Testament/Psalms</inlineHelpText>
+    <label>Projected Scope</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

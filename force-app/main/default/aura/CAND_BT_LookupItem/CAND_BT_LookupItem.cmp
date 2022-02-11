@@ -1,0 +1,27 @@
+<aura:component description="CAND_BT_LookupItem">
+  <aura:attribute name="lookupObject" type="SObject"/>
+  <aura:registerEvent name="selectedEvent" type="c:CAND_BT_LookupItemSelectedEvent"/>
+
+  <li role="presentation" onkeyup="{!c.onEnterKeyObjectSelected}" onclick="{!c.onObjectSelected}" id="{!v.lookupObject}" data-object-id="{!v.lookupObject.Id}">
+   <span class="slds-pill slds-lookup__item-action slds-media slds-media--center"
+         role="option"
+         tabindex="0"
+         id="{!v.lookupObject}"
+         data-object-id="{!v.lookupObject.Id}">
+      <span class="slds-media__body">
+         <span class="slds-listbox__option-text slds-listbox__option-text_entity"
+               id="{!v.lookupObject}"
+               data-object-id="{!v.lookupObject.Id}">
+          {!v.lookupObject.Name}
+        </span>
+        <aura:iteration items="{!v.lookupObject.Details}" var="detail" indexVar="detailIndex">
+          <span class="slds-listbox__option-meta slds-listbox__option-meta_entity"
+                id="{!v.lookupObject}"
+                data-object-id="{!v.lookupObject.Id}">
+            <lightning:formattedText value="{!detail}"/>
+          </span>
+        </aura:iteration>
+      </span>
+    </span>
+  </li>
+</aura:component>

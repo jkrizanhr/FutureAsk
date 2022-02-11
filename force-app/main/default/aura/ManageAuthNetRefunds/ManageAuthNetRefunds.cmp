@@ -1,0 +1,110 @@
+<aura:component
+  implements="force:hasRecordId,force:appHostable,flexipage:availableForAllPageTypes"
+  controller="ManageAuthNetRefundsController"
+  access="global"
+>
+  <!-- AURA ATTRIBUTES -->
+  <aura:attribute name="recordId" type="String" />
+  <aura:attribute name="loading" type="Boolean" default="true" />
+  <aura:attribute name="transaction" type="Object" default="" />
+  <aura:attribute name="modalType" type="String" default="" />
+
+  <!-- AURA HANDLERS -->
+  <aura:handler name="init" value="{!this}" action="{!c.init}" />
+  <aura:handler
+    name="closeWindow"
+    event="c:ManageAuthNetRefundCloseWindowEvent"
+    action="{!c.closeModal}"
+  />
+
+  <!-- Navigation -->
+  <aura:attribute name="pageReference" type="Object" />
+  <lightning:navigation aura:id="navService" />
+
+  <lightning:card title="Auth.net Transaction" iconName="standard:expense">
+    <div class="slds-p-horizontal_small">
+      <aura:if isTrue="{!not(v.loading)}">
+        <aura:if isTrue="{!and(empty(v.transaction.adjustedOpp),empty(v.transaction.originalOpp))}">
+          <lightning:layout>
+            <lightning:layoutItem size="1"></lightning:layoutItem>
+            <lightning:layoutItem size="3" class="slds-form-element__label">
+              Status<br />
+              Transaction Id
+            </lightning:layoutItem>
+            <lightning:layoutItem size="5">
+              {!v.transaction.status}<br />
+              {!v.transaction.id}
+            </lightning:layoutItem>
+            <lightning:layoutItem size="3">
+              <lightning:button
+                class="slds-button_stretch"
+                variant="brand-outline"
+                label="Refund"
+                title="Refund"
+                value="Full Refund"
+                onclick="{!c.handleClick}"
+              />
+            </lightning:layoutItem>
+          </lightning:layout>
+          <aura:set attribute="else">
+            <aura:if isTrue="{!empty(v.transaction.adjustedOpp)}">
+              <lightning:layout>
+                <lightning:layoutItem size="1"></lightning:layoutItem>
+                <lightning:layoutItem size="7">
+                  This is an adjusted opportunity. Click the link to open the original opportunity.
+                </lightning:layoutItem>
+                <lightning:layoutItem size="1"></lightning:layoutItem>
+                <lightning:layoutItem size="3">
+                  <lightning:button
+                    class="slds-button_stretch"
+                    variant="brand-outline"
+                    label="View Opp"
+                    title="View Opp"
+                    value="{!v.transaction.originalOpp}"
+                    onclick="{!c.openOpp}"
+                  />
+                </lightning:layoutItem>
+              </lightning:layout>
+              <aura:set attribute="else">
+                <lightning:layout>
+                  <lightning:layoutItem size="1"></lightning:layoutItem>
+                  <lightning:layoutItem size="7">
+                    This transaction has already been refunded. Click the link to open the
+                    adjustment opportunity.
+                  </lightning:layoutItem>
+                  <lightning:layoutItem size="1"></lightning:layoutItem>
+                  <lightning:layoutItem size="3">
+                    <lightning:button
+                      class="slds-button_stretch"
+                      variant="brand-outline"
+                      label="View Opp"
+                      title="View Opp"
+                      value="{!v.transaction.adjustedOpp}"
+                      onclick="{!c.openOpp}"
+                    />
+                  </lightning:layoutItem>
+                </lightning:layout>
+              </aura:set>
+            </aura:if>
+          </aura:set>
+        </aura:if>
+
+        <!-- spinner while loading -->
+        <aura:set attribute="else">
+          <div style="height: 30px;">
+            <lightning:spinner alternativeText="Loading" />
+          </div>
+        </aura:set>
+      </aura:if>
+    </div>
+  </lightning:card>
+
+  <!-- Open Modals -->
+  <aura:if isTrue="{!not(empty(v.modalType))}">
+    <c:ManageAuthNetRefundModals
+      recordId="{!v.recordId}"
+      transaction="{!v.transaction}"
+      modalType="{!v.modalType}"
+    />
+  </aura:if>
+</aura:component>

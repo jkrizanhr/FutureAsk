@@ -1,0 +1,16 @@
+.THIS .card-header {
+  display:inline;
+}
+.THIS .refresh-icon {
+  float:right;
+}
+.THIS .card-title {
+  padding:0px 15px;
+}
+.THIS .card-container {
+  padding:15px;
+}
+.THIS .loading-container {
+  width:100%;
+  text-align:center;
+}

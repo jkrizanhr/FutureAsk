@@ -1,0 +1,185 @@
+<aura:component description="DocumentTemplateCSVColumn">
+  <aura:attribute name="colConfig" type="Object" default="{}"/>
+  <aura:attribute name="defaultCSVConfig" type="Object[]"/>
+  <aura:attribute name="fieldSelectList" type="Object[]"/>
+  <aura:attribute name="idx" type="Integer"/>
+  <aura:attribute name="numColumns" type="Integer"/>
+  <aura:attribute name="templateQueries" type="Object[]"/>
+  <aura:attribute name="showAggregateSubColumns" type="Boolean" default="false"/>
+
+  <aura:registerEvent name="updateColumnEvent" type="c:DocTempUpdateColumnEvent"/>
+
+  <!--Table Row in the CSV Builder-->
+  <tr style="{!mod(v.idx, 2) == 0 ? 'background-color:#f3f3f3;' : ''}">
+    <!--Table Column 1: Query-->
+    <td style="vertical-align: top;">
+      <lightning:select aura:id="querySelect"
+                        name="querySelect"
+                        label=""
+                        value="{!v.colConfig.queryId}"
+                        onchange="{!c.onchangeQuery}">
+        <option value="" text="--SELECT--" selected="{!equals(v.colConfig.queryId, '')}"></option>
+        <aura:iteration var="q" items="{!v.templateQueries}">
+          <option value="{!q.Id}" text="{!q.Name}" selected="{!equals(v.colConfig.queryId, q.Id)}"></option>
+        </aura:iteration>
+      </lightning:select>
+    </td>
+
+    <aura:if isTrue="{!and(not(empty(v.colConfig)), empty(v.colConfig.subColumns))}">
+      <!--There are no Subcolumns. Show the column detail-->
+      <c:DocumentTemplateCSVColumnDetail colConfig="{!v.colConfig}"
+                                         fieldSelectList="{!v.fieldSelectList}"
+                                         idx="{!v.idx}"
+                                         numColumns="{!v.numColumns}">
+      </c:DocumentTemplateCSVColumnDetail>
+      <aura:set attribute="else">
+        <!--Show Subcolumn Group-->
+        <!--Table Column 2: Subquery/Aggregate/Secondary Query Table Column-->
+        <td>
+          <aura:if isTrue="{!not(empty(v.fieldSelectList))}">
+            <lightning:select aura:id="fieldSelect"
+                              name="fieldSelect"
+                              label=""
+                              value="{!v.colConfig.field}"
+                              onchange="{!c.onchangeField}">
+              <aura:iteration items="{!v.fieldSelectList}" var="fieldCol">
+                <aura:if isTrue="{!empty(fieldCol.queryId)}">
+                  <option value="{!fieldCol.field}"
+                          text="{!fieldCol.field}"
+                          selected="{!equals(v.colConfig.key, fieldCol.key)}">
+                  </option>
+                  <aura:set attribute="else">
+                    <aura:if
+                        isTrue="{!and(equals(fieldCol.queryId, v.colConfig.queryId), equals(fieldCol.parentKey, v.colConfig.parentKey))}">
+                      <option value="{!fieldCol.field}"
+                              text="{!fieldCol.field}"
+                              selected="{!equals(v.colConfig.key, fieldCol.key)}">
+                      </option>
+                    </aura:if>
+                  </aura:set>
+                </aura:if>
+              </aura:iteration>
+            </lightning:select>
+          </aura:if>
+        </td>
+
+
+        <!--Table Column 3: Number of Results Table Column -->
+        <td>
+          <lightning:input label=""
+                           value="{!'Number of Results: ' + v.colConfig.numResults}"
+                           disabled="true">
+          </lightning:input>
+        </td>
+
+        <!--Table Column 4: Add Result Group Table Column-->
+        <td>
+          <div class="slds-p-top--medium">
+                    <span>
+                        <lightning:buttonIcon iconName="utility:add"
+                                              alternativeText="Add Number of Results"
+                                              size="medium"
+                                              value="1"
+                                              onclick="{!c.onchangeNumSubColumns}">
+                        </lightning:buttonIcon>
+                    </span>
+            <span>
+                        <lightning:buttonIcon iconName="utility:ban"
+                                              alternativeText="Subtract Number of Results"
+                                              size="medium"
+                                              value="-1"
+                                              disabled="{!equals(v.colConfig.numResults, 1)}"
+                                              onclick="{!c.onchangeNumSubColumns}">
+                        </lightning:buttonIcon>
+                    </span>
+            <span>
+                        <!--<aura:if isTrue="{!and(not(empty(v.colConfig.subColumns)), equals(v.colConfig.selectIndex, 0))}">-->
+                        <aura:if
+                            isTrue="{!and(not(empty(v.colConfig.subColumns)), equals(v.colConfig.apiName, 'Aggregate'))}">
+                            <aura:if isTrue="{!v.showAggregateSubColumns}">
+                                    <lightning:buttonIcon iconName="utility:hide"
+                                                          alternativeText="Hide All"
+                                                          size="medium"
+                                                          onclick="{!c.onclickToggleAggregateSubColumns}">
+                                    </lightning:buttonIcon>
+                            <aura:set attribute="else">
+                                    <lightning:buttonIcon iconName="utility:preview"
+                                                          alternativeText="Show All"
+                                                          size="medium"
+                                                          onclick="{!c.onclickToggleAggregateSubColumns}">
+                                    </lightning:buttonIcon>
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                    </span>
+          </div>
+        </td>
+
+        <!--Table Column 5: Add SubColumn/Toggle Aggregate Column Preview Buttons-->
+        <td>
+          <div class="slds-p-top--medium slds-align_absolute-center">
+            <lightning:button iconName="utility:new"
+                              label="Add Result Column"
+                              onclick="{!c.onclickAddSubColumn}">
+            </lightning:button>
+          </div>
+        </td>
+
+        <!--Table Column 6-->
+        <td></td>
+
+        <!--Table Column 7: Column Grouping Table Actions-->
+        <td>
+          <table>
+            <tr>
+              <td>
+                <p></p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <c:DocTempCSVColumnActions column="{!v.colConfig}" idx="{!v.idx}" numColumns="{!v.numColumns}"/>
+              </td>
+            </tr>
+          </table>
+        </td>
+
+      </aura:set>
+    </aura:if>
+  </tr>
+
+  <aura:if isTrue="{!or(not(equals(v.colConfig.apiName, 'Aggregate')), v.showAggregateSubColumns)}">
+    <aura:iteration items="{!v.colConfig.subColumns}" var="subCol" indexVar="idx">
+      <tr>
+        <!--<aura:if isTrue="{!and(greaterthan(subCol.selectIndex, 0), equals(subCol.groupingValue, '0'))}">-->
+        <aura:if isTrue="{!and(
+                        or(equals(v.colConfig.apiName, 'Subquery'), equals(v.colConfig.apiName, 'Secondary')),
+                        equals(subCol.groupingValue, '0'))}">
+          <!--Subquery sub-columns-->
+          <td></td>
+          <c:DocumentTemplateCSVColumnDetail colConfig="{!subCol}"
+                                             fieldSelectList="{!v.fieldSelectList}"
+                                             idx="{!idx}"
+                                             parentIndex="{!v.idx}"
+                                             numColumns="{!v.colConfig.subColumns.length}"
+                                             parentCol="{!v.colConfig}">
+          </c:DocumentTemplateCSVColumnDetail>
+          <aura:set attribute="else">
+            <!--Aggregate sub-columns-->
+            <aura:if isTrue="{!and(equals(subCol.selectSource, 'Aggregate'), v.showAggregateSubColumns)}">
+              <!--Show Aggregate sub-columns-->
+              <td></td>
+              <c:DocumentTemplateCSVColumnDetail colConfig="{!subCol}"
+                                                 fieldSelectList="{!v.fieldSelectList}"
+                                                 idx="{!idx}"
+                                                 parentIndex="{!v.idx}"
+                                                 numColumns="{!v.colConfig.subColumns.length}"
+                                                 parentCol="{!v.colConfig}">
+              </c:DocumentTemplateCSVColumnDetail>
+            </aura:if>
+          </aura:set>
+        </aura:if>
+      </tr>
+    </aura:iteration>
+  </aura:if>
+</aura:component>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Project_Purpose__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Describe the purpose of this project in 2-3 paragraphs.</inlineHelpText>
+    <label>Project Purpose</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>8</visibleLines>
+</CustomField>

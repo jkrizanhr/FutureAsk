@@ -1,0 +1,132 @@
+<aura:component description="DocGenJobs" controller="DocGenJobsController">
+  <aura:attribute name="apexJobs" type="Object[]" default="[]"/>
+  <aura:attribute name="docGenJobs" type="Object[]" default="[]"/>
+  <aura:attribute name="jobLogs" type="Object[]" default="[]"/>
+  <aura:attribute name="attempts" type="Integer" default="0"/>
+  <aura:attribute name="jobInProgress" type="Boolean" default="false"/>
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+  <aura:method name="init" action="{!c.doInit}"/>
+
+  <lightning:notificationsLibrary aura:id="notifLib"/>
+
+  <lightning:card title="Document Generation Jobs">
+    <div class="slds-box slds-scrollable" style="height:100vh;">
+      <aura:if isTrue="{!empty(v.docGenJobs)}">
+        No Document Generation Job Logs Available
+        <aura:set attribute="else">
+          <aura:iteration items="{!v.docGenJobs}" var="job" indexVar="idx">
+            <div class="{!idx != 0 ? 'slds-p-top--small' : ''}">
+              <div class="slds-form-element__row">
+                <div class="slds-size_1-of-1 slds-box">
+                  <lightning:card class="docGenJob-title" title="{!job.Document_Template__r.Name}">
+                    <aura:set attribute="actions">
+                      <lightning:buttonGroup>
+                         <lightning:buttonIcon alternativeText="View More Details"
+                                               iconName="utility:preview"
+                                               onclick="{!c.onclickViewMoreDetails}"
+                                               value="{!job.Id}"/>
+                        <lightning:buttonIcon alternativeText="Abort Job"
+                                              iconName="utility:stop"
+                                              onclick="{!c.onclickAbortApexJob}"
+                                              disabled="{!empty(job.apexJob)
+                                                  || empty(job.apexJob.Status)
+                                                  || equals(job.apexJob.Status, 'Completed')
+                                                  || equals(job.apexJob.Status, 'Failed')
+                                                  || equals(job.apexJob.Status, 'Aborted')}"
+                                              value="{!job.apexJob.Id}"/>
+
+                        <aura:if isTrue="{!or(
+                              equals(job.Delivery_Option__c, 'PDF - Direct Download'),
+                              equals(job.Delivery_Option__c, 'CSV - Direct Download'))}">
+                          <lightning:buttonIcon alternativeText="Download"
+                                                iconName="utility:download"
+                                                disabled="{!not(equals(job.apexJob.Status, 'Completed'))}"
+                                                onclick="{!c.onClickDownloadAllFiles}"
+                                                value="{!job.Id}"/>
+                        </aura:if>
+                      </lightning:buttonGroup>
+                    </aura:set>
+
+                     <div class="slds-form-element__row">
+                        <div class="slds-p-left--medium slds-size_1-of-1 slds-p-bottom--medium">
+                          {!job.Delivery_Option__c}
+                        </div>
+                     </div>
+
+                    <aura:if isTrue="{!and(empty(job.apexJob.Id), empty(job.postGenJob.Id))}">
+
+                       <div class="slds-form-element__row">
+                          <div class="slds-p-left--medium slds-size_1-of-1">
+                            Apex Job Progress Unavailable.
+                          </div>
+                       </div>
+
+                    <aura:set attribute="else">
+
+                      <!--Percent Complete, Status & Stats-->
+                      <div class="slds-form-element__row">
+                        <div class="slds-size_1-of-1">
+                          <div class="slds-float--left">
+                            {!job.apexJob.percentComplete}% {!job.apexJob.Status}
+                          </div>
+                          <div class="slds-float--right">
+                            {!job.apexJob.JobItemsProcessed} Batches Processed / {!job.apexJob.TotalJobItems} Total Batches / {!job.apexJob.NumberOfErrors} Errors
+                          </div>
+                        </div>
+                      </div>
+                     <!--Progress Bar-->
+                      <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size_1-of-1">
+                          <lightning:progressBar value="{!job.apexJob.percentComplete}"/>
+                        </div>
+                      </div>
+                      <!--Apex Job & Created Date-->
+                      <div class="slds-form-element__row">
+                        <div class="slds-size_1-of-1">
+                          <aura:if isTrue="{!not(empty(job.Station_Brand__c))}">
+                            <div class="slds-float--left">
+                                {!job.Station_Brand__c}
+                            </div>
+                          </aura:if>
+                          <div class="slds-float--right">
+                            Created: <lightning:formattedDateTime value="{!job.apexJob.CreatedDate}"
+                                                                  year="2-digit"
+                                                                  day="2-digit"
+                                                                  month="2-digit"
+                                                                  hour="2-digit"
+                                                                  minute="2-digit"
+                                                                  second="2-digit"/>
+                          </div>
+                        </div>
+                      </div>
+                      <aura:if isTrue="{!not(empty(job.postGenJob))}">
+                        <div class="slds-form-element__row">
+                            <div class="slds-size_1-of-1">
+                                Post Generation Methods:
+                            </div>
+                        </div>
+                        <div class="slds-form-element__row">
+                          <div class="slds-size_1-of-1 slds-p-left--medium">
+                            {!job.postGenJob.percentComplete}% {!job.postGenJob.Status}
+                          </div>
+                        </div>
+                        <div class="slds-form-element__row">
+                          <div class="slds-size_1-of-1 slds-p-left--medium">
+                            {!job.postGenJob.JobItemsProcessed} Batches Processed / {!job.postGenJob.TotalJobItems} Total Batches / {!job.apexJob.NumberOfErrors} Errors
+                          </div>
+                        </div>
+                      </aura:if>
+                    </aura:set>
+                    </aura:if>
+                </lightning:card>
+                </div>
+              </div>
+            </div>
+          </aura:iteration>
+        </aura:set>
+      </aura:if>
+    </div>
+  </lightning:card>
+</aura:component>

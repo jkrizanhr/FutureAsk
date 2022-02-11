@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Driving_Partners__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>What partners (ministry and publishing partners) have driven the need for a new Biblica translation in this language?</inlineHelpText>
+    <label>Driving Partners</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Html</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

@@ -1,0 +1,268 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" controller="Portal_Controller">
+  <aura:attribute name="isLoading" type="Boolean" default="true"/>
+  <aura:attribute name="isSaving" type="Boolean" default="false"/>
+  <aura:attribute name="isEditing" type="Boolean" default="false"/>
+  <aura:attribute name="errorMessage" type="String" default=""/>
+  <aura:attribute name="contact" type="Object"/>
+  <aura:attribute name="picklists" type="Object"/>
+  <aura:attribute name="countries" type="List"/>
+  <aura:attribute name="country" type="String" default="United States"/>
+  <aura:attribute name="states" type="List"/>
+  <aura:attribute name="state" type="String" default="AL"/>
+  <aura:attribute name="emailField" type="String" />
+  <aura:attribute name="phoneField" type="String" />
+  <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+  
+  <aura:if isTrue="{!not(v.isLoading)}">
+    <aura:if isTrue="{!v.isEditing}">
+      <!-- EDIT PROFILE INFORMATION -->
+      <aura:if isTrue="{!v.isSaving}">
+        <lightning:spinner alternativeText="Loading"/>
+      </aura:if>
+      <aura:if isTrue="{!not(empty(v.errorMessage))}">
+        <p style="color: red;">{!v.errorMessage}</p>
+      </aura:if>
+      <lightning:recordEditForm aura:id="myRecordForm" recordId="{!v.contact.rpuId}" objectApiName="Requested_Profile_Update__c" onsubmit="{!c.handleSubmit}" onsuccess="{!c.handleSuccess}">
+        <lightning:messages />
+        <!-- Name -->
+        <lightning:inputField fieldName="Contact__c" class="slds-hide" value="{!v.contact.Id}"/>
+        <lightning:layout multipleRows="true">
+          <lightning:layoutItem class="slds-p-top_medium" size="1">
+            <label class="field-label required" for="Salutation">Prefix</label>  
+            <lightning:select aura:id="Salutation" label="Salutation" value="{!v.contact.Salutation}" variant="label-hidden">
+              <aura:iteration items="{!v.picklists.Salutation.picklistValues}" var="type">
+                <option value="{!type.value}" label="{!type.label}"></option>
+              </aura:iteration>
+            </lightning:select>
+          </lightning:layoutItem>
+          <lightning:layoutItem size="5" class="slds-p-left_small slds-p-top_medium">
+            <label class="field-label required" for="FirstName">First Name</label>  
+            <lightning:input aura:id="firstName" name="First_Name__c" value="{!v.contact.FirstName}"/>
+          </lightning:layoutItem>
+          <lightning:layoutItem size="5" class="slds-p-left_small slds-p-top_medium">
+            <div>
+              <label class="field-label required" for="LastName">Last Name</label>  
+              <lightning:input aura:id="lastName" name="Last_Name__c" value="{!v.contact.LastName}"/>
+            </div>
+          </lightning:layoutItem>
+          <lightning:layoutItem size="1" class="slds-p-left_small slds-p-top_medium">
+            <label class="field-label" for="Suffix">Suffix</label>  
+            <lightning:input aura:id="suffix" name="Suffix__c" value="{!v.contact.Suffix}"/>
+          </lightning:layoutItem>
+        </lightning:layout>
+        <!-- Address (Country)-->
+        <lightning:layout class="slds-p-top_medium" multipleRows="true">  
+          <lightning:layoutItem size="12">
+            <label class="field-label required" for="MailingCountry">Country</label>  
+            <lightning:select aura:id="MailingCountry" name="Mailing Country" label="Country" value="{!v.contact.MailingCountry}" variant="label-hidden">
+              <option value="United States" label="United States"></option>
+              <aura:iteration items="{!v.countries}" var="country">
+                <option value="{!country}" label="{!country}"></option>
+              </aura:iteration>
+            </lightning:select>
+          </lightning:layoutItem>
+        </lightning:layout>
+        <!-- Address (Street)-->
+        <lightning:layout class="slds-p-top_medium" multipleRows="true">  
+          <lightning:layoutItem size="12">
+            <label class="field-label required" for="MailingStreet">Street</label>
+            <lightning:input name="Street__c" aura:id="mailingStreet" value="{!v.contact.MailingStreet}"/>
+          </lightning:layoutItem>
+        </lightning:layout>
+        <!-- Address (City, State Zip)-->
+        <lightning:layout multipleRows="true">  
+          <!-- Mailing City -->
+          <lightning:layoutItem class="slds-p-top_medium" size="6">
+            <label class="field-label required" for="MailingCity">City</label>  
+            <lightning:input name="City__c" aura:id="mailingCity" maxlength="80" value="{!v.contact.MailingCity}"/>
+          </lightning:layoutItem>
+          <!-- Mailing State -->
+          <lightning:layoutItem class="slds-p-top_medium slds-p-left_small" size="3">
+            <label class="field-label required" for="MailingState">State/Province</label>
+            <aura:if isTrue="{!equals(v.contact.MailingCountry, 'United States')}">
+              <lightning:select aura:id="StateSelect" name="Mailing State" label="State" value="{!v.state}" variant="label-hidden" onchange="{!c.updateState}">
+              <aura:iteration items="{!v.states}" var="state">
+                <option value="{!state.value}" label="{!state.label}"></option>
+              </aura:iteration>
+            </lightning:select>
+              <aura:set attribute="else">
+                <lightning:input name="State__c" aura:id="mailingState" value="{!v.contact.MailingState}"/>
+              </aura:set>
+            </aura:if>
+          </lightning:layoutItem>
+          <!-- Postal Code -->
+          <lightning:layoutItem class="slds-p-top_medium slds-p-left_small" size="3">
+            <label class="field-label required" for="MailingPostalCode">Postal Code</label>  
+            <lightning:input name="Postal_Code__c" aura:id="postalCode" value="{!v.contact.MailingPostalCode}"/>
+          </lightning:layoutItem>
+        </lightning:layout>
+        <!-- Preferred Email/Phone -->
+        <lightning:layout multipleRows="true">  
+          <!-- Email Fields -->
+          <lightning:layoutItem class="slds-p-top_medium" size="6">
+            <label class="field-label required" for="EmailType">Preferred Email</label>  
+            <lightning:select aura:id="PreferredEmail" name="PreferredEmail" label="Preferred Email" value="{!v.contact.PreferredEmail}" variant="label-hidden" onchange="{!c.setEmailField}">
+              <aura:iteration items="{!v.picklists.npe01__Preferred_Email__c.picklistValues}" var="type">
+                <option value="{!type.value}" label="{!type.label}"></option>
+              </aura:iteration>
+            </lightning:select>
+            <div class="slds-p-top_medium"/>
+            <label class="field-label" for="Email">Personal Email</label>
+            <lightning:input type="email" name="email1" value="{!v.contact.PersonalEmail}" label="Personal Email" aura:id="personalEmail"/>
+            <div class="slds-p-top_medium"/>
+            <label class="field-label" for="Email">Work Email</label>
+            <lightning:input type="email" name="email1" value="{!v.contact.WorkEmail}" label="Work Email" aura:id="workEmail"/>
+            <div class="slds-p-top_medium"/>
+            <label class="field-label" for="Email">Alternate Email</label>
+            <lightning:input type="email" name="email1" value="{!v.contact.AlternateEmail}" label="Alternate Email" aura:id="alternateEmail"/>
+          </lightning:layoutItem>
+          <!-- Phone Fields -->
+          <lightning:layoutItem size="6" class="slds-p-left_small slds-p-top_medium">
+            <label class="field-label required" for="PhoneType">Preferred Phone</label>  
+            <lightning:select aura:id="PreferredPhone" label="Preferred Phone" value="{!v.contact.PreferredPhone}" variant="label-hidden" onchange="{!c.setPhoneField}">
+              <aura:iteration items="{!v.picklists.npe01__PreferredPhone__c.picklistValues}" var="type">
+                <option value="{!type.value}" label="{!type.label}"></option>
+              </aura:iteration>
+            </lightning:select>
+            <div class="slds-p-top_medium"/>
+            <label class="field-label" for="Phone">Home Phone</label>
+            <lightning:input type="tel" value="{!v.contact.HomePhone}" label="Home Phone" aura:id="homePhone"/>
+            <div class="slds-p-top_medium"/>
+            <label class="field-label" for="Phone">Work Phone</label>
+            <lightning:input type="tel" value="{!v.contact.WorkPhone}" label="Work Phone" aura:id="workPhone"/><div class="slds-p-top_medium"/>
+            <label class="field-label" for="Phone">Mobile Phone</label>
+            <lightning:input type="tel" value="{!v.contact.MobilePhone}" label="Mobile Phone" aura:id="mobilePhone"/>
+          </lightning:layoutItem>
+        </lightning:layout>
+        <!-- Account: Receipt Type/Receipt Language -->
+        <lightning:layout multipleRows="true">  
+          <!-- Receipt Language -->
+          <lightning:layoutItem class="slds-p-top_medium" size="6">
+            <label class="field-label required" for="languageType">Receipt Language</label>  
+            <lightning:select name="languageType" label="Receipt Language" value="{!v.contact.Language}" variant="label-hidden" aura:id="receiptLanguage">
+              <aura:iteration items="{!v.picklists.Language_Preference__c.picklistValues}" var="type">
+                <option value="{!type.value}" label="{!type.label}"></option>
+              </aura:iteration>
+            </lightning:select>
+          </lightning:layoutItem>
+          <!-- Receipt Type -->
+          <lightning:layoutItem class="slds-p-top_medium slds-p-left_small" size="6">
+            <label class="field-label required" for="Receipt_Type__c">Receipt Type</label>  
+            <lightning:select name="receiptType" label="Receipt Type" value="{!v.contact.Receipt}" variant="label-hidden" aura:id="receiptType">
+              <aura:iteration items="{!v.picklists.Receipt_Type__c.picklistValues}" var="type">
+                <option value="{!type.value}" label="{!type.label}"></option>
+              </aura:iteration>
+            </lightning:select>
+          </lightning:layoutItem>
+        </lightning:layout>
+        <div style="text-align: center; padding-top:15px;">
+          <lightning:button class="slds-m-top_small" variant="brand" type="submit" name="save" label="SAVE" />  
+          <lightning:button class="slds-m-top_small" variant="neutral" onclick="{!c.editRecord}" name="cancel" label="CANCEL" />  
+        </div>
+      </lightning:recordEditForm>
+      
+      <!-- VIEW PROFILE INFORMATION -->
+      <aura:set attribute="else">
+        <div style="text-align: right;">
+          <lightning:button class="slds-m-top_small" variant="brand" onclick="{!c.editRecord}" name="edit" label="EDIT" />  
+        </div>
+        <!-- Name / Address(Country, Street) -->
+        <lightning:layout multipleRows="true">  
+          <!-- Name -->
+          <lightning:layoutItem class="slds-p-top_small" size="12">
+            <label class="field-label" for="Name">Name</label>  
+            <lightning:input readonly="true" tabindex="-1" name="Name" variant="label-hidden" value="{!if(not(empty(v.contact.Salutation)), v.contact.Salutation + ' ', '') + v.contact.FirstName + ' ' + v.contact.LastName + ' ' + v.contact.Suffix}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+          <!-- Address (Country)-->
+          <lightning:layoutItem class="slds-p-top_small" size="12">
+            <label class="field-label" for="MailingCountry">Country</label>  
+            <lightning:input readonly="true" tabindex="-1" name="MailingCountry" variant="label-hidden" value="{!v.contact.MailingCountry}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+          <!-- Address (Street)-->
+          <lightning:layoutItem class="slds-p-top_small" size="12">
+            <label class="field-label" for="MailingStreet">Street</label>
+            <lightning:input readonly="true" tabindex="-1" name="MailingStreet" variant="label-hidden" value="{!v.contact.MailingStreet}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+        </lightning:layout>
+        <!-- Address (City, State Zip)-->
+        <lightning:layout multipleRows="true">  
+          <lightning:layoutItem class="slds-p-top_small" size="6">
+            <label class="field-label" for="MailingCity">City</label>  
+            <lightning:input readonly="true" tabindex="-1" name="MailingCity" variant="label-hidden" value="{!v.contact.MailingCity}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+          <lightning:layoutItem class="slds-p-top_small" size="3">
+            <label class="field-label" for="MailingState">State/Province</label>  
+            <lightning:input readonly="true" tabindex="-1" name="MailingState" variant="label-hidden" value="{!v.contact.MailingState}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+          <lightning:layoutItem class="slds-p-top_small" size="3">
+            <label class="field-label" for="MailingPostalCode">Postal Code</label>  
+            <lightning:input readonly="true" tabindex="-1" name="MailingPostalCode" variant="label-hidden" value="{!v.contact.MailingPostalCode}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+        </lightning:layout>
+        <!-- Phone/Email Fields -->
+        <lightning:layout multipleRows="true">  
+          <!-- Email Fields -->
+          <lightning:layoutItem class="slds-p-top_small" size="6">
+            <label class="field-label" for="EmailType">Preferred Email Type</label>  
+            <lightning:input readonly="true" tabindex="-1" name="npe01__Preferred_Email__c" variant="label-hidden" value="{!v.contact.PreferredEmail}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+            <div class="slds-p-top_small"/>
+            <label class="field-label" for="npe01__HomeEmail__c">Personal Email</label>
+            <lightning:input type="email" readonly="true" tabindex="-1" name="npe01__HomeEmail__c" variant="label-hidden" value="{!v.contact.PersonalEmail}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+            <div class="slds-p-top_small"/>
+            <label class="field-label" for="npe01__WorkEmail__c">Work Email</label>  
+            <lightning:input type="email" readonly="true" tabindex="-1" name="npe01__WorkEmail__c" variant="label-hidden" value="{!v.contact.WorkEmail}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+            <div class="slds-p-top_small"/>
+            <label class="field-label" for="npe01__AlternateEmail__c">Alternate Email</label>  
+            <lightning:input type="email" readonly="true" tabindex="-1" name="npe01__AlternateEmail__c" variant="label-hidden" value="{!v.contact.AlternateEmail}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+          <!-- Phone Fields -->
+          <lightning:layoutItem class="slds-p-top_small" size="6">
+            <label class="field-label" for="PhoneType">Preferred Phone Type</label>  
+            <lightning:input readonly="true" tabindex="-1" name="npe01__PreferredPhone__c" variant="label-hidden" value="{!v.contact.PreferredPhone}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+            <div class="slds-p-top_small"/>
+            <label class="field-label" for="HomePhone">Home Phone</label>
+            <lightning:input type="tel" readonly="true" tabindex="-1" name="HomePhone" variant="label-hidden" value="{!v.contact.HomePhone}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+            <div class="slds-p-top_small"/>
+            <label class="field-label" for="npe01__WorkPhone__c">Work Phone</label>  
+            <lightning:input type="tel" readonly="true" tabindex="-1" name="npe01__WorkPhone__c" variant="label-hidden" value="{!v.contact.WorkPhone}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+            <div class="slds-p-top_small"/>
+            <label class="field-label" for="MobilePhone">Mobile Phone</label>  
+            <lightning:input type="tel" readonly="true" tabindex="-1" name="MobilePhone" variant="label-hidden" value="{!v.contact.MobilePhone}"/>
+            <hr style="padding:-2px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+          <!-- Receipt Type -->
+          <lightning:layoutItem class="slds-p-top_small" size="6">
+            <label class="field-label" for="languageType">Receipt Language</label>  
+            <lightning:input readonly="true" tabindex="-1" name="Language_Preference__c" variant="label-hidden" value="{!v.contact.Language}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+          <lightning:layoutItem class="slds-p-top_small" size="6">
+            <label class="field-label" for="Receipt_Type__c">Receipt Type</label>  
+            <lightning:input readonly="true" tabindex="-1" name="Receipt_Type__c" variant="label-hidden" value="{!v.contact.Receipt}"/>
+            <hr style="padding:0px !important; margin: -7px 0px !important;"/>
+          </lightning:layoutItem>
+        </lightning:layout>
+      </aura:set>
+    </aura:if>
+    
+    <!-- IS LOADING -->
+    <aura:set attribute="else">
+      <div style="height: 100px;">
+        <lightning:spinner alternativeText="Loading" size="large" />
+      </div>
+    </aura:set>
+  </aura:if>
+</aura:component>

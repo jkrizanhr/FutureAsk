@@ -1,0 +1,15 @@
+.THIS .progress-bar-100 .slds-progress-bar__value{
+    background-color: #7DC37D;
+}
+
+.THIS .progress-bar-66 .slds-progress-bar__value{
+    background-color: #F2CF5B;
+}
+
+.THIS .progress-bar-33 .slds-progress-bar__value{
+    background-color: #EF6E5D;
+}
+
+.THIS .slds-progress-bar {
+    background: #ebebeb;
+}

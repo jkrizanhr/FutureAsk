@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Secondary_Language_Explanation__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Does this project include resources in other secondary languages (i.e. Spanish, French, English, etc.)? If so, please state the reason(s) why.</inlineHelpText>
+    <label>Secondary Language Explanation</label>
+    <length>32708</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

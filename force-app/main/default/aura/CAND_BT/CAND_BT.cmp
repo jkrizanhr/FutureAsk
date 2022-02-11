@@ -1,0 +1,26 @@
+<!-- A container component -->
+<aura:component controller="CAND_BT_Setting_Controller" description="CAND_BT"
+                implements="force:appHostable,flexipage:availableForAllPageTypes">
+  <aura:attribute name="btSettings" type="Object"/>
+  <aura:attribute name="message" type="String" default="Loading Settings..."/>
+  <aura:attribute name="shouldShowSpinner" type="Boolean" default="false"/>
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+  <aura:if isTrue="{!(not(empty(v.btSettings)))}">
+    <c:CAND_BT_ListView btSettings="{!v.btSettings}"
+                        sObjectName="{!v.btSettings.topLevelListView.label}"
+                        sObjectAPIName="{!v.btSettings.topLevelListView.objectAPIName}"/>
+    <aura:set attribute="else">
+      <lightning:card title="">
+        <div class="slds-align_absolute-center">
+          {!v.message}
+        </div>
+      </lightning:card>
+    </aura:set>
+  </aura:if>
+
+  <aura:if isTrue="{!v.shouldShowSpinner}">
+    <lightning:spinner aura:id="settingsSpinner"/>
+  </aura:if>
+</aura:component>

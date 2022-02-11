@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Bib_Probability_Total__c</fullName>
+    <description>Adding this field to help calculate remaining balance for funds to be raised on a project 2-2-22 jkrizan</description>
+    <externalId>false</externalId>
+    <formula>Future_Gift__r.Probability_m__c *  Allocation_Amount__c</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Probability Total</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+</CustomField>

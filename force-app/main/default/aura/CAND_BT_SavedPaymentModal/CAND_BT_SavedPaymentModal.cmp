@@ -1,0 +1,24 @@
+<aura:component>
+  <aura:attribute type="String" name="AccountId"/>
+  <aura:method name="toggleDisplay" action="{!c.toggleDisplay}" access="PUBLIC"/>
+
+  <div>
+    <section aura:id="PaymentModal" role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal">
+      <div class="slds-modal__container">
+        <header class="slds-modal__header slds-modal__header_empty customWidth">
+          <button onclick="{!c.toggleDisplay}" class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+            <span class="slds-assistive-text">Close</span>
+            <lightning:icon variant="inverse" iconName="utility:close" alternativeText="close" />
+          </button>
+        </header>
+        <div class="slds-modal__content slds-p-around_medium modalHeight customWidth" id="modal-content-id-1">
+          <iframe height="100%" width="100%" style="border:none;" src="{!'https://donateadminpoc-dev.intervarsity.org/?AccountId=' + v.AccountId}"></iframe>
+        </div>
+        <footer class="slds-modal__footer customWidth">
+          <lightning:button onclick="{!c.toggleDisplay}" variant="neutral" name="exit" label="Exit" />
+        </footer>
+      </div>
+    </section>
+    <div aura:id="PaymentModalbackdrop" class="slds-backdrop"></div>
+  </div>
+</aura:component>

@@ -1,0 +1,59 @@
+@font-face {
+  font-family: 'Catamaran-Regular';
+  src: url(/resource/CatamaranRegularFont); 
+}
+@font-face {
+  font-family: 'Catamaran-Bold';
+  src: url(/resource/CatamaranBoldFont); 
+}
+@font-face {
+  font-family: 'Lato-Regular';
+  src: url(/resource/LatoRegularFont); 
+}
+@font-face {
+  font-family: 'Lato-Light';
+  src: url(/resource/LatoLightFont); 
+}
+
+.THIS .slds-form-element__label{ 
+  display: none !important;
+}
+
+.THIS .required::after {
+  color: red;
+  content: ' *';
+}
+
+.THIS label {
+  font-family: 'Lato-Light', Sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: 	#696764;
+}
+
+/* Portrait Mode */
+@media only screen 
+  and (min-device-width: 320px) 
+  and (max-device-width: 480px)
+  and (-webkit-min-device-pixel-ratio: 2)
+  and (orientation: portrait) 
+{
+  .THIS .slds-size_1-of-12 {
+    width: 33% !important;
+  }
+  .THIS .slds-size_3-of-12 {
+    width: 50% !important;
+  }
+  .THIS .slds-size_5-of-12 {
+    width: 67% !important;
+  }
+  .THIS .slds-size_6-of-12 {
+    width: 100% !important;
+  }
+  .THIS .slds-p-left_small {
+    padding-left: 0 !important;
+  }
+  .THIS .slds-button {
+    width: 100%
+  }
+}

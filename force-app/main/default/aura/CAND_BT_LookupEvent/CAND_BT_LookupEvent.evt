@@ -1,0 +1,5 @@
+<aura:event type="COMPONENT" description="CAND_BT_LookupEvent">
+  <aura:attribute name="object" type="Object"/>
+  <aura:attribute name="objectAPIName" type="String"/>
+  <aura:attribute name="objectIndex" type="Integer"/>
+</aura:event>

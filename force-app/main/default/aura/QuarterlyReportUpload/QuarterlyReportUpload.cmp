@@ -1,0 +1,33 @@
+<aura:component description="Quarterly Report" controller="QuarterlyReportUpload_Ctrl" implements="force:hasRecordId,forceCommunity:availableForAllPageTypes,flexipage:availableForAllPageTypes">
+  <aura:attribute name="accept" type="List" default="['.jpg', '.jpeg', '.png', '.gif', '.svg', '.pdf', '.docx', '.pptx']"/>
+  <aura:attribute name="recordId" type="String"/>
+  <aura:attribute name="fileURL" type="String" default=""/>
+  <aura:attribute name="fileId" type="String" default=""/>
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+  <lightning:card>
+    <aura:set attribute="title">
+      <lightning:icon iconName="standard:file" size="small"/>
+      Quarterly Report Upload
+    </aura:set>
+    
+    <aura:if isTrue="{!not(empty(v.fileURL))}">
+      <div class="image-container" style="text-align:center">
+        <a href="javascript:void(0);" onclick="{!c.previewFile}">
+          <lightning:icon iconName="doctype:attachment" size="large"/>
+        </a>
+      </div>
+    </aura:if>
+
+    <div class="file-upload-container">
+      <lightning:fileUpload  name="fileUploader"
+                              label= "Upload New Quarterly Report"
+                              multiple="false"
+                              accept="{!v.accept}"
+                              disabled="false"
+                              recordId="{!v.recordId}"
+                              onuploadfinished="{!c.handleUploadFinished}"/>
+    </div>
+  </lightning:card>
+</aura:component>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Translation_Impact__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>What potential impact can Biblica expect to see from this translation?</inlineHelpText>
+    <label>Translation Impact</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Html</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

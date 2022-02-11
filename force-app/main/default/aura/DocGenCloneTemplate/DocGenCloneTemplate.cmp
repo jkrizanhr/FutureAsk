@@ -1,0 +1,11 @@
+<aura:component controller="DocumentTemplateCloningCtrl" 
+                implements="force:lightningQuickAction,force:hasRecordId">
+
+  <aura:attribute name="showSpinner" type="Boolean" default="false" access="private"/>
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  
+  <aura:if isTrue="{!v.showSpinner}">
+    <lightning:spinner aura:id="modalSpinner" alternativeText="Loading..."/>
+  </aura:if>
+</aura:component>

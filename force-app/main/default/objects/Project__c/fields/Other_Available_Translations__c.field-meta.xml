@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Other_Available_Translations__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>What other translations are available in this language? Please provide a brief overview of each translation. Include names and copyright dates. What is the scope, etc?</inlineHelpText>
+    <label>Other Available Translations</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Html</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

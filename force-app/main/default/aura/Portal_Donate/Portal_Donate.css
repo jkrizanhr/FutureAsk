@@ -1,0 +1,120 @@
+@font-face {
+  font-family: 'Lato-Regular';
+  src: url(/resource/LatoRegularFont); 
+}
+@font-face {
+  font-family: 'Lato-Light';
+  src: url(/resource/LatoLightFont); 
+}
+@font-face {
+  font-family: 'Lato-Bold';
+  src: url(/resource/LatoBoldFont); 
+}
+@font-face {
+  font-family: 'Catamaran-Bold';
+  src: url(/resource/CatamaranBoldFont); 
+}
+
+/* Component Labels */
+.THIS h1 {
+  color: #044f7a;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 22px;
+  text-transform: capitalize;
+  letter-spacing: 2.5px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+.THIS label {
+  font-family: 'Lato-Light', Sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: 	#696764;
+}
+
+/* Fonts */
+.THIS p {
+  color: #696764;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+.THIS .italics {
+  font-style: italic !important;
+}
+
+/* Action Modal */
+.THIS svg.slds-icon.slds-icon-text-success.slds-icon_large {
+  height: 100px;
+  width: 100px;
+  fill: #4FA800;
+}
+.THIS svg.slds-icon.slds-icon-text-error.slds-icon_large {
+  height: 100px;
+  width: 100px;
+}
+.THIS .modal-heading {
+  font-family: 'Catamaran-Bold', 'Lato-Bold', sans-serif;
+  font-size: 30px;
+  padding-top: 10px;
+}
+.THIS .modal-body {
+  font-family: 'Lato-Regular', sans-serif;
+  font-size: 14px;
+  padding-top: 5px;
+  padding-bottom: 20px;
+}
+
+/* Links */
+.THIS .link {
+  color: #54aeff;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  text-decoration: underline;
+  letter-spacing: 1px;
+}
+
+/* Frequency Button Group */
+.THIS .slds-radio_button__label {
+  width: 100% !important;
+  text-align: center;
+}
+.THIS .slds-radio_button-group {
+  width: 100% !important;
+}
+.THIS .slds-button.slds-radio_button {
+  width: 33% !important;
+}
+
+/* Hide Picklist Label */
+.THIS .slds-form-element__label{ 
+  display: none !important;
+}
+
+/* Portrait Mode */
+@media only screen 
+  and (min-device-width: 320px) 
+  and (max-device-width: 480px)
+  and (-webkit-min-device-pixel-ratio: 2)
+  and (orientation: portrait) 
+{
+  .THIS .slds-size_1-of-12 {
+    width: 33% !important;
+  }
+  .THIS .slds-size_3-of-12 {
+    width: 50% !important;
+  }
+  .THIS .slds-size_5-of-12 {
+    width: 67% !important;
+  }
+  .THIS .slds-size_6-of-12 {
+    width: 100% !important;
+  }
+  .THIS .slds-p-right_medium {
+    padding-right: 0 !important;
+  }
+  .THIS .slds-button {
+    width: 100%
+  }
+}

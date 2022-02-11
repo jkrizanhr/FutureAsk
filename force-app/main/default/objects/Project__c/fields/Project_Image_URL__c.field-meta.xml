@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Project_Image_URL__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(NOT(ISBLANK(Project_Photo_Content_Id__c)),
+&apos;/sfc/servlet.shepherd/document/download/&apos; + Project_Photo_Content_Id__c + &apos;?operationContext=S1&apos;,
+null)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Project Image URL</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

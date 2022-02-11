@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Translation_Iterations__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Will partners be able to leverage the iterations produced from our new translations when they are available? (Luke/Acts, NT, FB) Please specify a concrete plan (e.g., print Luke/Acts to promote the translation)</inlineHelpText>
+    <label>Translation Iterations</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Html</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

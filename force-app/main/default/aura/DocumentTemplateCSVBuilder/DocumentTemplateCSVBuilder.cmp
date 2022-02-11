@@ -1,0 +1,50 @@
+<aura:component description="DocumentTemplateCSVBuilder">
+  <aura:attribute name="csvColumnConfig" type="Object[]" default="[]"/>
+  <aura:attribute name="defaultCSVConfig" type="Object[]" default="[]"/>
+  <aura:attribute name="fieldSelectList" type="Object[]" default="[]"/>
+  <aura:attribute name="shouldShowSpinner" type="Boolean" default="false"/>
+  <aura:attribute name="tableHeaders" type="String[]" default="[
+        'Query', 'Field', 'Label', 'Format', 'Grp. Value', 'Alt. Value', 'Col. Index']"/>
+  <aura:attribute name="templateQueries" type="Object[]" default="[]"/>
+
+  <aura:handler name="updateColumnEvent" event="c:DocTempUpdateColumnEvent" action="{!c.handleColumnUpdate}"/>
+
+  <div class="slds-table--header-fixed_container" style="height:50vh;">
+    <div class="slds-scrollable_y" style="height:100%;">
+      <table class="slds-tables">
+        <thead>
+        <tr>
+          <aura:iteration items="{!v.tableHeaders}" var="header">
+            <th scope="col">
+              <div class="slds-align--absolute-center slds-cell-fixed">
+                {!header}
+              </div>
+            </th>
+          </aura:iteration>
+        </tr>
+        </thead>
+        <aura:if isTrue="{!and(not(empty(v.defaultCSVConfig)), not(empty(v.csvColumnConfig)))}">
+          <tbody>
+          <aura:iteration items="{!v.csvColumnConfig}" var="colConfig" indexVar="idx">
+            <c:DocumentTemplateCSVColumn colConfig="{!colConfig}"
+                                         defaultCSVConfig="{!v.defaultCSVConfig}"
+                                         fieldSelectList="{!v.fieldSelectList}"
+                                         idx="{!idx}"
+                                         numColumns="{!v.csvColumnConfig.length}"
+                                         templateQueries="{!v.templateQueries}">
+            </c:DocumentTemplateCSVColumn>
+          </aura:iteration>
+          </tbody>
+        </aura:if>
+      </table>
+
+      <div class="slds-align--absolute-center slds-p-top--medium slds-p-bottom--large">
+        <lightning:button label="Add Column" onclick="{!c.addColumn}"/>
+      </div>
+    </div>
+  </div>
+
+  <aura:if isTrue="{!v.shouldShowSpinner}">
+    <lightning:spinner aura:id="loadingSpinner" alternativeText="Loading..."/>
+  </aura:if>
+</aura:component>

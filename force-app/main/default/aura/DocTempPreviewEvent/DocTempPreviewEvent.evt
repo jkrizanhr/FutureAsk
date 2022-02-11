@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="DocTempPreviewEvent">
+    <aura:attribute name="previewUrl" type="String"/>
+</aura:event>

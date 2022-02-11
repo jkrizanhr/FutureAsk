@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>MENA_LMP_Projects1</fullName>
+    <columns>NAME</columns>
+    <columns>Language_Community__c</columns>
+    <columns>Partnership_Director__c</columns>
+    <columns>Region__c</columns>
+    <columns>Approved_Budget__c</columns>
+    <columns>Total_Funding_Need__c</columns>
+    <columns>General_Accounting_Unit__c</columns>
+    <columns>Media_Format__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>RECORDTYPE</field>
+        <operation>equals</operation>
+        <value>Project__c.Language_Ministry_Project</value>
+    </filters>
+    <filters>
+        <field>Region__c</field>
+        <operation>equals</operation>
+        <value>MENA</value>
+    </filters>
+    <label>MENA LMP Projects</label>
+</ListView>

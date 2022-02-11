@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Ministry_Context__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>What is the ministry need or opportunity that is addressed by project?</inlineHelpText>
+    <label>WHAT? - Ministry Context</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Html</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

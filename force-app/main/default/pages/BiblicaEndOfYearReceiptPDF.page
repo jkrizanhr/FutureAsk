@@ -1,0 +1,203 @@
+<apex:page id="BiblicaEndOfYearReceiptPDF" controller="DocumentGenerationController" action="{!processDocuments}" renderas="pdf"
+  showHeader="false" sideBar="false" cache="false" applyHtmlTag="false" readOnly="true" standardStylesheets="false" applyBodyTag="false">
+  <html>
+  <head>
+    <title>Thank You</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+      .hidable:empty {
+        display: none;
+      }
+      @page {
+        size: letter;
+        margin-top: 1in;
+        margin-bottom: 1in;
+        margin-left: 1in;
+        margin-right: 1in;
+      }
+      body, html {
+        margin:0px;
+        padding:0px;
+        font-family: Calibri,Helvetica,Arial,sans-serif;
+        font-size:11pt;
+        line-height: 140%;
+        color:#111111;
+      }
+    </style>
+  </head>
+  <apex:variable var="count" value="{!1}"/>
+  <apex:variable var="thisYear" value="{!$CurrentPage.parameters.thisYear}"/> 
+
+  <body>
+    <apex:repeat value="{!documents}" var="rec">
+      <apex:repeat value="{!rec.customMetadataQueries['Biblica_EOY_Receipt:_Metadata_Query']}" var="mq">
+        <div style="height:9in; width:100%; overflow:hidden;">
+          <div>
+
+            <!-- BODY OF LETTER -->
+            <p style="text-align: right;">      
+              <span>
+                <apex:outputText value="{0, date, MMMM d','  yyyy}">
+                  <apex:param value="{!today()}" />
+                </apex:outputText>
+              </span>
+            </p>
+
+            <div style="height:6.5in;overflow:hidden;">
+            <!-- <div>  -->
+              <p>
+                <span>
+                  <span style="font-family:Calibri,Helvetica,Arial,sans-serif;">
+                    Dear&nbsp;
+                    <apex:outputPanel rendered="{!NOT(ISBLANK(rec['primaryRecord']['npo02__Informal_Greeting__c']))}">{!rec['primaryRecord']['npo02__Informal_Greeting__c']}</apex:outputPanel>
+                    <apex:outputPanel rendered="{!rec['primaryRecord']['RecordTypeId'] = '0123i000000raYNAAY'}">{!rec['primaryRecord']['Name']}</apex:outputPanel>,
+                  </span>
+                </span>
+              </p>
+              <p style="text-align: left;">
+                <span>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  Thank you for helping make it possible to put God&apos;s Word and the saving message of Jesus Christ into the hands of so many people around the world in {!RIGHT($CurrentPage.parameters.thisYear, 4)}. Your partnership will have eternal significance because it&apos;s given many people a means to experience the transformative power of Jesus through Scripture!
+                </span>
+              </p>
+              <p style="text-align: left;">
+                <span>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  I hope the following statistics from {!RIGHT($CurrentPage.parameters.thisYear, 4)} will help give you a sense of the impact you&apos;ve had through your generosity:
+                </span>
+              </p>
+              <p style="text-align: left;">
+                <span>
+                  <ul style="padding-left: 27px; line-height: 160%;">
+                    <li>
+                      &nbsp;&nbsp;
+                      <apex:outputText value="{0, number, ###,##0}">
+                        <apex:param value="{!mq.Bibles_Distributed__c}"/>
+                      </apex:outputText> Bibles, Scripture portions, or Bible-engagement tools were distributed.
+                    </li>
+                    <li>
+                      &nbsp;&nbsp;
+                      <apex:outputText value="{0, number, ###,##0}">
+                        <apex:param value="{!mq.Leaders__c}"/>
+                      </apex:outputText> leaders equipped.
+                    </li>
+                    <li>
+                      &nbsp;&nbsp;
+                      <apex:outputText value="{0, number, ###,##0}">
+                        <apex:param value="{!mq.Bibles_Downloaded__c}"/>
+                      </apex:outputText> Bibles were downloaded through YouVersion
+                    </li>
+                    <li>
+                      &nbsp;&nbsp;
+                      <apex:outputText value="{0, number, ###,##0}">
+                        <apex:param value="{!mq.Completed_Translations__c}"/>
+                      </apex:outputText> translations of the Bible were completed, and over 
+                      <apex:outputText value="{0, number, ###,##0}">
+                        <apex:param value="{!mq.Started_Translations__c}"/>
+                      </apex:outputText> others were started.
+                    </li>
+                  </ul>
+                </span>
+              </p>
+              <p style="text-align: left;">
+                <span>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  While these statistics tell the big-picture story, individual testimonies show you up-close the difference you make. Enclosed with this letter, we&apos;ve included {!UPPER(LEFT(mq.Shared_Testimony__c, 1)) & MID(mq.Shared_Testimony__c, 2, LEN(mq.Shared_Testimony__c))}&apos;s story. Theirs is just one example of what your support has accomplished in the life of someone who receive their own Bible.
+                </span>
+              </p>
+              <p style="text-align: left;">
+                <span>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  You&apos;ll also find your donation summary below. I&apos;m so thankful for what God is doing through your support, and I&apos;m existed to see what He will contine to do in {!VALUE(RIGHT($CurrentPage.parameters.thisYear, 4)) + 1} as a result of your gifts. Together, we can see many more stories like {!UPPER(LEFT(mq.Shared_Testimony__c, 1)) & MID(mq.Shared_Testimony__c, 2, LEN(mq.Shared_Testimony__c))}&apos;s written.
+                </span>
+              </p>
+              <p style="margin-left: 3in;">
+                <span style="font-family:Calibri,Helvetica,Arial,sans-serif;">
+                  <span>
+                    With Christ it&apos;s all possible,
+                  </span>
+                </span>
+                <br />
+                <span>
+                    <apex:image url="{!$Resource.BiblicaReceipt_Signature}" width="80" height="45"/>
+                    <br />Geof Morin
+                    <br />President/Chief Executive Officer
+                    <br />Biblica - The International Bible Society
+                </span>
+              </p>
+            </div>
+          </div>
+          <hr/>
+
+          <!-- BOTTOM SUMMARY TABLE -->
+          <table style="width: 100%;">
+            <tr>
+              <td align="left" style="width: 50%;">
+                <span style="font-family:Calibri,Helvetica,Arial,sans-serif; font-weight:bold; font-size: 20px;">
+                  <span>
+                    Your Gift Summary
+                  </span>
+                </span>
+              </td>
+              <td align="right" style="width: 50%;">
+                <span style="font-family:Calibri,Helvetica,Arial,sans-serif; font-weight:bold; font-size: 20px !important; font-style: italic;">
+                  <span>
+                    Thank you for giving!
+                  </span>
+                </span>
+              </td>
+            </tr>
+            <tr><td><br/><br/></td><td><br/><br/></td></tr>
+            <tr>
+              <td align="left">
+                <!-- BOTTOM ADDRESS -->
+                <div>
+                  <span>
+                    <apex:outputPanel rendered="{!NOT(ISBLANK(rec['primaryRecord']['npo02__Formal_Greeting__c']))}">{!rec['primaryRecord']['npo02__Formal_Greeting__c']}
+                      <br/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!rec['primaryRecord']['RecordtypeId'] = '0123i000000raYNAAY'}">{!rec['primaryRecord']['Name']}
+                      <br/>
+                    </apex:outputPanel>
+                  </span>
+                  <div>
+                    <span><apex:outputText value="{!rec['primaryRecord']['BillingStreet']}" style="white-space:pre;" escape="false"/></span>
+                  </div>
+                  <span>
+                    {!rec['primaryRecord']['BillingCity']}, {!rec['primaryRecord']['BillingState']} &nbsp;{!rec['primaryRecord']['BillingPostalCode']}
+                    <br />
+                  </span>
+                </div>
+              </td>
+              <td align="right">
+                <!-- BOTTOM SUMMARY TABLE -->
+                <div>
+                  <table style="border:none; width: 100%">
+                    <tr>
+                      <td align="left" style="width: 50%; font-weight: bold; color: blue;">
+                        YTD Giving:&nbsp;
+                      </td>
+                      <th align="center" style="width: 50%; color: blue;">  
+                        <apex:outputPanel rendered="{!rec.aggregateQuerySizes['Biblica_EOY_Receipt:_Aggregate_Query'] == 0}">
+                          $0.00
+                        </apex:outputPanel> 
+                        <apex:outputPanel rendered="{!rec.aggregateQuerySizes['Biblica_EOY_Receipt:_Aggregate_Query'] > 0}">  
+                          <apex:repeat value="{!rec.aggregateQueries['Biblica_EOY_Receipt:_Aggregate_Query']}" var="ar">
+                            <apex:outputText value="{0, Number, Currency}">
+                              <apex:param value="{!ar.amt}" />
+                            </apex:outputText>
+                          </apex:repeat>
+                        </apex:outputPanel>
+                      </th>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </apex:repeat>
+    </apex:repeat>
+  </body>
+  </html>
+</apex:page>

@@ -1,0 +1,133 @@
+<apex:page id="BiblicaEndOfYearReceiptPortalUsersPDF" controller="DocumentGenerationController" action="{!processDocuments}" renderas="pdf"
+  showHeader="false" sideBar="false" cache="false" applyHtmlTag="false" readOnly="true" standardStylesheets="false" applyBodyTag="false">
+  <html>
+
+    <head>
+      <title>Thank You</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <style type="text/css">
+        .hidable:empty {
+          display: none;
+        }
+        @page {
+          margin: 0 0 0 0;
+        }
+        body, html {
+          margin:0px;
+          padding:0px;
+          font-family: sans-serif;
+          font-size:9pt;
+          line-height: 12px;
+          color:#111111;
+        }
+        h1 {
+          font-size: 20px;
+        }
+      </style>
+    </head>
+    <apex:variable var="count" value="{!1}"/>
+    <apex:variable var="thisYear" value="{!$CurrentPage.parameters.thisYear}"/>
+
+    <body>
+      <apex:repeat value="{!documents}" var="rec">
+        <apex:repeat value="{!rec.customMetadataQueries['Biblica_EOY_Receipt:_Metadata_Query']}" var="mq">
+        <div style="height: 75px; background-color: #044f7a; width: 100% !important; color: #ffffff; text-align: center; font-size: 30px;">
+          <p>REPRINT</p>
+        </div>
+        <table style="padding-top: 20px; padding-left: .75in; padding-bottom: 20px;">
+          <tr style="width: 100%;">
+            <td style="width: 700px;">
+              <h1>Biblica - The International Bible Society</h1>
+              <table>
+                <tr>
+                  <td style="width: 50%; font-size: 13px; padding: 2px 30px 2px 0;">1820 Jet Stream Drive</td>
+                  <td style="width: 50%; font-size: 13px; padding: 2px 30px 2px 0;">Contact Donor Services</td>
+                </tr>
+                <tr>
+                  <td style="width: 50%; font-size: 13px; padding: 2px 30px 2px 0;">Colorado Springs, CO 80921</td>
+                  <td style="width: 50%; font-size: 13px; padding: 2px 30px 2px 0;">M-F 8:00am-4:30pm MT</td>
+                </tr>
+                <tr>
+                  <td style="width: 50%; font-size: 13px; padding: 2px 30px 2px 0;">United States</td>
+                  <td style="width: 50%; font-size: 13px; padding: 2px 30px 2px 0;">+1(800)987-3595</td>
+                </tr>
+              </table>
+            </td>
+            <td style="width: 30%; text-align: right; padding-right: .75in;">
+              <apex:image id="biblica-logo" value="{!$Resource.BiblicaLogoCircle}" width="120" height="120"/>    
+            </td>
+          </tr>
+        </table>
+
+          <table style="padding-left: .75in; padding-right: .75in; padding-top: .5in; width: 100%">
+            <tr style="width: 100%; background-color: #54aeff; height: 35px !important; color: #ffffff;">
+              <th style="width: 65%; padding-left: 8px;">Month</th>
+              <th style="width: 35%; text-align: center;">Total Gift Amount </th>
+            </tr>
+
+            <apex:repeat value="{!fieldLib.monthIntegers}" var="monthInt" id="monthRepeat">
+              <apex:variable value="{!0}" var="monthFound"/>
+              <tr style="width: 100%; height: 30px !important; border: 1px solid #ebebeb;">
+                <td style="width:200px; background-color: #ebebeb; padding-left: 8px;">
+                  {!IF(monthInt == 0,'January','')}
+                  {!IF(monthInt == 1,'February','')}
+                  {!IF(monthInt == 2,'March','')}
+                  {!IF(monthInt == 3,'April','')}
+                  {!IF(monthInt == 4,'May','')}
+                  {!IF(monthInt == 5,'June','')}
+                  {!IF(monthInt == 6,'July','')}
+                  {!IF(monthInt == 7,'August','')}
+                  {!IF(monthInt == 8,'September','')}
+                  {!IF(monthInt == 9,'October','')}
+                  {!IF(monthInt == 10,'November','')}
+                  {!IF(monthInt == 11,'December','')}
+                  <apex:outputText value="{!' ' & RIGHT($CurrentPage.parameters.thisYear, 4)}" id="theValue"/><br/>
+                </td>
+                <td style="width: 35%; text-align: center; background-color: #ebebeb;">
+                  <apex:repeat value="{!rec.aggregateQueries['Biblica_EOY_Receipt:_Aggregate_Query']}" var="ar">
+                    <apex:variable var="monthFound" value="{!1}" rendered="{!ar.cd == 1 + monthInt}"/>
+                    <apex:outputText value="{0, Number, Currency}" rendered="{!ar.cd == 1 + monthInt}">
+                      <apex:param value="{!ar.amt}"/>
+                    </apex:outputText>
+                  </apex:repeat>
+                  <apex:outputText value="{0, Number, Currency}" rendered="{!monthFound == 0}">
+                    <apex:param value="{!0}"/>
+                  </apex:outputText>
+                </td>
+              </tr>
+            </apex:repeat>
+            
+            <apex:variable value="{!0}" var="yearFound"/>
+            <tr style="width: 100%; height: 35px !important; border: 1px solid #ebebeb;">
+              <td style="width:200px; background-color: #ebebeb; padding-left: 8px;">
+                <b>Total Amount This Year:</b>
+              </td>
+              <td style="width: 35%; text-align: center; background-color: #ebebeb;"><b>
+                <apex:repeat value="{!rec.aggregateQueries['Biblica_EOY_Receipt:_Aggregate_Query_By_Year']}" var="ar">
+                  <apex:variable var="yearFound" value="{!1}" rendered="{!TEXT(ar.cd) == RIGHT($CurrentPage.parameters.thisYear, 4)}"/>
+                  <apex:outputText value="{0, Number, Currency}" rendered="{!TEXT(ar.cd) == RIGHT($CurrentPage.parameters.thisYear, 4)}">
+                    <apex:param value="{!ar.amt}"/>
+                  </apex:outputText>
+                </apex:repeat>
+                <apex:outputText value="{0, Number, Currency}" rendered="{!yearFound == 0}">
+                  <apex:param value="{!0}"/>
+                </apex:outputText></b>
+              </td>
+            </tr>
+          </table>
+
+          <table style="padding-left: .75in; padding-right: .75in; padding-top: .5in; width: 100%">
+            <tr style="width: 100%; height: 35px !important;">
+              <td>
+                  Donations to Biblica are tax deductible to the extent allowed by law. Unless specifically noted, no goods or services were received in exchange for the gift referenced above. We will not sell, rent, trade, or loan for any purpose the names and addresses of current donors.
+              </td>
+            </tr>
+          </table>    
+
+        <div style="height: 1.75in; background-color: #044f7a; width: 100% !important; position: absolute; top: 9.25in;"></div>
+            
+        </apex:repeat>
+      </apex:repeat>
+    </body>
+  </html>
+</apex:page>

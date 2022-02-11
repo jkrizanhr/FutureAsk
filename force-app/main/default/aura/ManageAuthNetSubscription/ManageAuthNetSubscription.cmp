@@ -1,0 +1,172 @@
+<aura:component
+  implements="force:hasRecordId,force:appHostable,flexipage:availableForAllPageTypes"
+  controller="ManageAuthNetSubscriptionController"
+  access="global"
+>
+  <!-- AURA ATTRIBUTES -->
+  <aura:attribute name="recordId" type="String" />
+  <aura:attribute name="loading" type="Boolean" default="true" />
+  <aura:attribute name="subscription" type="Object" default="" />
+  <aura:attribute name="modalType" type="String" default="" />
+
+  <!-- AURA HANDLERS -->
+  <aura:handler name="init" value="{!this}" action="{!c.init}" />
+  <aura:handler
+    name="closeWindow"
+    event="c:ManageAuthNetSubscriptionCloseWindowEvent"
+    action="{!c.closeModal}"
+  />
+
+  <lightning:card title="Auth.net Subscription" iconName="standard:expense">
+    <aura:set attribute="actions">
+      <!-- <lightning:buttonIcon iconName="utility:refresh" variant="border-filled" alternativeText="Refresh" onclick="{!c.init}"/> -->
+    </aura:set>
+    <div class="slds-p-horizontal_small">
+      <aura:if isTrue="{!not(v.loading)}">
+        <aura:if isTrue="{!v.subscription.status == 'canceled'}">
+          <lightning:layout>
+            <lightning:layoutItem size="12">
+              This subscription has been canceled.
+            </lightning:layoutItem>
+          </lightning:layout>
+
+          <aura:set attribute="else">
+            <aura:if isTrue="{!v.subscription.paymentMethod == 'Credit Card'}">
+              <lightning:layout>
+                <lightning:layoutItem size="1"></lightning:layoutItem>
+                <lightning:layoutItem size="3" class="slds-form-element__label"
+                  >Card Number</lightning:layoutItem
+                >
+                <lightning:layoutItem size="8">
+                  XXXXXX{!v.subscription.cardNumber}
+                </lightning:layoutItem>
+              </lightning:layout>
+              <lightning:layout>
+                <lightning:layoutItem size="1"></lightning:layoutItem>
+                <lightning:layoutItem size="3" class="slds-form-element__label"
+                  >Expiration Date</lightning:layoutItem
+                >
+                <lightning:layoutItem size="8">
+                  {!(v.subscription.expirationMonth + '/' + v.subscription.expirationYear)}
+                </lightning:layoutItem>
+              </lightning:layout>
+            </aura:if>
+            <aura:if isTrue="{!v.subscription.paymentMethod == 'Bank Account'}">
+              <lightning:layout>
+                <lightning:layoutItem size="1"></lightning:layoutItem>
+                <lightning:layoutItem size="3" class="slds-form-element__label"
+                  >Account Number</lightning:layoutItem
+                >
+                <lightning:layoutItem size="8">
+                  {!v.subscription.accountNumber}
+                </lightning:layoutItem>
+              </lightning:layout>
+              <lightning:layout>
+                <lightning:layoutItem size="1"></lightning:layoutItem>
+                <lightning:layoutItem size="3" class="slds-form-element__label"
+                  >Routing Number</lightning:layoutItem
+                >
+                <lightning:layoutItem size="8">
+                  {!v.subscription.routingNumber}
+                </lightning:layoutItem>
+              </lightning:layout>
+            </aura:if>
+            <lightning:layout>
+              <lightning:layoutItem size="1"></lightning:layoutItem>
+              <lightning:layoutItem size="3" class="slds-form-element__label"
+                >Amount</lightning:layoutItem
+              >
+              <lightning:layoutItem size="8">
+                <lightning:formattedNumber
+                  value="{!v.subscription.amount}"
+                  style="currency"
+                  currencyCode="USD"
+                />
+              </lightning:layoutItem>
+            </lightning:layout>
+            <lightning:layout>
+              <lightning:layoutItem size="1"></lightning:layoutItem>
+              <lightning:layoutItem size="3" class="slds-form-element__label"
+                >Start Date</lightning:layoutItem
+              >
+              <lightning:layoutItem size="8">
+                <lightning:formattedDateTime value="{!v.subscription.startDate}" />
+              </lightning:layoutItem>
+            </lightning:layout>
+            <lightning:layout>
+              <lightning:layoutItem size="1"></lightning:layoutItem>
+              <lightning:layoutItem size="3" class="slds-form-element__label"
+                >End Date</lightning:layoutItem
+              >
+              <lightning:layoutItem size="8">
+                <lightning:formattedDateTime value="{!v.subscription.endDate}" />
+              </lightning:layoutItem>
+            </lightning:layout>
+            <lightning:layout>
+              <lightning:layoutItem size="1"></lightning:layoutItem>
+              <lightning:layoutItem size="3" class="slds-form-element__label"
+                >Frequency</lightning:layoutItem
+              >
+              <lightning:layoutItem size="8">
+                {!('Payments occur ' + v.subscription.installmentPeriod)}
+              </lightning:layoutItem>
+            </lightning:layout>
+
+            <div style="padding-top: 10px;"></div>
+
+            <lightning:layout>
+              <lightning:layoutItem size="6" class="slds-p-right_small slds-p-bottom_medium">
+                <lightning:button
+                  class="slds-button_stretch"
+                  variant="brand-outline"
+                  label="Cancel Subscription"
+                  title="Cancel Subscription"
+                  value="Cancel Subscription"
+                  onclick="{!c.handleClick}"
+                />
+              </lightning:layoutItem>
+              <lightning:layoutItem size="6" class="slds-p-left_small slds-p-bottom_medium">
+                <lightning:button
+                  class="slds-button_stretch"
+                  variant="brand-outline"
+                  label="Update Subscription"
+                  title="Update Subscription"
+                  value="Update Subscription"
+                  onclick="{!c.handleClick}"
+                />
+              </lightning:layoutItem>
+            </lightning:layout>
+            <lightning:layout>
+              <lightning:layoutItem size="12">
+                <lightning:button
+                  class="slds-button_stretch"
+                  variant="brand-outline"
+                  label="Update Payment Method"
+                  title="Update Payment Method"
+                  value="Update Payment Method"
+                  onclick="{!c.handleClick}"
+                />
+              </lightning:layoutItem>
+            </lightning:layout>
+          </aura:set>
+        </aura:if>
+
+        <!-- spinner while loading -->
+        <aura:set attribute="else">
+          <div style="height: 30px;">
+            <lightning:spinner alternativeText="Loading" />
+          </div>
+        </aura:set>
+      </aura:if>
+    </div>
+  </lightning:card>
+
+  <!-- Open Modals -->
+  <aura:if isTrue="{!not(empty(v.modalType))}">
+    <c:ManageAuthNetSubscriptionModals
+      recordId="{!v.recordId}"
+      subscription="{!v.subscription}"
+      modalType="{!v.modalType}"
+    />
+  </aura:if>
+</aura:component>

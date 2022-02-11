@@ -1,0 +1,3 @@
+<design:component >
+  <design:attribute name="description" label="Description" description="Text shown below the pie chart."/>
+</design:component>

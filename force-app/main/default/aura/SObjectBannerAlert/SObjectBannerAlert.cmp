@@ -1,0 +1,35 @@
+<aura:component controller="SObjectBannerAlert_Ctrl" implements="flexipage:availableForAllPageTypes,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global">
+  <aura:attribute name="alertGroups" type="Object[]" default="[]"/>
+  <aura:attribute name="recordId" type="String"/>
+  
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  <aura:handler event="force:refreshView" action="{!c.doInit}" />
+  
+  <lightning:notificationsLibrary aura:id="notifLib"/>
+  <aura:dependency resource="markup://force:editRecord" type="EVENT" />
+
+  <aura:if isTrue="{!v.alertGroups.length}">
+    <div class="notify-container">
+      <aura:iteration var="alertGroup" items="{!v.alertGroups}">
+        <div class="{!'slds-notify slds-notify--alert slds-theme--' + alertGroup.alertType + ' slds-theme--alert-texture alert-override'}" role="alert">
+          <span class="slds-assistive-text">Attention</span>
+          <article class="slds-tile article-override">
+            <h3 class="{!'slds-tile__title slds-truncate title-override ' + (alertGroup.alertType == 'warning' ? 'dark-color' : '')}" title="{!alertGroup.alertType}">{!alertGroup.alertType}</h3>
+            <div class="slds-tile__detail">
+              <table>
+                <aura:iteration var="alert" items="{!alertGroup.alerts}">
+                  <tr>
+                    <td valign="top" class="detail-override" title="{!alert.message}">
+                      <lightning:helptext title="Alert Conditions" content="{!alert.sObjectFieldLabel + ' equals ' + alert.messageValue}" class="help-text" iconName="utility:filterList"/>
+                      <lightning:formattedRichText value="{!alert.message}" class="message-field"/>
+                    </td>
+                  </tr>
+                </aura:iteration>
+              </table>
+            </div>
+          </article>
+        </div>
+      </aura:iteration>
+    </div>
+  </aura:if>
+</aura:component>

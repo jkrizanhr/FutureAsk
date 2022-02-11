@@ -1,0 +1,44 @@
+<aura:component controller="CAND_BT_Controller" description="CAND_BT_BatchModal">
+  <aura:attribute name="recordId" type="String" default=''/>
+  <aura:attribute name="accept" type="List" default="['.jpg', '.jpeg', '.docx', '.pdf', '.png', '.ppt', '.xls']"/>
+  <aura:attribute name="multiple" type="Boolean" default="true"/>
+  <aura:attribute name="filesList" type="List" default="[]"/>
+
+  <aura:registerEvent name="closeWindow" type="c:CAND_BT_UploadFileEvent"/>
+
+  <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+    <div class="slds-modal__container">
+      <header class="slds-modal__header">
+        <lightning:button class="slds-modal__close" variant="bare" iconName="utility:close" title="Close" onclick="{!c.closeModal}"/>
+        <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Upload Files</h2>
+      </header>
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+        <lightning:layout>
+          <lightning:layoutItem size="5">
+            <lightning:fileUpload name="fileUploader"
+                                  label= "Upload Attachment"
+                                  multiple="{!v.multiple}"
+                                  accept="{!v.accept}"
+                                  recordId="{!v.recordId}"
+                                  onuploadfinished="{! c.handleUploadFinished }"/>
+          </lightning:layoutItem>
+          <lightning:layoutItem size="1" />
+          <lightning:layoutItem size="6">
+            <ul>
+              <aura:iteration items="{!v.filesList}" var="file">
+                <li style="padding: 2px;">
+                  <lightning:icon iconName="{!'doctype:' + file.type}" size="small"/>&nbsp;{!file.name}
+                </li>
+              </aura:iteration>
+            </ul>
+          </lightning:layoutItem>
+        </lightning:layout>
+      </div>
+      <footer class="slds-modal__footer">
+        <lightning:button class="slds-button slds-button_neutral" label="Close" onclick="{!c.closeModal}"/>
+      </footer>
+    </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+
+</aura:component>

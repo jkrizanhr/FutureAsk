@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Strategic_Focus__c</fullName>
+    <externalId>false</externalId>
+    <label>Strategic Focus</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Digital Innovation</fullName>
+                <default>false</default>
+                <label>Digital Innovation</label>
+            </value>
+            <value>
+                <fullName>Frontline Church</fullName>
+                <default>false</default>
+                <label>Frontline Church</label>
+            </value>
+            <value>
+                <fullName>Gateway Translation</fullName>
+                <default>false</default>
+                <label>Gateway Translation</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+            <value>
+                <fullName>Rising Generations</fullName>
+                <default>false</default>
+                <label>Rising Generations</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

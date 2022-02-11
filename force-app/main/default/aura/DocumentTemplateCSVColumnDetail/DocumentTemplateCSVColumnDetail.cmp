@@ -1,0 +1,86 @@
+<aura:component description="DocumentTemplateCSVColumnDetail">
+  <aura:attribute name="colConfig" type="Object"/>
+  <aura:attribute name="fieldSelectList" type="Object[]"/>
+  <aura:attribute name="idx" type="Integer"/>
+  <aura:attribute name="parentIndex" type="Integer"/>
+  <aura:attribute name="numColumns" type="Integer"/>
+  <aura:attribute name="parentCol" type="Object"/>
+
+  <aura:registerEvent name="updateColumnEvent" type="c:DocTempUpdateColumnEvent"/>
+
+  <!--Table Column 2: Field-->
+  <td>
+    <aura:if isTrue="{!not(empty(v.fieldSelectList))}">
+      <lightning:select aura:id="fieldSelect"
+                        name="fieldSelect"
+                        label=""
+                        value="{!v.colConfig.field}"
+                        onchange="{!c.onchangeField}">
+        <aura:iteration items="{!v.fieldSelectList}" var="fieldCol">
+          <aura:if isTrue="{!empty(fieldCol.queryId)}">
+            <option value="{!fieldCol.field}"
+                    text="{!fieldCol.field}"
+                    selected="{!equals(v.colConfig.key, fieldCol.key)}">
+            </option>
+            <aura:set attribute="else">
+              <aura:if
+                  isTrue="{!and(equals(fieldCol.queryId, v.colConfig.queryId), equals(fieldCol.parentKey, v.colConfig.parentKey))}">
+                <option value="{!fieldCol.field}"
+                        text="{!fieldCol.field}"
+                        selected="{!equals(v.colConfig.key, fieldCol.key)}">
+                </option>
+              </aura:if>
+            </aura:set>
+          </aura:if>
+        </aura:iteration>
+      </lightning:select>
+    </aura:if>
+  </td>
+
+  <!--Table Column 3: Label-->
+  <td>
+    <lightning:input type="text" label="" value="{!v.colConfig.label}"/>
+  </td>
+
+  <!--Table Column 4: Format-->
+  <td>
+    <lightning:select label="" value="{!v.colConfig.formatting}">
+      <option value="" text="None" selected="{!equals(v.colConfig.formatting, '')}"></option>
+      <option value="date" text="Date" selected="{!equals(v.colConfig.formatting, 'date')}"></option>
+      <option value="dateyyyy" text="Date (YYYY)" selected="{!equals(v.colConfig.formatting, 'dateyyyy')}"></option>
+      <option value="dateTime" text="DateTime" selected="{!equals(v.colConfig.formatting, 'dateTime')}"></option>
+      <option value="currency" text="Currency" selected="{!equals(v.colConfig.formatting, 'currency')}"></option>
+      <!--<option value="percent" text="Percent" selected="{!equals(v.colConfig.formatting, 'percent')}"></option>-->
+    </lightning:select>
+  </td>
+
+  <!--Table Column 5: Grp. Value-->
+  <td>
+    <lightning:input type="text"
+                     label=""
+                     value="{!v.colConfig.groupingValue}"
+                     disabled="{!not(equals(v.colConfig.selectSource, 'Aggregate'))}">
+    </lightning:input>
+  </td>
+
+  <!--Table Column 6: Alt Value-->
+  <td>
+    <lightning:input type="text" label="" value="{!v.colConfig.altValue}"/>
+  </td>
+
+  <!--Table Column 7: Col. Index and Action Button Icons-->
+  <td>
+    <table>
+      <tr>
+        <td>
+          <p>{!v.colConfig.columnNum}</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <c:DocTempCSVColumnActions column="{!v.colConfig}" idx="{!v.idx}" numColumns="{!v.numColumns}"/>
+        </td>
+      </tr>
+    </table>
+  </td>
+</aura:component>

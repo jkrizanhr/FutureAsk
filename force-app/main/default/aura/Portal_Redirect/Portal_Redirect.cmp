@@ -1,0 +1,11 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" controller="Portal_Controller">
+  <aura:attribute name="redirect" type="String" default=""/>
+  <aura:attribute name="isCommunityBuilder" type="Boolean" default="false"/>
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  
+  <aura:if isTrue="{!v.isCommunityBuilder}">
+    <p style="text-align: center;">
+      Redirect to: /s/{!v.redirect}
+    </p>
+  </aura:if>
+</aura:component>

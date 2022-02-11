@@ -1,0 +1,75 @@
+<aura:component controller="CAND_BT_Controller" description="CAND_BT_DonorSearchModal">
+  <aura:attribute name="accounts" type="Object[]" default='[{}]'/>
+  <aura:attribute name="timer" type="Integer"/>
+  <aura:attribute name="amount" type="Integer" default="0"/>
+
+  <aura:method name="toggleDisplay" action="{!c.toggleDisplay}" access="PUBLIC"/>
+  <aura:registerEvent name="CAND_BT_GetOppAllocations" type="c:CAND_BT_GetOppAllocations"/>
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <div>
+      <section aura:id="DonorSearchModalBox" role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-modal_medium">
+        <div class="slds-modal__container">
+          <header class="slds-modal__header">
+            <button onclick="{!c.toggleDisplay}" class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+              <span class="slds-assistive-text">Close</span>
+              <lightning:icon variant="inverse" iconName="utility:close" alternativeText="close" />
+            </button>
+            Search for a Donor via Name
+          </header>
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+            <div onkeyup="{!c.handleSearch}" class="fullWidth">
+              <lightning:input name="filterText" aura:id="filterText" type="search" label="" placeholder="Search..." class="fullWidth"/>
+            </div>
+
+            <aura:if isTrue="{! v.accounts[0].Name == null}">
+              <div class='slds-p-left_small slds-p-top_small slds-text-heading_small'>
+                No Donors have been found
+              </div>
+            <aura:set attribute="else">
+              <lightning:accordion aura:id="DonorSearchAccordion">
+                <aura:iteration items="{!v.accounts}" var="account">
+                  <lightning:accordionSection name="{!account.Id}" label="{!account.Name}">
+                    <aura:set attribute="body">
+                      <article class="slds-card ">
+                        <aura:iteration items="{!account.Opportunities}" var="opp">
+                          <div class="slds-card__body slds-border_bottom slds-card__body_inner slds-grid">
+                            <div class="slds-col slds-size_3-of-4">
+                              <dl class="slds-grid slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                  <dt class="slds-dl_inline__label">Amount:</dt>
+                                  <dd class="slds-dl_inline__detail"><ui:outputCurrency value="{!opp.Original_Amount__c}"/></dd>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                  <dt class="slds-dl_inline__label">Close Date:</dt>
+                                  <dd class="slds-dl_inline__detail"><lightning:formattedDateTime value="{!opp.CloseDate}" year="numeric" month="numeric" day="numeric" timeZone="UTC"/></dd>
+                                </div>
+                                <!-- <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                  <dt class="slds-dl_inline__label">Receipt:</dt>
+                                  <dd class="slds-dl_inline__detail">{!opp.Receipt__c}</dd>
+                                </div> -->
+                                <!-- <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                  <dt class="slds-dl_inline__label">Giving Method:</dt>
+                                  <dd class="slds-dl_inline__detail">{!opp.Giving_Method__c}</dd>
+                                </div> -->
+                              </dl>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                              <button label="Copy" class="slds-button slds-button_neutral" onclick="{!c.copyOppRecord}" value="{!opp.Id}">Copy</button>
+                            </div>
+                          </div>
+                        </aura:iteration>
+                      </article>
+                    </aura:set>
+                  </lightning:accordionSection>
+                </aura:iteration>
+              </lightning:accordion>
+            </aura:set>
+            </aura:if>
+          </div>
+        </div>
+      </section>
+      <div aura:id="DonorSearchModalBackdrop" class="slds-backdrop"></div>
+    </div>
+
+</aura:component>

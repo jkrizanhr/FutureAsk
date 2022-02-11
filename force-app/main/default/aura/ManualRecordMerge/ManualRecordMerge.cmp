@@ -1,0 +1,65 @@
+<aura:component implements="force:lightningQuickAction,flexipage:availableForAllPageTypes" controller="ManualRecordMerge_Ctrl">
+    <aura:attribute name="objectType" type="String" default="Account"/>
+    <aura:attribute name="successScreen" type="Boolean" default="false"/>
+    <aura:attribute name="recordsToMerge" type="List"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <aura:if isTrue="{!not(v.successScreen)}">
+
+        <lightning:select name="objectSelect" label="Object Type to Merge" required="true" value="{!v.objectType}" onchange="{!c.objectTypeChange}">
+            <option value="Account">Account</option>
+            <option value="Contact">Contact</option>
+            <option value="Lead">Lead</option>
+        </lightning:select>
+
+        <!-- STANDARD OBJECT WITH LOOKUP TO ACCOUNT -->
+        <aura:if isTrue="{!v.objectType == 'Account'}">
+            <aura:iteration var="rec" items="{!v.recordsToMerge}" indexVar="idx">
+                <lightning:recordEditForm objectApiName="Contact">
+                    <lightning:inputField fieldName="AccountId" value="{!rec.recordId}"/>
+                </lightning:recordEditForm>
+            </aura:iteration>
+        </aura:if>
+
+
+        <!-- STANDARD OBJECT WITH LOOKUP TO CONTACT -->
+        <aura:if isTrue="{!v.objectType == 'Contact'}">
+            <aura:iteration var="rec" items="{!v.recordsToMerge}" indexVar="idx">
+                <lightning:recordEditForm objectApiName="CampaignMember">
+                    <lightning:inputField fieldName="ContactId" value="{!rec.recordId}"/>
+                </lightning:recordEditForm>
+            </aura:iteration>
+        </aura:if>
+
+        <!-- STANDARD OBJECT WITH LOOKUP TO LEAD -->
+        <aura:if isTrue="{!v.objectType == 'Lead'}">
+            <aura:iteration var="rec" items="{!v.recordsToMerge}" indexVar="idx">
+                <lightning:recordEditForm objectApiName="CampaignMember">
+                    <lightning:inputField fieldName="LeadId" value="{!rec.recordId}"/>
+                </lightning:recordEditForm>
+            </aura:iteration>
+        </aura:if>
+
+        <aura:if isTrue="{!empty(v.recordsToMerge)}">
+            <div style="width:100%;height:10px;"></div>
+        </aura:if>
+        <lightning:button label="Add Record to Merge" onclick="{!c.addRow}" variant="base"/>
+        <br />
+        <br />
+        <lightning:button label="Match as Duplicates"
+                        variant="brand"
+                        onclick="{!c.saveDuplicates}"/>
+    
+        <aura:set attribute="else">
+            <p class="success-panel">
+                The records have been flagged and are now ready to be merged. In the top center 
+                of your browser, there should be a grey notification that duplicates now exist. 
+                Click the view duplicates to open the merge wizard and complete the merging process.
+            </p>
+            <lightning:button label="Start New Merge"
+                        variant="brand"
+                        onclick="{!c.resetForm}"/>
+        </aura:set>
+    </aura:if>
+</aura:component>

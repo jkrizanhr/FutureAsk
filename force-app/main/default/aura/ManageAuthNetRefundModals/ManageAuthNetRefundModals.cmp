@@ -1,0 +1,68 @@
+<aura:component
+  controller="ManageAuthNetRefundsController"
+  description="ModalsForAuthNetSubscription"
+>
+  <aura:attribute name="recordId" type="String" default="" />
+  <aura:attribute name="loading" type="Boolean" default="false" />
+  <aura:attribute name="transaction" type="Object" default="" />
+  <aura:attribute name="modalType" type="String" default="" />
+
+  <!-- Navigation -->
+  <aura:handler name="init" value="{!this}" action="{!c.init}" />
+  <aura:attribute name="pageReference" type="Object" />
+  <lightning:navigation aura:id="navService" />
+
+  <aura:registerEvent name="closeWindow" type="c:ManageAuthNetRefundCloseWindowEvent" />
+
+  <section
+    role="dialog"
+    tabindex="-1"
+    aria-labelledby="modal-heading-01"
+    aria-modal="true"
+    aria-describedby="modal-content-id-1"
+    class="slds-modal slds-fade-in-open"
+  >
+    <div class="slds-modal__container">
+      <header class="slds-modal__header">
+        <lightning:button
+          class="slds-modal__close"
+          variant="bare"
+          iconName="utility:close"
+          title="Close"
+          onclick="{!c.closeModal}"
+        />
+        <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{!v.modalType}</h2>
+      </header>
+      <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+        <aura:if isTrue="{!not(v.loading)}">
+          <!-- FULL REFUND MODAL -->
+          <aura:if isTrue="{!v.modalType == 'Full Refund'}">
+            <div style="padding-top: 15px; padding-bottom: 15px; text-align: center;">
+              Are you sure you would like to refund this transaction of
+              <lightning:formattedNumber
+                value="{!v.transaction.amount}"
+                style="currency"
+                currencyCode="USD"
+              />?
+            </div>
+            <div style="padding-top: 15px; padding-bottom: 15px; text-align: center;">
+              <lightning:button
+                class="slds-button slds-button_brand"
+                label="Refund"
+                onclick="{!c.fullRefund}"
+              />
+            </div>
+          </aura:if>
+
+          <!-- spinner while loading -->
+          <aura:set attribute="else">
+            <div class="modalSpinner">
+              <lightning:spinner alternativeText="Loading" />
+            </div>
+          </aura:set>
+        </aura:if>
+      </div>
+    </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</aura:component>

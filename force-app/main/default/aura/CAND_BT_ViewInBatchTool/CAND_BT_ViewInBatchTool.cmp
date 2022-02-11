@@ -1,0 +1,11 @@
+<aura:component controller="CAND_BT_Setting_Controller" implements="force:lightningQuickAction,force:hasRecordId">
+  <aura:attribute name="recordId" type="Id"/>
+  <aura:attribute name="btSettings" type="Object"/>
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+  <div class="slds-is-relative">
+    Please wait while we load this page...
+    <br/>
+    <lightning:spinner alternativeText="Loading" size="small"/>
+  </div>
+</aura:component>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_Frontline_Church_LMP_Projects</fullName>
+    <columns>NAME</columns>
+    <columns>LMP_Project_Manager__c</columns>
+    <columns>Partnership_Director__c</columns>
+    <columns>Status__c</columns>
+    <columns>Strategic_Focus__c</columns>
+    <columns>Region__c</columns>
+    <columns>Countries_Served__c</columns>
+    <columns>Total_Funding_Need__c</columns>
+    <columns>Target_Completion_Date__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>RECORDTYPE</field>
+        <operation>equals</operation>
+        <value>Project__c.Language_Ministry_Project</value>
+    </filters>
+    <filters>
+        <field>Strategic_Focus__c</field>
+        <operation>equals</operation>
+        <value>Frontline Church</value>
+    </filters>
+    <filters>
+        <field>Status__c</field>
+        <operation>notEqual</operation>
+        <value>Cancelled</value>
+    </filters>
+    <label>All Frontline Church LMP Projects</label>
+</ListView>

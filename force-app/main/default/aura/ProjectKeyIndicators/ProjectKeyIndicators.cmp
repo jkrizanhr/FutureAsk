@@ -1,0 +1,124 @@
+<aura:component implements="force:hasRecordId,force:appHostable,flexipage:availableForAllPageTypes" controller="ProjectKeyIndicatorsCtrl" access="global" >
+  <!-- AURA ATTRIBUTES -->
+  <aura:attribute name="recordId" type="String"/>
+  <aura:attribute name="project" type="Object" default=""/>
+  <aura:attribute name="operational" type="Integer" />
+  <aura:attribute name="financial" type="Integer" />
+  <aura:attribute name="deliverable" type="Integer" />
+
+  <!-- AURA HANDLERS -->
+  <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+
+  <lightning:card title="Key Indicators" iconName="standard:calibration">
+    <aura:set attribute="actions">
+        <lightning:buttonIcon iconName="utility:refresh" variant="border-filled" alternativeText="Refresh" onclick="{!c.init}"/>
+    </aura:set>
+    <div class="slds-p-horizontal_small">
+      <aura:if isTrue="{!empty(v.project)}">
+        <div style="height: 30px">
+          <lightning:spinner alternativeText="Loading"/>
+        </div>
+        <aura:set attribute="else">
+          
+        <!-- OPERATIONAL INDICATOR -->
+          <lightning:layout>
+            <lightning:layoutItem padding="around-small" size="6">
+              <p class="field-title">Operational Indicator<lightning:helptext content="Percentage of complete clickup tasks."/></p>
+            </lightning:layoutItem>
+            <lightning:layoutItem padding="around-small" alignmentBump="left">
+              <aura:if isTrue="{!empty(v.project.Clickup_Status_Snapshots__r)}">
+                Data not available.
+                <aura:set attribute="else">
+                  <aura:if isTrue="{!(v.project.Clickup_Status_Snapshots__r[0].Total_Tasks__c == 0)}">
+                    No ClickUp tasks exist.
+                    <aura:set attribute="else">
+                      <lightning:formattedNumber value="{!div(v.operational, 100)}" style="percent"/>
+                    </aura:set>
+                  </aura:if>
+                </aura:set>
+              </aura:if>
+            </lightning:layoutItem>
+          </lightning:layout>
+          <aura:if isTrue="{!(v.operational le 33)}">
+            <div class="progress-bar-33" style="padding: 0 10px;">
+                <lightning:progressBar value="{!v.operational}" size="large" variant="circular" />
+            </div>
+            <aura:set attribute="else">
+              <aura:if isTrue="{!(v.operational le 65)}">
+                <div class="progress-bar-66" style="padding: 0 10px;">
+                    <lightning:progressBar value="{!v.operational}" size="large" variant="circular" />
+                </div>
+                <aura:set attribute="else">
+                  <div class="progress-bar-100" style="padding: 0 10px;">
+                    <lightning:progressBar value="{!v.operational}" size="large" variant="circular" />
+                  </div>
+                </aura:set>
+              </aura:if>
+            </aura:set>
+          </aura:if>
+          
+          <!-- FINANCIAL INDICATOR -->
+          <lightning:layout>
+            <lightning:layoutItem padding="around-small" size="6">
+              <p class="field-title">Financial Indicator<lightning:helptext content="Total Need - Actual Raised (only direct funding)"/></p>
+            </lightning:layoutItem>
+            <lightning:layoutItem padding="around-small" alignmentBump="left">
+              <lightning:formattedNumber value="{!(v.project.Total_Funding_Need__c - v.project.Actual_Received__c)}" style="currency" currencyCode="USD"/>
+            </lightning:layoutItem>
+          </lightning:layout>
+          <aura:if isTrue="{!(v.financial le 33)}">
+            <div class="progress-bar-33" style="padding: 0 10px;">
+                <lightning:progressBar value="{!v.financial}" size="large" variant="circular" />
+            </div>
+            <aura:set attribute="else">
+              <aura:if isTrue="{!(v.financial le 65)}">
+                <div class="progress-bar-66" style="padding: 0 10px;">
+                    <lightning:progressBar value="{!v.financial}" size="large" variant="circular" />
+                </div>
+                <aura:set attribute="else">
+                  <div class="progress-bar-100" style="padding: 0 10px;">
+                    <lightning:progressBar value="{!v.financial}" size="large" variant="circular" />
+                  </div>
+                </aura:set>
+              </aura:if>
+            </aura:set>
+          </aura:if>
+          
+          <!-- DELIVERABLE INDICATOR -->
+          <lightning:layout>
+            <lightning:layoutItem padding="around-small" size="6">
+              <p class="field-title">Deliverable Indicator<lightning:helptext content="Fraction of complete Project Deliverables."/></p>
+            </lightning:layoutItem>
+            <lightning:layoutItem padding="around-small" alignmentBump="left">
+              <aura:if isTrue="{!(v.project.Number_of_Active_Deliverables__c == 0)}">
+                No deliverables exist.
+                <aura:set attribute="else">
+                  {!v.project.Number_of_Complete_Deliverables__c}/{!v.project.Number_of_Active_Deliverables__c}
+                </aura:set>
+              </aura:if>
+            </lightning:layoutItem>
+          </lightning:layout>
+          <aura:if isTrue="{!(v.deliverable le 33)}">
+            <div class="progress-bar-33" style="padding: 0 10px;">
+                <lightning:progressBar value="{!v.deliverable}" size="large" variant="circular" />
+            </div>
+            <aura:set attribute="else">
+              <aura:if isTrue="{!(v.deliverable le 65)}">
+                <div class="progress-bar-66" style="padding: 0 10px;">
+                    <lightning:progressBar value="{!v.deliverable}" size="large" variant="circular" />
+                </div>
+                <aura:set attribute="else">
+                  <div class="progress-bar-100" style="padding: 0 10px;">
+                    <lightning:progressBar value="{!v.deliverable}" size="large" variant="circular" />
+                  </div>
+                </aura:set>
+              </aura:if>
+            </aura:set>
+          </aura:if>
+
+        </aura:set>
+      </aura:if> 
+    </div>
+  </lightning:card> 
+  
+</aura:component>

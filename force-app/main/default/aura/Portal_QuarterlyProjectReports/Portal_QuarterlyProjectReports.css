@@ -1,0 +1,48 @@
+@font-face {
+  font-family: 'Lato-Regular';
+  src: url(/resource/LatoRegularFont); 
+}
+@font-face {
+  font-family: 'Lato-Light';
+  src: url(/resource/LatoLightFont); 
+}
+@font-face {
+  font-family: 'Lato-Bold';
+  src: url(/resource/LatoBoldFont); 
+}
+
+
+/* Component Header */
+.THIS .header {
+  text-align: center;
+  width: 100%;
+}
+.THIS h1 {
+  color: #044f7a;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+/* Fonts */
+.THIS p {
+  color: #696764;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* Portrait Mode */
+@media only screen 
+  and (min-device-width: 320px) 
+  and (max-device-width: 480px)
+  and (-webkit-min-device-pixel-ratio: 2)
+  and (orientation: portrait) {
+  .THIS .slds-size_6-of-12 {
+    width: 100% !important;
+  }
+}

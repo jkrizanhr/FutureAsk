@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LTP_Project__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <externalId>false</externalId>
+    <inlineHelpText>The LTP project that this LMP project is building on.</inlineHelpText>
+    <label>LTP Project</label>
+    <referenceTo>Project__c</referenceTo>
+    <relationshipLabel>LMP Projects</relationshipLabel>
+    <relationshipName>Projects2</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

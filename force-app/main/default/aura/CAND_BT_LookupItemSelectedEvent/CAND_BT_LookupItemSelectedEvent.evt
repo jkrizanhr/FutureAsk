@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="Fired when lookup object is selected">
+  <aura:attribute name="object" type="Object"/>
+</aura:event>

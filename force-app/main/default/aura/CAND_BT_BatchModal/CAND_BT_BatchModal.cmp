@@ -1,0 +1,58 @@
+<aura:component controller="CAND_BT_Controller" description="CAND_BT_BatchModal">
+  <aura:attribute name="recordId" type="String" default=''/>
+  <aura:attribute name="batchName" type="String" default=''/>
+  <aura:attribute name="btSettings" type="Object"/>
+  <aura:attribute name="batchDate" type="String"/>
+  <aura:attribute name="Keyer" type="String"/>
+  <aura:attribute name="display" type="Boolean"/>
+
+  <aura:method name="toggleDisplay" action="{!c.toggleDisplay}" access="PUBLIC"/>
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <div>
+      <section aura:id="Modalbox1" role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal">
+        <div class="slds-modal__container">
+          <header class="slds-modal__header">
+              <button onclick="{!c.toggleDisplay}" class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                <span class="slds-assistive-text">Close</span>
+                <lightning:icon variant="inverse" iconName="utility:close" alternativeText="close" />
+              </button>
+              <aura:if isTrue="{!v.recordId == ''}">
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Create a Batch</h2>
+              <aura:set attribute='else'>
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Edit {!v.batchName}</h2>
+              </aura:set>
+              </aura:if>
+          </header>
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+            <lightning:recordEditForm onsuccess="{!c.saveBatchCreation}"
+                                      recordId="{!v.recordId}"
+                                      objectApiName="Cash_Batch__c">
+              <!-- the messages component is for error messages -->
+              <aura:if isTrue="{!v.display}">
+                <lightning:messages />
+              </aura:if>
+  
+              <lightning:inputField aura:id="field" fieldName="Type__c" />
+              <lightning:inputField aura:id="field" fieldName="Original_Control_Batch_Total__c" />
+              <lightning:inputField aura:id="field" fieldName="Total_Included_In_Batch__c" />
+              <lightning:inputField aura:id="field" fieldName="Anonymous_Batch__c" />
+              <lightning:inputField aura:id="field" fieldName="Records_Included_In_Batch__c" />
+              <lightning:inputField aura:id="field" fieldName="Opportunity_Type__c" />
+              <lightning:inputField aura:id="field" fieldName="Status__c" />
+              <lightning:inputField aura:id="field" fieldName="Batch_Variation__c" />
+              <lightning:inputField aura:id="field" fieldName="Original_Currency__c" />
+              <lightning:inputField aura:id="field" value="{!v.batchDate}" fieldName="Date__c" required="true"/>
+              <lightning:inputField aura:id="field" value="{!v.Keyer}" fieldName="Keyer__c" />
+              <div class="slds-m-top_medium slds-float_right" >
+                <lightning:button onclick="{!c.toggleDisplay}" variant="neutral" name="cancel" label="Cancel" />
+                <lightning:button variant="brand" type="submit" name="save" label="Save" />
+              </div>
+            </lightning:recordEditForm>
+          </div>
+        </div>
+      </section>
+      <div aura:id="Modalbackdrop" class="slds-backdrop"></div>
+    </div>
+
+</aura:component>

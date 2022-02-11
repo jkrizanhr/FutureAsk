@@ -1,0 +1,15 @@
+SELECT Id, (SELECT Name FROM Contacts) FROM Account
+
+
+Future_Gift__C is Future Ask (Parent)
+Future_Gift_Allocation__c is Future Allocation (Child)
+
+SELECT SUM(Allocation_Amount__c) from Future_Gift_Allocation__c WHERE General_Accounting_Unit__c = 'a0e3i000001z1CpAAI' AND (Future_Gift__r.Stage__c = 'Proposed' OR Future_Gift__r.Stage__c ='Solicitation' OR Future_Gift__r.Stage__c ='Commitment Made') AND Fiscal_Year(Future_Gift__r.Actual_Ask_Date__c) = 
+
+SELECT Count(Id) from Future_Gift_Allocation__c
+
+
+SELECT SUM(Bib_Probability_Total__c) from Future_Gift_Allocation__c WHERE General_Accounting_Unit__c =:strgau AND (Future_Gift__r.Stage__c = ‘Proposed’ OR Future_Gift__r.Stage__c =‘Solicitation’ OR Future_Gift__r.Stage__c =‘Commitment Made’);
+
+
+SELECT Id from GAU_Balance__c WHERE GAU_Balance__c.Date__c =2021-10-01

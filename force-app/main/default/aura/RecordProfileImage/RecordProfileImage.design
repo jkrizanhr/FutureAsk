@@ -1,0 +1,4 @@
+<design:component >
+    <design:attribute name="cardLabel" label="Title" description="Title displayed in the card component." required="true"/>
+    <design:attribute name="fieldName" label="Field API Name for Profile Picture" description="The API name of the field that stores the content ID for the profile picture." required="true"/>
+</design:component>

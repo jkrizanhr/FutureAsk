@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Printed_Reach__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Determined by quarterly reports on actual print activities. Read only.</inlineHelpText>
+    <label>Printed Reach</label>
+    <summarizedField>Narrative__c.Print_Delivery__c</summarizedField>
+    <summaryForeignKey>Narrative__c.Project__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

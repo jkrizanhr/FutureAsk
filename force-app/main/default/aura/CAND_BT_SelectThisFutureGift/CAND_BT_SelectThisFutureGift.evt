@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="Event tells CAND_BT_Form to populate Future Ask">
+  <aura:attribute name="futureGift" type="Future_Gift__c" />
+</aura:event>

@@ -1,0 +1,32 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId" access="global" controller="GetClickUpProjectJob">
+  <!-- AURA ATTRIBUTES -->
+  <aura:attribute name="recordId" type="String"/>
+  
+  <!-- AURA HANDLERS -->
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+  <!-- AURA COMPONENT -->
+  <aura:html tag="style">
+    .cuf-content {
+      padding: 0 0rem !important;
+    }
+    .slds-p-around--medium {
+      padding: 0rem !important;
+    }       
+    .slds-modal__content{
+      overflow-y:hidden !important;
+      height:unset !important;
+      max-height:250px; !important;
+    }
+  </aura:html>
+  
+    <div class="modal-header slds-modal__header slds-size_1-of-1">
+      <h2 class="title slds-text-heading--medium">Getting Snapshot...</h2>
+    </div>
+    
+    <div class="slds-modal__content slds-align_center slds-size_1-of-1 slds-is-relative">
+      <p style="padding: 10px;">Retrieving snapshot from Clickup. This may take up to three minutes.</p>
+      <br/><br/>
+    </div>
+
+</aura:component>

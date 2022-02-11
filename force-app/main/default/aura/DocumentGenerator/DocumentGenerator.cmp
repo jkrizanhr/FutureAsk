@@ -1,0 +1,199 @@
+<aura:component controller="DocumentGeneratorComponentController" description="DocumentGenerator" 
+                implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName">
+
+  <!-- Attributes -->
+  <aura:attribute name="aggregateQueries" type="String[]" />
+  <aura:attribute name="aggregateQueryDisplayList" type="List" />
+  <aura:attribute name="customMetadataQueries" type="String[]" />
+  <aura:attribute name="customMetadataQueryDisplayList" type="List" />
+  <aura:attribute name="deliveryOptionSelect" type="String" />
+  <aura:attribute name="documentTemplate" type="Object" />
+  <aura:attribute name="documentTemplates" type="Object[]" default="[]" />
+  <aura:attribute name="inTemplatePreviewTestMode" type="Boolean" default="false" />
+  <aura:attribute name="isOneOff" type="Boolean" default="false" />
+  <aura:attribute name="isTestMode" type="Boolean" default="false" />
+  <aura:attribute name="jobInProgress" type="Boolean" default="false" />
+  <aura:attribute name="message" type="String" />
+  <aura:attribute name="primarySOQLQuery" type="String" />
+  <aura:attribute name="questionAnswerMap" type="Map" default="{}" />
+  <aura:attribute name="showAdvanced" type="Boolean" default="false" />
+
+  <!-- Attribute even with force:hasRecordId interface to avoid null pointer on bulk generation page -->
+  <aura:attribute name="recordId" type="String" />
+  <aura:attribute name="secondaryQueries" type="String[]" />
+  <aura:attribute name="secondaryQueryDisplayList" type="List" />
+  <aura:attribute name="selectedDocumentTemplateId" type="String" />
+  <aura:attribute name="shouldShowSpinner" type="Boolean" />
+  <aura:attribute name="showIsTestMode" type="Boolean" default="false" />
+  <!-- Attribute even with force:hasSObjectName interface to avoid null pointer on bulk generation page -->
+  <aura:attribute name="sObjectName" type="String" />
+
+  <!-- Handler(s) -->
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+  <!-- Registered Event(s) -->
+  <aura:registerEvent name="generateDocumentPreview" type="c:DocTempPreviewEvent" />
+
+  <!-- Lightning card container component -->
+  <lightning:card title="{!v.inTemplatePreviewTestMode ? '' : 'Document Generator'}">
+    <lightning:notificationsLibrary aura:id="notifLib" />
+
+    <form class="slds-form slds-form--compound slds-p-left--small slds-p-right--small slds-p-bottom--xx-large">
+
+      <div class="slds-form-element__row">
+        <div class="{!and(not(v.inTemplatePreviewTestMode), empty(v.recordId)) ? 'slds-form-element slds-size_2-of-3 slds-p-right--large' : ''}">
+
+          <div class="slds-form-element__group">
+            <!-- Document Template -->
+            <aura:if isTrue="{!not(v.inTemplatePreviewTestMode)}">
+              <div class="slds-form-element__row slds-p-top--small">
+                <!-- Populate with Document Templates for the given object that is selected or the page lives on -->
+                <div class="slds-form-element slds-size_1-of-1">
+                  <lightning:select aura:id="documentTemplateSelect" name="documentTemplateSelect" 
+                                    label="Document Template" required="true" 
+                                    value="{!v.selectedDocumentTemplateId}" 
+                                    onchange="{!c.onchangeDocumentTemplate}"/>
+                </div>
+              </div>
+            </aura:if>
+            <!--Template Instructions-->
+            <aura:if isTrue="{!not(empty(v.documentTemplate))}">
+              <div class="slds-form-element__row slds-p-top--small">
+                <div class="slds-form-element slds-size_1-of-1">
+                  <lightning:formattedRichText value="{!v.documentTemplate.Template_Instructions__c}" />
+                </div>
+              </div>
+
+              <!--Document Template Questions-->
+              <aura:if isTrue="{!and(not(empty(v.documentTemplate)), not(empty(v.documentTemplate.Document_Template_Questions__r)))}">
+                <aura:iteration items="{!v.documentTemplate.Document_Template_Questions__r}" var="question" indexVar="index">
+                  <!--Row-->
+                  <div class="slds-form-element__row slds-p-top--small">
+                    <aura:if isTrue="{!or(empty(question.Question_Field_Type__c), equals(question.Question_Field_Type__c, 'Text'))}">
+                      <!--Text field as input-->
+                      <div class="slds-form-element slds-size_1-of-1">
+                        <aura:if isTrue="{!not(empty(question.Question_Help_Text__c))}">
+                          <lightning:helptext content="{!question.Question_Help_Text__c}" />
+                        </aura:if>
+                        <lightning:input label="{!question.Question__c}" 
+                                         required="{!question.Is_Required__c}" 
+                                         value="{!question.answer}"/>
+                      </div>
+                    </aura:if>
+                    <aura:if isTrue="{!equals(question.Question_Field_Type__c, 'Picklist')}">
+                      <!--Display picklist options-->
+                      <div class="slds-form-element slds-size_1-of-1">
+                        <aura:if isTrue="{!not(empty(question.Question_Help_Text__c))}">
+                          <lightning:helptext content="{!question.Question_Help_Text__c}" />
+                        </aura:if>
+                        <lightning:select label="{!question.Question__c}" required="{!question.Is_Required__c}" value="{!question.answer}">
+                          <aura:iteration items="{!question.Document_Template_Question_Options__r}" var="option">
+                            <option value="{!option.Option_Value__c}" selected="{!equals(option.Option_Value__c, question.answer)}">
+                              {!option.Name}
+                            </option>
+                          </aura:iteration>
+                        </lightning:select>
+                      </div>
+                    </aura:if>
+                    <aura:if isTrue="{!equals(question.Question_Field_Type__c, 'Date')}">
+                      <!--Display date as datepicker-->
+                      <div class="slds-form-element slds-size_1-of-1">
+                        <aura:if isTrue="{!not(empty(question.Question_Help_Text__c))}">
+                          <lightning:helptext content="{!question.Question_Help_Text__c}" />
+                        </aura:if>
+                        <ui:inputDate label="{!question.Question__c}" value="{!question.answer}" 
+                                      required="{!question.Is_Required__c}" displayDatePicker="true" 
+                                      format="YYYY-MM-dd"/>
+                      </div>
+                    </aura:if>
+                    <aura:if isTrue="{!equals(question.Question_Field_Type__c, 'Rich Text')}">
+                      <!--Rich text field as input-->
+                      <div class="slds-form-element slds-size_1-of-1">
+                        <aura:if isTrue="{!not(empty(question.Question_Help_Text__c))}">
+                          <lightning:helptext content="{!question.Question_Help_Text__c}" />
+                        </aura:if>
+                        <aura:if isTrue="{!question.Is_Required__c}">
+                          <span class="required" style="color:red">*</span>
+                        </aura:if>
+                        <lightning:inputRichText label="{!question.Question__c}" value="{!question.answer}" labelVisible="true"/>
+                      </div>
+                    </aura:if>
+                  </div>
+                </aura:iteration>
+                <!--Queries-->
+              </aura:if>
+              <!--End of condition: not empty document template and not empty document template questions -->
+              <!--Delivery Option-->
+              <div class="slds-form-element__row slds-p-top--small">
+                <div class="slds-form-element slds-size_1-of-1">
+                  <lightning:select aura:id="deliveryOptionSelect" name="deliveryOptionSelect" 
+                                    label="Delivery Option" required="true" 
+                                    onchange="{!c.onchangeDeliveryOption}" 
+                                    value="{!v.deliveryOptionSelect}"/>
+                </div>
+              </div>
+              <!--Test Mode Checkbox-->
+              <aura:if isTrue="{!and(not(v.inTemplatePreviewTestMode), v.showIsTestMode)}">
+                <div class="slds-form-element__row slds-p-top--small">
+                  <div class="slds-form-element slds-size_1-of-1">
+                    <lightning:helptext content="Do not allow post document generation methods." />
+                    <lightning:input type="checkbox" onchange="{!c.onchangeTestModeCheckbox}" label="Test Mode" />
+                  </div>
+                </div>
+              </aura:if>
+              <!-- <div>
+                <span>Advanced&nbsp;</span>
+                <lightning:buttonIcon
+                    iconName="utility:chevrondown"
+                    size="x-small"
+                    onclick="{!c.toggleAdvanced}"
+                    alternativeText="Show Advanced">
+                </lightning:buttonIcon>
+              </div>
+              <aura:if isTrue="{!v.showAdvanced}">
+                <aura:if isTrue="{!not(v.inTemplatePreviewTestMode)}">
+                  <c:DocGenQuery aggregateQueries="{!v.aggregateQueries}"
+                                  aggregateQueryDisplayList="{!v.aggregateQueryDisplayList}"
+                                  customMetadataQueries="{!v.customMetadataQueries}"
+                                  customMetadataQueryDisplayList="{!v.customMetadataQueryDisplayList}"
+                                  primarySOQLQuery="{!v.primarySOQLQuery}"
+                                  secondaryQueries="{!v.secondaryQueries}"
+                                  secondaryQueryDisplayList="{!v.secondaryQueryDisplayList}"/>
+                </aura:if>
+              </aura:if> -->
+              <!--Generate Button-->
+              <div class="slds-form-element__row slds-p-top--small">
+                <div class="slds-form-element slds-size_1-of-1">
+                  <span>
+                    <lightning:button label="Validate" variant="brand" onclick="{!c.generateDocument}" value="validate" />
+                  </span>
+                  <span class="slds-p-left--medium">
+                    <lightning:button label="Generate" variant="brand" onclick="{!c.generateDocument}" value="generate" />
+                  </span>
+                </div>
+              </div>
+            </aura:if>
+            <!--End of condition: not in template preview test mode-->
+            <aura:if isTrue="{!not(empty(v.message))}">
+              <div style="border-left; border-bottom; border-right; border-top; border-color:red">
+                {!v.message}
+              </div>
+            </aura:if>
+          </div> <!-- End of the form group -->
+        </div>
+
+        <aura:if isTrue="{!and(empty(v.recordId), not(v.inTemplatePreviewTestMode))}">
+          <div class="slds-form-element slds-size_1-of-3">
+            <!--Doument Generation Job Logs-->
+            <c:DocGenJobs aura:id="docGenJobs" jobInProgress="{!v.jobInProgress}" />
+          </div>
+        </aura:if>
+
+      </div>
+    </form>
+
+    <aura:if isTrue="{!v.shouldShowSpinner}">
+      <lightning:spinner aura:id="loadingSpinner" alternativeText="Loading..." />
+    </aura:if>
+  </lightning:card>
+</aura:component>

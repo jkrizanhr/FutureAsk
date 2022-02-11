@@ -1,0 +1,25 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global">
+  <aura:attribute name="title" type="String"/>
+  <aura:attribute name="subtitle" type="String"/>
+  <aura:attribute name="imageURL" type="String"/>
+  <aura:attribute name="isMobile" type="Boolean" default="false"/>
+  <!-- Aura Handler -->
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+  <aura:if isTrue="{!not(v.isMobile)}">
+    <div style="height: 200px; width: 100%; background: #044f7a; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+      <img src="{!v.imageURL}" alt="Header Image" />
+      <h2>{!v.subtitle}</h2>
+      <h1>{!v.title}</h1>
+    </div>
+  </aura:if>
+  
+  <aura:if isTrue="{!v.isMobile}">
+    <div style="height: 100px; width: 100%; background: #044f7a; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+      <img src="{!v.imageURL}" alt="Header Image" />
+      <h2 class="mobile">{!v.subtitle}</h2>
+      <h1 class="mobile">{!v.title}</h1>
+    </div>
+  </aura:if>
+
+</aura:component>

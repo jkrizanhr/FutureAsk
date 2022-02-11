@@ -1,0 +1,10 @@
+.THIS {
+  background-color:white;
+  height: 100%;
+}
+.THIS .slds-textarea {
+  height: 13vh;
+}
+.THIS form {
+  background-color: white;
+}

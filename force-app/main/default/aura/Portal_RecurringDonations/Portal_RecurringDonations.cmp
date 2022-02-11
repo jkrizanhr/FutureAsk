@@ -1,0 +1,112 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" controller="Portal_Controller">
+  <aura:attribute name="recurringDonations" type="List"/>
+  <aura:attribute name="showFAQs" type="Boolean" default="false"/>
+  <aura:attribute name="isLoading" type="Boolean" default="true"/>
+  <aura:attribute name="isMobile" type="Boolean" default="false"/>
+  <aura:attribute name="recordId" type="String" />
+  <aura:attribute name="modalType" type="String" />
+  <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+  <aura:handler event="force:refreshView" action="{!c.init}"/>
+  <aura:handler name="closeWindow" event="c:Portal_RecurringDonationsCloseWindowEvent" action="{!c.closeModal}"/>
+  
+  <div>
+    <!-- Component Heading (Active Recurring Donations) -->
+    <lightning:layout>
+      <div class="header">
+        <h1><b>Guardians</b>&nbsp;Active Recurring Donations&nbsp;&nbsp;<lightning:button class="link" variant="base" label="Need Help?" onclick="{!c.toggleModal}"/></h1>
+      </div>
+    </lightning:layout>
+    <table style="width:100%">
+      <!-- Header Row -->
+      <aura:if isTrue="{!not(v.isMobile)}">
+        <tr>
+          <th><div class="th-cell">Amount</div></th>
+          <th><div class="th-cell">Frequency</div></th>
+          <th><div class="th-cell">Next Processing Date</div></th>
+          <th><div class="th-cell">Most Recent Donation</div></th>
+          <th><div class="th-cell">Total Giving (YTD)</div></th>
+          <th><div class="th-cell">Actions</div></th>
+        </tr>
+      </aura:if>
+      <aura:if isTrue="{!v.isMobile}">
+        <tr>
+          <th class="th-cell">Amount</th>
+          <th class="th-cell">Frequency</th>
+          <th class="th-cell">Next Processing Date</th>
+          <th class="th-cell mobile-hide">Most Recent Donation</th>
+          <th class="th-cell mobile-hide">Total Giving (YTD)</th>
+          <th class="th-cell">Actions</th>
+        </tr>
+      </aura:if>
+    <aura:if isTrue="{!not(v.isLoading)}">
+      <!-- Body Rows -->
+      <aura:iteration items="{!v.recurringDonations}" var="rd">
+        <tr>
+          <td><lightning:formattedNumber value="{!rd.Original_Amount__c}" style="currency" currencyCode="{!rd.Original_Currency__c}"/></td>
+          <td>{!rd.npe03__Installment_Period__c}
+            <aura:if isTrue="{!rd.npe03__Installment_Period__c != 'Yearly'}">
+              ({!rd.npsp__Day_of_Month__c}{!rd.suffix})
+            </aura:if>
+          </td>
+          <td><ui:outputDate value="{!rd.npe03__Next_Payment_Date__c}" format="M/d/yyyy"/></td>
+          <td class="mobile-hide"><ui:outputDate value="{!rd.npe03__Last_Payment_Date__c}" format="M/d/yyyy"/></td>
+          <td class="mobile-hide"><lightning:formattedNumber value="{!if(empty(rd.Original_Total_Paid_Amount__c),0,rd.Original_Total_Paid_Amount__c)}" style="currency" currencyCode="{!rd.Original_Currency__c}"/></td>
+          <td><lightning:button class="link" variant="base" label="Update" value="{!rd.Id}" onclick="{!c.updateSubscription}"/></td>
+        </tr>
+      </aura:iteration>
+      <!-- Spinner (Is Loading) -->
+      <aura:set attribute="else">
+        <div><lightning:spinner/></div>
+      </aura:set>
+    </aura:if>
+    </table>
+    <aura:if isTrue="{!and(empty(v.recurringDonations), not(v.isLoading))}">
+      <p style="text-align: center; padding: 20px; font-size: 14px;">
+        You do not currently have any recurring donations set up. Go to the <lightning:button class="link" variant="base" label="Give Page" onclick="{!c.goToGivePage}"/> to set one up.
+      </p>
+    </aura:if>
+  </div>
+
+  <!-- SUBSCRIPTION MANAGEMENT MODALS -->
+  <aura:if isTrue="{!not(empty(v.modalType))}">
+    <c:Portal_RecurringDonationsModals recordId="{!v.recordId}" modalType="{!v.modalType}" isMobile="{!v.isMobile}"/>
+  </aura:if>
+
+  <!-- FREQUENTLY ASKED QUESTIONS MODAL -->
+  <aura:if isTrue="{!v.showFAQs}">
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+      <div class="slds-modal__container">
+        <header class="slds-modal__header slds-modal__header_empty">
+          <lightning:buttonIcon class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" alternativeText="Close" iconName="utility:close" onclick="{!c.toggleModal}"/>
+        </header>
+        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+          <p class="question">
+            Question: How do I cancel my recurring donation?
+          </p>
+          <p class="answer">
+            To cancel a recurring donation contact Biblica at 1(800)987-3595 or send an email to <a href="mailto:donor.services@biblica.com">donor.services@biblica.com</a>.
+          </p>
+          <br/>
+          <p class="question">
+            Question: How do I change the amount or day of the month that my online recurring donation is processed?
+          </p>
+          <p class="answer">
+            To ensure the request is processed correctly, please contact Biblica at 1(800)987-3595 or send an email to <a href="mailto:donor.services@biblica.com">donor.services@biblica.com</a> to make this change.
+          </p>
+          <br/>
+          <p class="question">
+            Question: How do I change my payment method for my online recurring donation?
+          </p>
+          <p class="answer">
+            First, create a saved payment method for the new card or bank account in the table below your active recurring donations. Then, click "Update" to select the new payment method from the drop down list.
+          </p>
+          <div style="text-align: center; padding-top: 10px;">
+            <lightning:button class="link" label="Close" onclick="{!c.toggleModal}"/>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </aura:if>
+  
+</aura:component>

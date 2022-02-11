@@ -1,0 +1,85 @@
+@font-face {
+  font-family: 'Catamaran-Regular';
+  src: url(/resource/CatamaranRegularFont); 
+}
+@font-face {
+  font-family: 'Catamaran-Bold';
+  src: url(/resource/CatamaranBoldFont); 
+}
+@font-face {
+  font-family: 'Lato-Regular';
+  src: url(/resource/LatoRegularFont); 
+}
+@font-face {
+  font-family: 'Lato-Light';
+  src: url(/resource/LatoLightFont); 
+}
+
+.THIS .header {
+  text-align: center;
+  width: 100%;
+}
+
+.THIS h1 {
+  color: #044f7a;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.THIS h2 {
+  color: 	#54aeff;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin-bottom: 5;
+  text-align: left;
+}
+
+.THIS p {
+  color: 	#696764;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 14px;
+  text-transform: none;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+/* icon styling */
+.THIS i {
+  color: #696764;
+  padding-right: 10px;
+  font-size: 18px;
+}
+
+/* missing picture formatting */
+.THIS .picture {
+  background-color: #ebebeb;
+  border-radius: 10px;
+  width: 92%;
+  height: 150px;
+  text-align: center;
+}
+
+/* image formatting */
+.THIS img {
+  object-fit: cover;
+  flex-shrink: 0;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+/* donate button formatting */
+.THIS .link {
+  color: #54aeff;
+  font-family: 'Lato-Regular', Sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  text-transform: capitalize;
+  text-decoration: underline;
+  letter-spacing: 1px;
+}

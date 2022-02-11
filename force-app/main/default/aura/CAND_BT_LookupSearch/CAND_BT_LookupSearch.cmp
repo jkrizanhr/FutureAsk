@@ -1,0 +1,108 @@
+<aura:component controller="CAND_BT_Controller" description="CAND_BT_LookupSearch">
+  <aura:attribute name="btSettings" type="Object[]"/>
+  <aura:attribute name="fieldAPIName" type="String"/>
+  <aura:attribute name="isDisabled" type="Boolean"/>
+  <aura:attribute name="isRequired" type="Boolean"/>
+  <aura:attribute name="value" type="Object"/>
+  <aura:attribute name="objectAPIName" type="String"/>
+  <aura:attribute name="objectIndex" type="Integer"/>
+  <aura:attribute name="objectLabel" type="String"/>
+  <aura:attribute name="objectPluralLabel" type="String"/>
+  <aura:attribute name="objects" type="List"/>
+  <aura:attribute name="record" type="Object"/>
+  <aura:attribute name="selectedObject" type="SObject"/>
+  <aura:attribute name="timer" type="Integer"/>
+  <aura:attribute name="gauId" type="String" default=""/>
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  <aura:handler name="selectedEvent" event="c:CAND_BT_LookupItemSelectedEvent" action="{!c.handleLookupItemSelected}"/>
+
+  <aura:registerEvent name="searchEvent" type="c:CAND_BT_LookupEvent"/>
+
+  <lightning:notificationsLibrary aura:id="notifLib"/>
+  
+  <div aura:id="searchContainer" class="slds-form-element slds-lookup" data-select="single">
+    <aura:if isTrue="{!v.isRequired}">
+      <abbr class="slds-required" title="required">*</abbr>
+    </aura:if>
+    <label class="slds-form-element__label">{!v.objectLabel}</label>
+    <div class="slds-form-element__control">
+      <aura:if isTrue="{!not(v.selectedObject)}">
+        <div class="slds-input-has-icon slds-input-has-icon_right">
+          <input aura:id="searchInput"
+                 class="slds-lookup__search-input slds-input"
+                 type="search"
+                 tabindex="0"
+                 value="{!v.value}"
+                 placeholder="{!empty(v.objectPluralLabel) ? 'Search' : 'Search ' + v.objectPluralLabel + '...'}"
+                 role="combobox"
+                 onkeyup="{!c.searchKeyChange}"
+                 disabled="{!v.isDisabled}"
+                 onblur="{!c.onBlur}"/>
+            <span class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right">
+              <lightning:icon iconName="utility:search" size="x-small" alternativeText="search"/>
+            </span>
+        </div>
+        <aura:set attribute="else">
+          <div>
+            <aura:if isTrue="{!not(v.isDisabled)}">
+              <!--Lookup is NOT disabled-->
+              <div class="slds-pill_container">
+                <span class="slds-pill slds-size--1-of-1">
+                  <lightning:buttonIcon aura:id="objectRecord"
+                                        size="small"
+                                        alternativeText="Edit Record"
+                                        iconName="utility:record_update"
+                                        onclick="{!c.onClickEditLookupRecord}"
+                                        variant="bare"
+                                        tabindex="-1"/>
+                  <span class="slds-pill__label" title="{!v.selectedObject.Name}">
+                    {!v.selectedObject.Name}
+                  </span>
+                  <lightning:buttonIcon size="small"
+                                        class="removeButton"
+                                        alternativeText="Remove"
+                                        iconName="utility:close"
+                                        variant="bare"
+                                        tabindex="-1"
+                                        onclick="{!c.removeSelectedObject}"/>
+                </span>
+              </div>
+              <aura:set attribute="else">
+              <!--Lookup is disabled-->
+                <div class="slds-pill_container disabledContainer">
+                  <span class="slds-pill slds-size--1-of-1 disabledField">
+                    <lightning:buttonIcon aura:id="objectRecord"
+                                          size="small"
+                                          disabled="true"
+                                          alternativeText="Edit Record"
+                                          iconName="utility:record_create"
+                                          tabindex="-1"
+                                          onclick="{!c.onClickEditLookupRecord}"/>
+                    <span class="slds-pill__label">
+                        {!v.selectedObject.Name}
+                    </span>
+                     <lightning:buttonIcon size="small"
+                                           class="removeButton"
+                                           alternativeText="Remove"
+                                           disabled="true"
+                                           iconName="utility:close"
+                                           tabindex="-1"
+                                           onclick="{!c.removeSelectedObject}"/>
+                  </span>
+                </div>
+              </aura:set>
+            </aura:if>
+          </div>
+        </aura:set>
+      </aura:if>
+    </div>
+    <div class="slds-lookup__menu">
+      <ul class="slds-lookup__list" role="listbox">
+        <aura:iteration items="{!v.objects}" var="object">
+          <c:CAND_BT_LookupItem lookupObject="{!object}"/>
+        </aura:iteration>
+      </ul>
+    </div>
+  </div>
+</aura:component>

@@ -1,0 +1,19 @@
+.THIS .splitRemovalButton {
+  color: red;
+  border: none;
+}
+.THIS .lock {
+  border: none;
+}
+
+.THIS .uiInput--checkbox input {
+  display: inline-block;
+}
+
+.THIS .containerDiv {
+  height:fit-content;
+}
+
+.THIS .customPaddingTop {
+  padding-top:21px;
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Local_In_Country_Funds_Available__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Can funds be raised locally/in-country to support this translation?</inlineHelpText>
+    <label>Local/In-Country Funds Available</label>
+    <length>255</length>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

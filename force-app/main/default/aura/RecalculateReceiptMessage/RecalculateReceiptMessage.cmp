@@ -1,0 +1,29 @@
+<aura:component controller="RecalculateReceiptMessageController"
+  implements="force:lightningQuickAction,force:hasRecordId">
+  <aura:attribute name="recordId" type="Id" />
+  <aura:attribute name="showSpinner" type="Boolean" />
+  <aura:attribute name="errors" type="String" default="" />
+
+
+  <div class="slds-is-relative">
+    <!-- Please wait while we load this page... -->
+    <p class="slds-text-heading_small">
+      <strong>Warning:</strong>
+      <br />
+      This will reprocess the receipt message for all historical donations tied to this campaign or on a campaign below
+      this campaign in the hierarchy.
+    </p>
+    <br />
+    <lightning:button label="Confirm Update Receipt Messages" onclick="{!c.calculateMess}" />
+    <br />
+    <aura:if isTrue="{!not(empty(v.errors))}">
+      <p style="margin-top:20px;">
+        {!v.errors}
+      </p>
+    </aura:if>
+    <aura:if isTrue="{!v.showSpinner}">
+      <lightning:spinner alternativeText="Loading" size="small" />
+    </aura:if>
+  </div>
+
+</aura:component>

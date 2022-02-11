@@ -1,0 +1,5 @@
+<design:component>
+  <design:attribute name="title" label="Title" description="Name of the section header."/>
+  <design:attribute name="subtitle" label="Subtitle" description="Subtitle for the section header."/>
+  <design:attribute name="imageURL" label="Image URL" description="URL of image to be used for the background."/>
+</design:component>

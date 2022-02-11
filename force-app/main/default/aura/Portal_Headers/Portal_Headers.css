@@ -1,0 +1,76 @@
+@font-face {
+  font-family: 'Catamaran-Regular';
+  src: url(/resource/CatamaranRegularFont); 
+}
+@font-face {
+  font-family: 'Catamaran-Bold';
+  src: url(/resource/CatamaranBoldFont); 
+}
+@font-face {
+  font-family: 'Lato-Regular';
+  src: url(/resource/LatoRegularFont); 
+}
+@font-face {
+  font-family: 'Lato-Light';
+  src: url(/resource/LatoLightFont); 
+}
+@font-face {
+  font-family: 'Lato-Bold';
+  src: url(/resource/LatoBoldFont); 
+}
+
+/* Desktop */
+.THIS h1 { 
+  font-family: 'Lato-Bold',Sans-serif;
+  font-size: 100px;
+  text-transform: uppercase;
+  color: #ffffff;
+  letter-spacing: 2px;
+  position: absolute;
+  bottom: -20px;
+  left: 100px;
+}
+.THIS h2 { 
+  font-family: 'Lato-Regular',Sans-serif;
+  font-size: 20px;
+  text-transform: none;
+  color: #ffffff;
+  letter-spacing: 1px;
+  position: absolute;
+  bottom: 110px;
+  left: 105px;
+  width: 40%;
+}
+
+/* Mobile */
+.THIS h1.mobile{ 
+  font-family: 'Lato-Bold',Sans-serif;
+  font-size: 50px;
+  text-transform: uppercase;
+  color: #ffffff;
+  letter-spacing: 2px;
+  position: absolute;
+  bottom: 10px;
+  left: 25px;
+  line-height: 50px;
+}
+.THIS h2.mobile{ 
+  font-family: 'Lato-Regular',Sans-serif;
+  font-size: 10px;
+  text-transform: none;
+  color: #ffffff;
+  letter-spacing: 1px;
+  position: absolute;
+  bottom: 65px;
+  left: 28px;
+  width: 60%;
+}
+
+.THIS img {
+  object-fit: cover;
+  opacity: 0.25;
+  filter: grayscale(100%);
+  flex-shrink: 0;
+  min-width: 100%;
+  min-height: 100%;
+}

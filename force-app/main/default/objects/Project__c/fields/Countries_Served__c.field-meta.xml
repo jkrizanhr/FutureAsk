@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Countries_Served__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>After saving, add all the countries served from the right sidebar. It is not directly editable here.</inlineHelpText>
+    <label>Countries Served</label>
+    <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

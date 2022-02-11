@@ -1,0 +1,27 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" controller="Portal_Controller">
+  <aura:attribute name="reports" type="List"/>
+  <aura:attribute name="description" type="String" default="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."/>
+
+  <aura:handler name="init" value="{!this}" action="{!c.init}"/>  
+  
+  <div>
+    <p>{!v.description}</p>
+
+    <hr style="border-top: 1px solid #696764;"/>
+
+    <lightning:layout>
+      <div class="header">
+        <h1>My Projects Quarterly Reports</h1>
+      </div>
+    </lightning:layout>
+    
+    <lightning:layout multipleRows="true" >
+      <aura:iteration items="{!v.reports}" var="pr">
+        <lightning:layoutItem size="6" class="slds-p-around_xx-small">
+          <lightning:button class="slds-button_stretch" variant="brand" iconName="utility:download" label="{!pr.Year__c + ' ' + pr.Quarter__c}" value="{!pr.Community_URL__c}" onclick="{!c.openReport}" iconPosition="right" />
+        </lightning:layoutItem>
+      </aura:iteration>
+    </lightning:layout>
+  </div>
+  
+</aura:component>

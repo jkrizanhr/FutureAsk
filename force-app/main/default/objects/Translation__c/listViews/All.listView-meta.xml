@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All</fullName>
+    <columns>NAME</columns>
+    <columns>Language__c</columns>
+    <columns>Top_100__c</columns>
+    <columns>Region__c</columns>
+    <columns>Creative_Commons_Release__c</columns>
+    <columns>Latest_Revision__c</columns>
+    <columns>Available_For_Use__c</columns>
+    <columns>Projected_Completion_Date__c</columns>
+    <columns>Audio_Status__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>All</label>
+</ListView>

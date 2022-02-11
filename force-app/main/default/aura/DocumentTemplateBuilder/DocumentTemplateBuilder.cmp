@@ -1,0 +1,58 @@
+<aura:component description="DocumentTemplateBuilder" controller="DocumentTemplateBuilderController"
+                implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId">
+
+  <aura:attribute name="aggregateQueries" type="Object[]"/>
+  <aura:attribute name="csvColumnConfig" type="Object" default="[]"/>
+  <aura:attribute name="defaultCSVConfig" type="Object" default="[]"/>
+  <aura:attribute name="deliveryOptions" type="String[]" default="[
+        {'label': 'PDF - Email', 'value': 'PDF - Email'},
+        {'label': 'PDF - Direct Download', 'value': 'PDF - Direct Download'},
+        {'label': 'CSV - Email', 'value': 'CSV - Email'},
+        {'label': 'CSV - Direct Download', 'value': 'CSV - Direct Download'}
+    ]"/>
+  <aura:attribute name="documentTemplate" type="Object"/>
+  <aura:attribute name="fieldSelectList" type="Object[]" default="[]"/>
+  <aura:attribute name="primarySOQLQuery" type="String"/>
+  <aura:attribute name="selectedDeliveryOptions" type="List"/>
+  <aura:attribute name="selectedField" type="Object" default="{}"/>
+  <aura:attribute name="shouldShowSpinner" type="Boolean"/>
+  <aura:attribute name="showQueries" type="Boolean" default="true"/>
+  <aura:attribute name="sObjectList" type="Object[]" default="[]"/>
+  <aura:attribute name="templateQueries" type="Object[]" default="[]"/>
+  <aura:attribute name="visualForcePages" type="Object[]" default="[]"/>
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+  <lightning:notificationsLibrary aura:id="notifLib"/>
+
+  <!--SAVE BUTTON AT TOP-->
+  <lightning:button label="Save Template"
+                    class="slds-align--absolute-center"
+                    variant="brand"
+                    onclick="{!c.saveDocumentTemplate}"/>
+
+  <lightning:card title="CSV Export Builder">
+    <aura:set attribute="actions">
+      <lightning:buttonIcon iconName="utility:thunder"
+                            onclick="{!c.automateColumns}"
+                            alternativeText="Automate Columns"/>
+    </aura:set>
+
+    <aura:if isTrue="{!not(empty(v.defaultCSVConfig))}">
+      <c:DocumentTemplateCSVBuilder csvColumnConfig="{!v.csvColumnConfig}"
+                                    defaultCSVConfig="{!v.defaultCSVConfig}"
+                                    fieldSelectList="{!v.fieldSelectList}"
+                                    templateQueries="{!v.templateQueries}"/>
+    </aura:if>
+  </lightning:card>
+
+  <!--Bottom Save Button-->
+  <lightning:button label="Save Template"
+                    class="slds-align--absolute-center"
+                    variant="brand"
+                    onclick="{!c.saveDocumentTemplate}"/>
+
+  <aura:if isTrue="{!v.shouldShowSpinner}">
+    <lightning:spinner aura:id="loadingSpinner" alternativeText="Loading..."/>
+  </aura:if>
+</aura:component>

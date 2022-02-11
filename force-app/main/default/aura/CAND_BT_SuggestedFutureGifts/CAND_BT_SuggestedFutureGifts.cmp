@@ -1,0 +1,120 @@
+<aura:component controller="CAND_BT_Controller">
+  <!-- attributes -->
+  <aura:attribute name="futureGifts" type="List"></aura:attribute>
+  <aura:attribute name="loading" type="Boolean"></aura:attribute>
+  <aura:attribute name="accountId" type="String"></aura:attribute>
+  <!-- events -->
+  <aura:registerEvent name="CAND_BT_SelectThisFutureGift" type="c:CAND_BT_SelectThisFutureGift" />
+  <!-- handlers -->
+  <aura:handler name="init" value="{!this}" action="{!c.handlePopulateFutureGifts}"/>
+  <lightning:notificationsLibrary aura:id="notifications" />
+
+  <aura:if isTrue="{!v.futureGifts.length > 0}">
+    <aura:set attribute="else">
+      <div class="slds-box slds-p-top_medium slds-is-relative">
+        <aura:if isTrue="{!v.loading}">
+          <lightning:spinner></lightning:spinner>
+        </aura:if>
+        <div class="slds-p-horizontal_small slds-grid slds-wrap slds-text-title">
+          No Suggested Future Asks
+        </div>
+      </div>
+    </aura:set>
+    <div class="slds-box slds-p-top_medium">
+      <div class="slds-p-bottom_small slds-p-left_small slds-text-title">
+        Suggested Future Asks: {!v.futureGifts.length}
+      </div>
+      <div class="slds-p-horizontal_small slds-grid slds-wrap slds-is-relative">
+        <aura:if isTrue="{!v.loading}">
+          <lightning:spinner></lightning:spinner>
+        </aura:if>
+        <aura:iteration items="{!v.futureGifts}" var="futureGift">
+          <div class="slds-box slds-col slds-size_1-of-1 slds-grid slds-wrap">
+            <div class="slds-col slds-size_3-of-4">
+              <dl class="slds-grid slds-wrap">
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                  <dt class="slds-dl_inline__label"><b>Future Ask #</b>:</dt>
+                  <dd class="slds-dl_inline__detail">
+                    <a href="{!'/' + futureGift.Id}" target="_blank">{!futureGift.Name}</a>
+                  </dd>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                  <dt class="slds-dl_inline__label"><b>Record Type:</b></dt>
+                  <dd class="slds-dl_inline__detail">
+                    {!futureGift.RecordType.Name}
+                  </dd>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                  <dt class="slds-dl_inline__label"><b>Proposal Account:</b></dt>
+                  <dd class="slds-dl_inline__detail">
+                    <a href="{!'/' + futureGift.Account__c}" target="_blank">{!futureGift.Account__r.Name}</a>
+                  </dd>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                  <dt class="slds-dl_inline__label"><b>Stage:</b></dt>
+                  <dd class="slds-dl_inline__detail">
+                    {!futureGift.Stage__c}
+                  </dd>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                  <dt class="slds-dl_inline__label"><b>Proposal Primary Contact:</b></dt>
+                  <dd class="slds-dl_inline__detail">
+                    <a href="{!'/' + futureGift.Primary_Contact__c}" target="_blank">{!futureGift.Primary_Contact__r.Name}</a>
+                  </dd>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                  <dt class="slds-dl_inline__label"><b>Giving Period:</b></dt>
+                  <dd class="slds-dl_inline__detail">
+                    <lightning:formattedDateTime value="{!futureGift.Giving_Start__c}" year="numeric" month="numeric"
+                      day="numeric" timeZone="UTC" />
+                    &nbsp;-&nbsp;
+                    <lightning:formattedDateTime value="{!futureGift.Giving_End__c}" year="numeric" month="numeric"
+                      day="numeric" timeZone="UTC" />
+                  </dd>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                  <dt class="slds-dl_inline__label"><b>Paid By:</b></dt>
+                  <dd class="slds-dl_inline__detail">
+                    <aura:if isTrue="{!futureGift.Paid_By__r}">
+                        <a href="{!'/' + futureGift.Paid_By__c}" target="_blank">{!futureGift.Paid_By__r.Name}</a>
+                    </aura:if>
+                  </dd>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                  <dt class="slds-dl_inline__label"><b>Actual Ask:</b></dt>
+                  <dd class="slds-dl_inline__detail">
+                    <lightning:formattedNumber style="currency" currencyCode="USD" value="{!futureGift.Actual_Ask_Amount__c}"/>&nbsp;
+                    <aura:if isTrue="{!futureGift.Original_Currency__c != 'USD'}">
+                      (<lightning:formattedNumber style="currency" currencyCode="{!futureGift.Original_Currency__c}" value="{!futureGift.Original_Actual_Ask_Amount__c}"/>)
+                    </aura:if>
+                  </dd>
+                </div>
+                <aura:if isTrue="{!not(empty(futureGift.Gift_Description__c))}">
+                  <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-1">
+                    <dt class="slds-dl_inline__label"><b>Description:&nbsp;</b>
+                      <dd class="slds-dl_inline__detail">
+                        {!futureGift.Gift_Description__c}
+                      </dd>
+                    </dt>
+                  </div>
+                </aura:if>
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-1">
+                  <b>Future Ask Allocations:&nbsp;</b><br/>
+                  <aura:iteration items="{!futureGift.Future_Gift_Allocations__r}" var="all">
+                    {!all.Name}:&nbsp;&nbsp;<aura:if isTrue="{!not(empty(all.Campaign__r.Name))}">{!all.Campaign__r.Name},&nbsp;</aura:if>{!all.General_Accounting_Unit__r.Name}&nbsp;-
+                    <lightning:formattedNumber style="currency" currencyCode="USD" value="{!all.Allocation_Amount__c}"/>&nbsp;
+                    <br/>
+                  </aura:iteration>
+                </div>
+              </dl>
+            </div>
+            <div class="slds-col slds-size_1-of-4 slds-text-align_right">
+              <lightning:button label="Copy" onclick="{!c.handleCopyFutureGift}" value="{!futureGift}">
+              </lightning:button>
+            </div>
+          </div>
+        </aura:iteration>
+      </div>
+    </div>
+  </aura:if>
+</aura:component>

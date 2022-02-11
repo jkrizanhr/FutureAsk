@@ -1,0 +1,402 @@
+body {
+  color: rgb(156, 157, 158);
+}
+
+h2,
+h3,
+.black-text {
+  color: black;
+}
+
+#swal-container .swal2-container {
+  position: inherit;
+}
+
+h3.title {
+  font-size: 1.3rem;
+}
+
+label {
+  margin-bottom: 0.3rem;
+}
+
+.col-form-label {
+  padding-top: 0px;
+  padding-bottom: 0.3rem;
+}
+
+.form-group {
+  margin-bottom: 0.5rem;
+}
+
+.orange-text {
+  color: rgb(251, 102, 47);
+}
+
+.blue-background {
+  background-color: #007bff;
+}
+
+.form input,
+.form textarea {
+  background-color: rgb(244, 246, 246);
+}
+
+.glyphicon-chevron-left::before {
+  border-style: solid;
+  border-width: 0.25em 0.25em 0 0;
+  content: '';
+  display: inline-block;
+  height: 0.45em;
+  position: relative;
+  top: 0.5em;
+  vertical-align: top;
+  width: 0.45em;
+  left: 0.25em;
+  transform: rotate(-135deg);
+}
+
+.glyphicon-chevron-right::before {
+  border-style: solid;
+  border-width: 0.25em 0.25em 0 0;
+  content: '';
+  display: inline-block;
+  height: 0.45em;
+  position: relative;
+  top: 0.5em;
+  vertical-align: top;
+  width: 0.45em;
+  left: 0;
+  transform: rotate(45deg);
+}
+
+.btn {
+  white-space: nowrap;
+  padding: 0.5rem 0.75rem;
+}
+
+.btn-outline-primary:not(:active) {
+  background-color: rgb(244, 246, 246);
+  border-color: rgb(231, 232, 232);
+  color: rgb(110, 117, 124);
+}
+
+.btn-outline-secondary:not(:active) {
+  background-color: rgb(244, 246, 246);
+  border-color: rgb(231, 232, 232);
+}
+
+.don-opt-group {
+  margin-bottom: 20px;
+}
+
+.double-wide-btn {
+  max-width: 65%;
+  display: inline-block;
+  padding: 0px;
+}
+
+.donation-opt-btn {
+  max-width: 30%;
+  display: inline-block;
+  padding: 0px;
+}
+
+.input-height-auto {
+  height: auto;
+}
+
+.interior-btn {
+  width: 100%;
+}
+
+.donation-opt-btn:not(:last-child) {
+  margin-right: 2.3333333333333333%;
+}
+
+.donation-opt-btn:not(:first-child) {
+  margin-left: 2.33333333333333333%;
+
+}
+
+.double-wide-btn:not(:last-child) {
+  margin-right: 2.3333333333333333%;
+}
+
+.double-wide-btn:not(:first-child) {
+  margin-left: 2.33333333333333333%;
+
+}
+
+.btn-outline-secondary:hover {
+  background-color: rgb(251, 102, 47);
+  color: #fff;
+}
+
+.btn-outline-secondary.blue-icon {
+  color: #007bff !important;
+}
+
+.btn-outline-secondary.blue-icon:hover {
+  background-color: #007bff;
+  color: #fff !important;
+}
+
+.btn-outline-secondary.blue-icon:not(:disabled):not(.disabled):active,
+.btn-outline-secondary.blue-icon:not(:disabled):not(.disabled).active {
+  background-color: #007bff;
+  color: #fff !important;
+}
+
+.btn-outline-secondary:not(:disabled):not(.disabled):active,
+.btn-outline-secondary:not(:disabled):not(.disabled).active {
+  background-color: rgb(251, 102, 47);
+  color: #fff;
+}
+
+.mobile-match-box {
+  margin-top: -25px;
+}
+
+.main-header {
+  text-align: center;
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.centerImg {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  height: 200px;
+}
+
+.required {
+  color: red;
+  font-weight: bold;
+  font-size: large;
+}
+
+.paddedText {
+  padding-top: 15px;
+}
+
+.minorPaddingTop {
+  padding-top: 5px;
+}
+
+.btnGroupSpacing {
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+.donationOptionFrequency {
+  vertical-align: middle !important;
+}
+
+.social-button-container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.social-button {
+  display: inline-block !important;
+  margin: 0px 4px;
+}
+
+.social-button :hover {
+  cursor: pointer;
+}
+
+.fa-f {
+  padding: 5px;
+  padding-top: 7px;
+  width: 30px;
+  text-align: center;
+  text-decoration: none;
+  margin: 5px 2px;
+  border-radius: 50%;
+}
+
+.fa-facebook-f {
+  background: #3B5998;
+  color: white;
+}
+
+.fa-twitter {
+  background: #55ACEE;
+  color: white;
+}
+
+.campaign-progress-container {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+}
+
+.progress-container {
+  width: 100%;
+}
+
+.progress {
+  border-radius: 0px;
+  height: 30px;
+  margin-bottom: 0px;
+}
+
+.percentage-label {
+  margin-top: 2px;
+  font-weight: 600;
+  font-size: large;
+  float: right;
+  padding-right: 5px;
+}
+
+.progress-bar {
+  border-radius: 0px;
+  transition: width 2s linear 1s;
+}
+
+.donation-multiplier-total {
+  /* font-size: larger; */
+  border: 1px solid rgb(204, 204, 204);
+  border-radius: 3px;
+  margin-left: 15px;
+  margin-right: 15px;
+  padding: 6px 15px;
+}
+
+.currency-label {
+  padding-top: 6px;
+}
+
+.mb-3.custom-value-input {
+  margin-bottom: none !important;
+}
+
+.total-amount {
+  text-align: center;
+  margin-bottom: 0px;
+}
+
+.fail-message {
+  width: 500px;
+  margin: 150px auto;
+  font-size: large;
+}
+
+.progress-total-information {
+  vertical-align: top;
+  font-size: 1.25rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-left: 5px;
+}
+
+.blue-total {
+  color: rgb(70, 60, 150);
+}
+
+.submit-button {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.sweet-alert .sa-icon.sa-success .sa-placeholder {
+  border: 4px solid rgb(251, 102, 47);
+}
+
+.sweet-alert .sa-icon.sa-success .sa-line {
+  background-color: rgb(251, 102, 47);
+}
+
+.sweet-alert h2 {
+  color: rgb(251, 102, 47);
+  font-size: 45px;
+  font-weight: 300;
+  text-transform: uppercase;
+}
+
+.sweet-alert h3 {
+  text-transform: uppercase;
+  margin: 20px auto;
+  width: 80%;
+  overflow: hidden;
+}
+
+
+.sweet-alert h3,
+.sweet-alert p {
+  color: rgb(29, 73, 114);
+}
+
+.sweet-alert p {
+  font-weight: 400;
+  width: 99%;
+}
+
+.sweet-alert h3:before,
+.sweet-alert h3:after {
+  content: "";
+  display: inline-block;
+  width: 50%;
+  margin: 0 .5em 0 -55%;
+  vertical-align: middle;
+  border-bottom: 1px solid;
+}
+
+.sweet-alert h3:after {
+  margin: 0 -55% 0 .5em;
+}
+
+.sweet-alert button {
+  text-transform: uppercase;
+}
+
+.sweet-alert .fa {
+  font-size: 30px;
+  border-radius: 50%;
+  background-color: rgb(29, 73, 114);
+  color: white;
+}
+
+.sweet-alert .fa.fa-facebook-f {
+  padding: 10px 16px 8px 15px;
+}
+
+.sweet-alert .fa.fa-twitter {
+  padding: 10px 10px 9px 10px;
+}
+
+@media all and (max-width: 375px) {
+  .small-mobile-text {
+    white-space: normal !important;
+  }
+}
+
+@media all and (max-width: 500px) {
+  .campaign-progress-container {
+    flex-flow: row-reverse wrap;
+  }
+
+  .small-mobile-text {
+    font-size: x-small;
+  }
+}
+
+@media all and (max-width: 700px) {
+  .percentage-label {
+    font-weight: 400;
+    font-size: small;
+    padding-right: 0px;
+    margin-right: 0px;
+  }
+}

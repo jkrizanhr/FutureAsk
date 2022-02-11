@@ -1,0 +1,37 @@
+<aura:component description="Record Profile Picture" controller="RecordProfilePicture" implements="force:hasRecordId,force:hasSObjectName,forceCommunity:availableForAllPageTypes,flexipage:availableForAllPageTypes">
+    <aura:attribute name="accept" type="List" default="['.jpg', '.jpeg', '.png', '.gif', '.svg']"/>
+    <aura:attribute name="recordId" type="String"/>
+    <aura:attribute name="imageUrl" type="String" default=""/>
+    <aura:attribute name="fileId" type="String" default=""/>
+    <aura:attribute name="fieldName" type="String" default=""/>
+    <aura:attribute name="sObjectName" type="String"/>
+    <aura:attribute name="cardLabel" type="String"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <lightning:card>
+        <aura:set attribute="title">
+            <lightning:icon iconName="utility:image" size="small"/>&nbsp;
+            {!v.cardLabel}
+        </aura:set>
+
+        <aura:if isTrue="{!not(empty(v.imageUrl))}">
+            <div class="image-container">
+                <a href="javascript:void(0);" onclick="{!c.previewFile}">
+                    <img src="{!v.imageUrl}" alt="{!v.cardLabel}"/>
+                </a>
+            </div>
+        </aura:if>
+
+        <div class="file-upload-container">
+            <lightning:fileUpload  name="fileUploader"
+                                   label= "Upload New Image"
+                                   multiple="false"
+                                   accept="{!v.accept}"
+                                   disabled="false"
+                                   recordId="{!v.recordId}"
+                                   onuploadfinished="{!c.handleUploadFinished}"/>
+        </div>
+
+    </lightning:card>
+</aura:component>
