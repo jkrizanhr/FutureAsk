@@ -1,0 +1,132 @@
+<template>
+    <div class="slds-card">
+        <header class="slds-card__header">
+            <h2 class="slds-card__title slds-text-heading_medium">Project Financial Totals</h2>
+        </header>
+        <div class="slds-card__body">
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+    <caption><b>Project Totals</b></caption>
+    <tbody>
+        <tr>
+            <td>Total Project Current FY Need</td>
+            <td>${totalProjectFYCost}</td>
+        </tr>
+        <tr>
+            <td>Current FY Starting Balance:</td>
+            <td>{data.gauBalanceSum}</td>
+        </tr>
+        <tr>
+            <td>Actual Funds Raised:</td>
+            <td>{data.allocationAmountsSum}</td>
+        </tr>
+        <tr>
+            <td>Funds Expected this FY:</td>
+            <td>{data.probabilityTotals}</td>
+        </tr>
+        <tr>
+            <td>Funds Transfered to this project:</td>
+            <td>{data.sumTransferAmount}</td>
+        </tr>
+        <tr>
+            <td><b>Remaining FY Need:</b></td>
+            <td><b>{data.remainingFYNeed}</b></td>
+        </tr>
+    </tbody>
+</table>
+<br>
+<button class="slds-button slds-button_brand" onclick={updateProjectRecord}>Update Project Record</button>
+        
+        </div>
+    </div>
+    <br/>
+    <br/>
+<table class="slds-table slds-table_cell-buffer slds-table_bordered sortable" id="GAUBalanceCarryover">
+        <caption>GAU Balance Carryover</caption>
+        <thead>
+            <tr class="slds-text-heading_label">
+                <th scope="col">Date</th>
+                <th scope="col">General Accounting Unit</th>
+                <th scope="col">FY Starting Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template if:true={data.gauBalanceData}>
+                <template for:each={data.gauBalanceData} for:item="item">
+                    <tr key={item.Id}>
+                        <td>{item.Date__c}</td>
+                        <td>{item.General_Accounting_Unit__r.Name}</td>
+                        <td>{item.GP_Balance__c}</td>
+                    </tr>
+                </template>
+            </template>
+        </tbody>
+    </table>
+<br><br>
+    <table class="slds-table slds-table_cell-buffer slds-table_bordered sortable" id="GAUAllocations">
+        <caption>GAU Allocations</caption>
+        <thead>
+            <tr class="slds-text-heading_label">
+                <th scope="col">Opportunity Name</th>
+                <th scope="col">Allocation Amount</th>
+                <th scope="col">Original Opp Close Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template for:each={data.gauAllocationData} for:item="item">
+                <tr key={item.Id}>
+                    <td>{item.Opportunity_Name__c}</td>
+                    <td>${item.npsp__Amount__c}</td>
+                    <td>{item.Original_Opportunity_Close_Date__c}</td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+    <br/><br/>
+    <table class="slds-table slds-table_cell-buffer slds-table_bordered sortable" id="FutureAskAllocations">
+        <caption>Future Ask Allocations</caption>
+        <thead>
+            <tr class="slds-text-heading_label">
+                <th scope="col">General Accounting Unit</th>
+                <th scope="col">Probability Total</th>
+                <th scope="col">Future Gift Stage</th>
+                <th scope="col">Probability %</th>
+                <th scope="col">Actual Close Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template if:true={data.allocationAmounts}>
+                <template for:each={data.allocationAmounts} for:item="item">
+                    <tr key={item.Id}>
+                        <td>{item.General_Accounting_Unit__r.Name}</td>
+                        <td>${item.Bib_Funding_Status_Probability_Total__c}</td>
+                        <td>{item.Future_Gift__r.Stage__c}</td>
+                        <td>{item.Future_Gift__r.Probability_m__c}</td>
+                        <td>{item.Future_Gift__r.Actual_Ask_Date__c}</td>
+                    </tr>
+                </template>
+            </template>
+        </tbody>
+    </table>
+    <br/><br/>  
+    <table class="slds-table slds-table_cell-buffer slds-table_bordered sortable" id="TransferData">
+    <caption>Transfer Data</caption>
+    <thead>
+        <tr class="slds-text-heading_label">
+            <th scope="col">Date</th>
+            <th scope="col">Amount</th>
+            <th scope="col">From GAU</th>
+        </tr>
+    </thead>
+    <tbody>
+        <template if:true={data.transferData}>
+            <template for:each={data.transferData} for:item="item">
+                <tr key={item.Id}>
+                    <td>{item.Date__c}</td>
+                    <td>${item.Amount__c}</td>
+                    <td>{item.Secondary_General_Accounting_Unit__r.Name}</td>
+                </tr>
+            </template>
+        </template>
+    </tbody>
+</table>
+</template>
